@@ -3,7 +3,7 @@ use std::{fs, path::Path};
 use image::{ImageBuffer, Rgb};
 use rstest::fixture;
 
-pub const TEST_SANDBOX_DIR: &str = "tests/sandbox/";
+pub const TEST_SANDBOX_DIR: &str = "tests/sandbox";
 
 #[fixture]
 pub fn image_data() -> ImageBuffer<Rgb<u8>, Vec<u8>> {
@@ -56,4 +56,9 @@ pub fn create_dir_and_write_file(path: &Path, content: &str) {
 pub fn create_image_file(path: &Path, image_data: &ImageBuffer<Rgb<u8>, Vec<u8>>) {
     fs::create_dir_all(path.parent().unwrap()).expect("Unable to create directory");
     image_data.save(path).expect("Unable to write file");
+}
+
+pub fn create_yolo_label_file(path: &Path, content: &str) {
+    fs::create_dir_all(path.parent().unwrap()).expect("Unable to create directory");
+    fs::write(path, content).expect("Unable to write file");
 }

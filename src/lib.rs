@@ -4,6 +4,7 @@ use itertools::{EitherOrBoth, Itertools};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fs, path::PathBuf};
 
+pub use crate::yolo_file::*;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct YoloProjectConfig {
@@ -216,48 +217,9 @@ impl YoloProject {
         }
     }
 
-    pub fn validate_label_file(label_path: &String) -> bool {
-        /*
-            1. Check for empty file
-            2. Check for corrupted format
-            3. Check if duplicates exist in the same file.
-            4. Check if invalid class ids exist
-            5. Check if points are normalized 0.0 - 1.0
-
-            <class> <x_center> <y_center> <width> <height>
-            <class>: The class label of the object.
-            <x_center>: The normalized x-coordinate of the bounding box center.
-            <y_center>: The normalized y-coordinate of the bounding box center.
-            <width>: The normalized width of the bounding box.
-            <height>: The normalized height of the bounding box.
-         */
-
-        let label_file = fs::read_to_string(label_path);
-
-        if label_file.is_err() {
-            return false;
-        }
-
-        let label_file = label_file.unwrap();
-        let label_file = label_file.split("\n");
-
-        for line in label_file {
-            let parts = line.split(" ").collect::<Vec<&str>>();
-
-
-
-            if parts.len() != 5 {
-                return false;
-            }
-
-            let class = parts[0].parse::<i32>();
-            let x = parts[1].parse::<f32>();
-            let y = parts[2].parse::<f32>();
-            let width = parts[3].parse::<f32>();
-            let height = parts[4].parse::<f32>();
-
-            // if class.is_err() || 
-    }
+    // pub fn validate_label_file(label_path: &String) -> bool {
+    //     // TODO:
+    // }
 
     pub fn validate(
         &self,
