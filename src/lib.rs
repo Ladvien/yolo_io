@@ -1,6 +1,9 @@
+mod yolo_file;
+
 use itertools::{EitherOrBoth, Itertools};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fs, path::PathBuf};
+
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct YoloProjectConfig {
@@ -53,6 +56,7 @@ impl YoloProject {
             &config.image_path,
             vec!["jpg", "png", "PNG", "JPEG"],
         );
+
         let label_paths = Self::get_filepaths_for_extension(&config.label_path, vec!["txt"]);
 
         let all_filepaths = image_paths
@@ -62,6 +66,7 @@ impl YoloProject {
 
         let mut stems = Self::get_file_stems(&all_filepaths);
 
+        // Remove duplicate stems; only works if sorted first.
         stems.sort();
         stems.dedup();
 
@@ -72,6 +77,8 @@ impl YoloProject {
             config: config.clone(),
         }
     }
+
+    fn validate_label_file() {}
 
     fn get_filepaths_for_extension(path: &str, extensions: Vec<&str>) -> Vec<PathWithKey> {
         let file_paths = std::fs::read_dir(path);
@@ -146,12 +153,13 @@ impl YoloProject {
                 })
                 .collect::<Vec<Result<String, ()>>>();
 
+            // TODO: Validate label files
+            // TODO: Remove invalid label files from pairing.
+            //       they go straight to errors.
+
             let unconfirmed_pairs = image_paths_for_stem
                 .into_iter()
                 .zip_longest(label_paths_for_stem.into_iter());
-
-            // TODO: Peek in label file to determine it is valid.
-            // TODO: Filter out invalid labels before pairing.
 
             pairing_map.insert(
                 stem.clone(),
@@ -206,6 +214,49 @@ impl YoloProject {
                 message: Some("Image file is missing.".to_string()),
             }]),
         }
+    }
+
+    pub fn validate_label_file(label_path: &String) -> bool {
+        /*
+            1. Check for empty file
+            2. Check for corrupted format
+            3. Check if duplicates exist in the same file.
+            4. Check if invalid class ids exist
+            5. Check if points are normalized 0.0 - 1.0
+
+            <class> <x_center> <y_center> <width> <height>
+            <class>: The class label of the object.
+            <x_center>: The normalized x-coordinate of the bounding box center.
+            <y_center>: The normalized y-coordinate of the bounding box center.
+            <width>: The normalized width of the bounding box.
+            <height>: The normalized height of the bounding box.
+         */
+
+        let label_file = fs::read_to_string(label_path);
+
+        if label_file.is_err() {
+            return false;
+        }
+
+        let label_file = label_file.unwrap();
+        let label_file = label_file.split("\n");
+
+        for line in label_file {
+            let parts = line.split(" ").collect::<Vec<&str>>();
+
+
+
+            if parts.len() != 5 {
+                return false;
+            }
+
+            let class = parts[0].parse::<i32>();
+            let x = parts[1].parse::<f32>();
+            let y = parts[2].parse::<f32>();
+            let width = parts[3].parse::<f32>();
+            let height = parts[4].parse::<f32>();
+
+            // if class.is_err() || 
     }
 
     pub fn validate(

@@ -1,10 +1,7 @@
-use std::{
-    fs,
-    path::{Path, PathBuf},
-};
+use std::{fs, path::Path};
 
 use image::{ImageBuffer, Rgb};
-use rstest::{fixture, rstest};
+use rstest::fixture;
 
 pub const TEST_SANDBOX_DIR: &str = "tests/sandbox/";
 

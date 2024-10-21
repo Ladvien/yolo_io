@@ -4,11 +4,8 @@ mod common;
 mod tests {
 
     use image::{ImageBuffer, Rgb};
-    use rstest::{fixture, rstest};
-    use std::{
-        fs,
-        path::{Path, PathBuf},
-    };
+    use rstest::rstest;
+    use std::path::PathBuf;
     use yolo_io::{YoloProject, YoloProjectConfig};
 
     use crate::common::{
@@ -119,9 +116,7 @@ mod tests {
     }
 
     #[rstest]
-    fn test_project_validation_produces_one_invalid_pair_for_no_image_one_label(
-        image_data: ImageBuffer<Rgb<u8>, Vec<u8>>,
-    ) {
+    fn test_project_validation_produces_one_invalid_pair_for_no_image_one_label() {
         let filename = "four";
         let this_test_directory = format!("{}/{}/", TEST_SANDBOX_DIR, filename);
 
@@ -146,9 +141,7 @@ mod tests {
     }
 
     #[rstest]
-    fn test_project_validation_produces_one_invalid_pair_for_no_image_no_label(
-        image_data: ImageBuffer<Rgb<u8>, Vec<u8>>,
-    ) {
+    fn test_project_validation_produces_one_invalid_pair_for_no_image_no_label() {
         let filename = "five";
         let this_test_directory = format!("{}/{}/", TEST_SANDBOX_DIR, filename);
 
