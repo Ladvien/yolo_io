@@ -2,65 +2,76 @@ mod common;
 
 #[cfg(test)]
 mod tests {
-    use std::{fs, path::PathBuf};
-
-    use yolo_io::{YoloClass, YoloFile};
+    use rstest::rstest;
+    use std::path::PathBuf;
 
     use crate::common::{create_yolo_label_file, TEST_SANDBOX_DIR};
+    use yolo_io::{FileMetadata, YoloClass, YoloFile};
 
-    #[test]
+    #[rstest]
     fn test_yolo_file_new_parses_valid_file_correctly() {
         let path = format!("{}/data/valid1.txt", TEST_SANDBOX_DIR);
         let content = format!(
             "{}\n{}\n{}\n",
-            "0 0.5 0.5 0.5 0.5", "0 0.5 0.5 0.5 0.5", "1 0.5 0.5 0.5 0.5"
+            "0 0.25 0.5 0.25 0.5", "0 0.5 0.5 0.15 0.5", "1 0.5 0.5 0.5 0.35"
         );
         let content = content.as_ref();
         create_yolo_label_file(&PathBuf::from(&path), content);
 
-        let classes = vec![
-            YoloClass {
-                id: 0,
-                name: "person".to_string(),
-            },
-            YoloClass {
-                id: 1,
-                name: "car".to_string(),
-            },
-        ];
+        let metadata = FileMetadata {
+            classes: vec![
+                YoloClass {
+                    id: 0,
+                    name: "person".to_string(),
+                },
+                YoloClass {
+                    id: 1,
+                    name: "car".to_string(),
+                },
+            ],
+            duplicate_tolerance: 0.01,
+        };
 
-        let yolo_file = YoloFile::new(classes, &path);
+        let yolo_file = YoloFile::new(metadata, &path);
+
+        println!("{:?}", yolo_file);
 
         assert!(yolo_file.is_ok());
     }
 
-    #[test]
+    #[rstest]
     fn test_yolo_file_new_invalid_file_format_due_to_missing_column() {
         let path = format!("{}/data/invalid1.txt", TEST_SANDBOX_DIR);
         let content = r#"0 0.5 0.5 0.5"#;
         create_yolo_label_file(&PathBuf::from(&path), content);
 
-        let classes = vec![YoloClass {
-            id: 0,
-            name: "person".to_string(),
-        }];
+        let metadata = FileMetadata {
+            classes: vec![YoloClass {
+                id: 0,
+                name: "person".to_string(),
+            }],
+            duplicate_tolerance: 0.01,
+        };
 
-        let yolo_file = YoloFile::new(classes, &path);
+        let yolo_file = YoloFile::new(metadata, &path);
         assert!(yolo_file.is_err());
     }
 
-    #[test]
+    #[rstest]
     fn test_yolo_file_new_invalid_file_format_due_unparsable_class_id() {
         let path = format!("{}/data/invalid2.txt", TEST_SANDBOX_DIR);
         let content = r#"a 0.5 0.5 0.5 0.5"#;
         create_yolo_label_file(&PathBuf::from(&path), content);
 
-        let classes = vec![YoloClass {
-            id: 0,
-            name: "person".to_string(),
-        }];
+        let metadata = FileMetadata {
+            classes: vec![YoloClass {
+                id: 0,
+                name: "person".to_string(),
+            }],
+            duplicate_tolerance: 0.01,
+        };
 
-        let yolo_file = YoloFile::new(classes, &path);
+        let yolo_file = YoloFile::new(metadata, &path);
 
         if let Err(err) = yolo_file {
             assert_eq!(
@@ -78,12 +89,15 @@ mod tests {
         let content = r#"2 0.5 0.5 0.5 0.5"#;
         create_yolo_label_file(&PathBuf::from(&path), content);
 
-        let classes = vec![YoloClass {
-            id: 0,
-            name: "person".to_string(),
-        }];
+        let metadata = FileMetadata {
+            classes: vec![YoloClass {
+                id: 0,
+                name: "person".to_string(),
+            }],
+            duplicate_tolerance: 0.01,
+        };
 
-        let yolo_file = YoloFile::new(classes, &path);
+        let yolo_file = YoloFile::new(metadata, &path);
 
         if let Err(err) = yolo_file {
             assert_eq!(
@@ -101,12 +115,15 @@ mod tests {
         let content = r#"1 0.5 0.5 0.5 0.5"#;
         create_yolo_label_file(&PathBuf::from(&path), content);
 
-        let classes = vec![YoloClass {
-            id: 0,
-            name: "person".to_string(),
-        }];
+        let metadata = FileMetadata {
+            classes: vec![YoloClass {
+                id: 0,
+                name: "person".to_string(),
+            }],
+            duplicate_tolerance: 0.01,
+        };
 
-        let yolo_file = YoloFile::new(classes, &path);
+        let yolo_file = YoloFile::new(metadata, &path);
 
         if let Err(err) = yolo_file {
             assert_eq!(
@@ -124,12 +141,15 @@ mod tests {
         let content = r#"0 a 0.5 0.5 0.5"#;
         create_yolo_label_file(&PathBuf::from(&path), content);
 
-        let classes = vec![YoloClass {
-            id: 0,
-            name: "person".to_string(),
-        }];
+        let metadata = FileMetadata {
+            classes: vec![YoloClass {
+                id: 0,
+                name: "person".to_string(),
+            }],
+            duplicate_tolerance: 0.01,
+        };
 
-        let yolo_file = YoloFile::new(classes, &path);
+        let yolo_file = YoloFile::new(metadata, &path);
 
         if let Err(err) = yolo_file {
             assert_eq!(
@@ -147,12 +167,15 @@ mod tests {
         let content = r#"0 0.5 a 0.5 0.5"#;
         create_yolo_label_file(&PathBuf::from(&path), content);
 
-        let classes = vec![YoloClass {
-            id: 0,
-            name: "person".to_string(),
-        }];
+        let metadata = FileMetadata {
+            classes: vec![YoloClass {
+                id: 0,
+                name: "person".to_string(),
+            }],
+            duplicate_tolerance: 0.01,
+        };
 
-        let yolo_file = YoloFile::new(classes, &path);
+        let yolo_file = YoloFile::new(metadata, &path);
 
         if let Err(err) = yolo_file {
             assert_eq!(
@@ -170,12 +193,15 @@ mod tests {
         let content = r#"0 0.5 0.5 a 0.5"#;
         create_yolo_label_file(&PathBuf::from(&path), content);
 
-        let classes = vec![YoloClass {
-            id: 0,
-            name: "person".to_string(),
-        }];
+        let metadata = FileMetadata {
+            classes: vec![YoloClass {
+                id: 0,
+                name: "person".to_string(),
+            }],
+            duplicate_tolerance: 0.01,
+        };
 
-        let yolo_file = YoloFile::new(classes, &path);
+        let yolo_file = YoloFile::new(metadata, &path);
 
         if let Err(err) = yolo_file {
             assert_eq!(
@@ -193,12 +219,15 @@ mod tests {
         let content = r#"0 0.5 0.5 0.5 a"#;
         create_yolo_label_file(&PathBuf::from(&path), content);
 
-        let classes = vec![YoloClass {
-            id: 0,
-            name: "person".to_string(),
-        }];
+        let metadata = FileMetadata {
+            classes: vec![YoloClass {
+                id: 0,
+                name: "person".to_string(),
+            }],
+            duplicate_tolerance: 0.01,
+        };
 
-        let yolo_file = YoloFile::new(classes, &path);
+        let yolo_file = YoloFile::new(metadata, &path);
 
         if let Err(err) = yolo_file {
             assert_eq!(
@@ -216,12 +245,15 @@ mod tests {
         let content = r#"0 1.5 0.5 0.5 0.5"#;
         create_yolo_label_file(&PathBuf::from(&path), content);
 
-        let classes = vec![YoloClass {
-            id: 0,
-            name: "person".to_string(),
-        }];
+        let metadata = FileMetadata {
+            classes: vec![YoloClass {
+                id: 0,
+                name: "person".to_string(),
+            }],
+            duplicate_tolerance: 0.01,
+        };
 
-        let yolo_file = YoloFile::new(classes, &path);
+        let yolo_file = YoloFile::new(metadata, &path);
 
         if let Err(err) = yolo_file {
             assert_eq!(
@@ -239,12 +271,15 @@ mod tests {
         let content = r#"0 0.5 1.5 0.5 0.5"#;
         create_yolo_label_file(&PathBuf::from(&path), content);
 
-        let classes = vec![YoloClass {
-            id: 0,
-            name: "person".to_string(),
-        }];
+        let metadata = FileMetadata {
+            classes: vec![YoloClass {
+                id: 0,
+                name: "person".to_string(),
+            }],
+            duplicate_tolerance: 0.01,
+        };
 
-        let yolo_file = YoloFile::new(classes, &path);
+        let yolo_file = YoloFile::new(metadata, &path);
 
         if let Err(err) = yolo_file {
             assert_eq!(
@@ -262,12 +297,15 @@ mod tests {
         let content = r#"0 0.5 0.5 1.5 0.5"#;
         create_yolo_label_file(&PathBuf::from(&path), content);
 
-        let classes = vec![YoloClass {
-            id: 0,
-            name: "person".to_string(),
-        }];
+        let metadata = FileMetadata {
+            classes: vec![YoloClass {
+                id: 0,
+                name: "person".to_string(),
+            }],
+            duplicate_tolerance: 0.01,
+        };
 
-        let yolo_file = YoloFile::new(classes, &path);
+        let yolo_file = YoloFile::new(metadata, &path);
 
         if let Err(err) = yolo_file {
             assert_eq!(
@@ -285,12 +323,15 @@ mod tests {
         let content = r#"0 0.5 0.5 0.5 1.5"#;
         create_yolo_label_file(&PathBuf::from(&path), content);
 
-        let classes = vec![YoloClass {
-            id: 0,
-            name: "person".to_string(),
-        }];
+        let metadata = FileMetadata {
+            classes: vec![YoloClass {
+                id: 0,
+                name: "person".to_string(),
+            }],
+            duplicate_tolerance: 0.01,
+        };
 
-        let yolo_file = YoloFile::new(classes, &path);
+        let yolo_file = YoloFile::new(metadata, &path);
 
         if let Err(err) = yolo_file {
             assert_eq!(
@@ -308,12 +349,15 @@ mod tests {
         let content = "";
         create_yolo_label_file(&PathBuf::from(&path), content);
 
-        let classes = vec![YoloClass {
-            id: 0,
-            name: "person".to_string(),
-        }];
+        let metadata = FileMetadata {
+            classes: vec![YoloClass {
+                id: 0,
+                name: "person".to_string(),
+            }],
+            duplicate_tolerance: 0.01,
+        };
 
-        let yolo_file = YoloFile::new(classes, &path);
+        let yolo_file = YoloFile::new(metadata, &path);
 
         if let Err(err) = yolo_file {
             assert_eq!(

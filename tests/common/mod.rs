@@ -2,6 +2,7 @@ use std::{fs, path::Path};
 
 use image::{ImageBuffer, Rgb};
 use rstest::fixture;
+use yolo_io::{FileMetadata, YoloClass};
 
 pub const TEST_SANDBOX_DIR: &str = "tests/sandbox";
 

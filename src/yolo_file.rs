@@ -18,6 +18,8 @@ use std::{error::Error, fs::read_to_string};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
+use crate::{FileMetadata, YoloProjectConfig};
+
 #[derive(Error, Debug, Serialize, Deserialize)]
 pub enum YoloFileParseError {
     #[error("Invalid format for file '{0}'")]
@@ -59,7 +61,7 @@ pub struct YoloFile {
 }
 
 impl YoloFile {
-    pub fn new(classes: Vec<YoloClass>, path: &str) -> Result<YoloFile, Box<dyn Error>> {
+    pub fn new(metadata: FileMetadata, path: &str) -> Result<YoloFile, Box<dyn Error>> {
         let potential_file = read_to_string(path);
 
         let mut entries = Vec::<YoloEntry>::new();
@@ -86,7 +88,7 @@ impl YoloFile {
                     ))
                 })?;
 
-                let found = classes.iter().any(|c| c.id == class as usize);
+                let found = metadata.classes.iter().any(|c| c.id == class as usize);
                 if !found {
                     return Err(Box::new(YoloFileParseError::ClassIdNotFound(
                         path.to_string(),
@@ -179,10 +181,48 @@ impl YoloFile {
             }
 
             // TODO: Check for duplicate labels with tolerance
-            let mut class_ids = Vec::<i32>::new();
-            for entry in &entries {}
+            let mut label_coordinates = Vec::<(f32, f32, f32, f32)>::new();
+
+            for entry in &entries {
+                let x1 = entry.x_center - entry.width / 2.0;
+                let x2 = entry.x_center + entry.width / 2.0;
+                let y1 = entry.y_center - entry.height / 2.0;
+                let y2 = entry.y_center + entry.height / 2.0;
+
+                label_coordinates.push((x1, x2, y1, y2))
+            }
+
+            let tolerance = 0.01;
+            Self::check_for_duplicates(&label_coordinates, tolerance, path)?;
         }
 
         Ok(YoloFile { entries })
+    }
+
+    fn check_for_duplicates(
+        duplicated_labels: &[(f32, f32, f32, f32)],
+        tolerance: f32,
+        path: &str,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        for (index, coordinates) in duplicated_labels.iter().enumerate() {
+            let (x1, x2, y1, y2) = coordinates;
+
+            for (i, other_coordinates) in duplicated_labels.iter().enumerate() {
+                if i != index {
+                    let (ox1, ox2, oy1, oy2) = other_coordinates;
+
+                    if (x1 - ox1).abs() < tolerance
+                        && (x2 - ox2).abs() < tolerance
+                        && (y1 - oy1).abs() < tolerance
+                        && (y2 - oy2).abs() < tolerance
+                    {
+                        return Err(Box::new(YoloFileParseError::DuplicateEntries(
+                            path.to_string(),
+                        )));
+                    }
+                }
+            }
+        }
+        Ok(())
     }
 }

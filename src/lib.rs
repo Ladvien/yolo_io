@@ -7,6 +7,17 @@ use std::{collections::HashMap, fs, path::PathBuf};
 pub use crate::yolo_file::*;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct YoloClass {
+    pub id: usize,
+    pub name: String,
+}
+
+pub struct FileMetadata {
+    pub classes: Vec<YoloClass>,
+    pub duplicate_tolerance: f32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct YoloProjectConfig {
     pub image_path: String,
     pub label_path: String,
