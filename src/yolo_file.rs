@@ -178,7 +178,7 @@ impl YoloFile {
                 });
             }
 
-            // Check for duplicates
+            // TODO: Check for duplicate labels with tolerance
             let mut class_ids = Vec::<i32>::new();
             for entry in &entries {}
         }

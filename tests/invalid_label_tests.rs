@@ -50,7 +50,7 @@ mod tests {
     }
 
     #[test]
-    fn test_yolo_file_new_invalid_file_format_due_unparseable_class_id() {
+    fn test_yolo_file_new_invalid_file_format_due_unparsable_class_id() {
         let path = format!("{}/data/invalid2.txt", TEST_SANDBOX_DIR);
         let content = r#"a 0.5 0.5 0.5 0.5"#;
         create_yolo_label_file(&PathBuf::from(&path), content);
