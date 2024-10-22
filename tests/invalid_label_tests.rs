@@ -32,7 +32,7 @@ mod tests {
             duplicate_tolerance: 0.01,
         };
 
-        let yolo_file = YoloFile::new(metadata, &path);
+        let yolo_file = YoloFile::new(&metadata, &path);
 
         println!("{:?}", yolo_file);
 
@@ -53,7 +53,7 @@ mod tests {
             duplicate_tolerance: 0.01,
         };
 
-        let yolo_file = YoloFile::new(metadata, &path);
+        let yolo_file = YoloFile::new(&metadata, &path);
         assert!(yolo_file.is_err());
     }
 
@@ -71,7 +71,7 @@ mod tests {
             duplicate_tolerance: 0.01,
         };
 
-        let yolo_file = YoloFile::new(metadata, &path);
+        let yolo_file = YoloFile::new(&metadata, &path);
 
         if let Err(err) = yolo_file {
             assert_eq!(
@@ -97,7 +97,7 @@ mod tests {
             duplicate_tolerance: 0.01,
         };
 
-        let yolo_file = YoloFile::new(metadata, &path);
+        let yolo_file = YoloFile::new(&metadata, &path);
 
         if let Err(err) = yolo_file {
             assert_eq!(
@@ -123,7 +123,7 @@ mod tests {
             duplicate_tolerance: 0.01,
         };
 
-        let yolo_file = YoloFile::new(metadata, &path);
+        let yolo_file = YoloFile::new(&metadata, &path);
 
         if let Err(err) = yolo_file {
             assert_eq!(
@@ -149,7 +149,7 @@ mod tests {
             duplicate_tolerance: 0.01,
         };
 
-        let yolo_file = YoloFile::new(metadata, &path);
+        let yolo_file = YoloFile::new(&metadata, &path);
 
         if let Err(err) = yolo_file {
             assert_eq!(
@@ -175,7 +175,7 @@ mod tests {
             duplicate_tolerance: 0.01,
         };
 
-        let yolo_file = YoloFile::new(metadata, &path);
+        let yolo_file = YoloFile::new(&metadata, &path);
 
         if let Err(err) = yolo_file {
             assert_eq!(
@@ -201,7 +201,7 @@ mod tests {
             duplicate_tolerance: 0.01,
         };
 
-        let yolo_file = YoloFile::new(metadata, &path);
+        let yolo_file = YoloFile::new(&metadata, &path);
 
         if let Err(err) = yolo_file {
             assert_eq!(
@@ -227,7 +227,7 @@ mod tests {
             duplicate_tolerance: 0.01,
         };
 
-        let yolo_file = YoloFile::new(metadata, &path);
+        let yolo_file = YoloFile::new(&metadata, &path);
 
         if let Err(err) = yolo_file {
             assert_eq!(
@@ -253,7 +253,7 @@ mod tests {
             duplicate_tolerance: 0.01,
         };
 
-        let yolo_file = YoloFile::new(metadata, &path);
+        let yolo_file = YoloFile::new(&metadata, &path);
 
         if let Err(err) = yolo_file {
             assert_eq!(
@@ -279,7 +279,7 @@ mod tests {
             duplicate_tolerance: 0.01,
         };
 
-        let yolo_file = YoloFile::new(metadata, &path);
+        let yolo_file = YoloFile::new(&metadata, &path);
 
         if let Err(err) = yolo_file {
             assert_eq!(
@@ -305,7 +305,7 @@ mod tests {
             duplicate_tolerance: 0.01,
         };
 
-        let yolo_file = YoloFile::new(metadata, &path);
+        let yolo_file = YoloFile::new(&metadata, &path);
 
         if let Err(err) = yolo_file {
             assert_eq!(
@@ -331,7 +331,7 @@ mod tests {
             duplicate_tolerance: 0.01,
         };
 
-        let yolo_file = YoloFile::new(metadata, &path);
+        let yolo_file = YoloFile::new(&metadata, &path);
 
         if let Err(err) = yolo_file {
             assert_eq!(
@@ -357,7 +357,7 @@ mod tests {
             duplicate_tolerance: 0.01,
         };
 
-        let yolo_file = YoloFile::new(metadata, &path);
+        let yolo_file = YoloFile::new(&metadata, &path);
 
         if let Err(err) = yolo_file {
             assert_eq!(
@@ -393,7 +393,7 @@ mod tests {
             duplicate_tolerance: 0.01,
         };
 
-        let yolo_file = YoloFile::new(metadata, &path);
+        let yolo_file = YoloFile::new(&metadata, &path);
 
         if let Err(err) = yolo_file {
             assert_eq!(

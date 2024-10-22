@@ -78,7 +78,7 @@ pub fn create_yolo_project_config() -> YoloProjectConfig {
         },
         r#type: String::from("yolo"),
         project_name: String::from("test_project"),
-        folder_paths: ExportPaths {
+        export_paths: ExportPaths {
             train: String::from("train/"),
             validation: String::from("validation/"),
             test: String::from("test/"),

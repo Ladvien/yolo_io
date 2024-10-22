@@ -54,7 +54,7 @@ pub struct YoloProjectConfig {
     pub source_paths: SourcePaths,
     pub r#type: String,
     pub project_name: String,
-    pub folder_paths: ExportPaths,
+    pub export_paths: ExportPaths,
     pub class_map: HashMap<u32, String>,
     pub duplicate_tolerance: f32,
 }
@@ -205,6 +205,7 @@ impl YoloProject {
                 })
                 .collect::<Vec<Result<String, ()>>>();
 
+            // WILO: Working on filtering out invalid labels before pairing.
             let label_paths_for_stem = label_filenames
                 .clone()
                 .into_iter()
@@ -216,6 +217,27 @@ impl YoloProject {
                 .collect::<Vec<Result<String, ()>>>();
 
             // TODO: Validate label files
+            let mut label_files = label_paths_for_stem.clone();
+            label_files.retain(|path| path.is_ok());
+
+            let test = label_files
+                .into_iter()
+                .filter_map(|path| {
+                    if let Ok(path) = path {
+                        let yolo_file = YoloFile::new(&file_metadata, &path);
+                        if let Ok(yolo_file) = yolo_file {
+                            Some(yolo_file)
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    }
+                })
+                .collect::<Vec<YoloFile>>();
+
+            println!("{:#?}", test);
+
             // TODO: Remove invalid label files from pairing.
             //       they go straight to errors.
 

@@ -60,7 +60,7 @@ pub struct YoloFile {
 }
 
 impl YoloFile {
-    pub fn new(metadata: FileMetadata, path: &str) -> Result<YoloFile, Box<dyn Error>> {
+    pub fn new(metadata: &FileMetadata, path: &String) -> Result<YoloFile, Box<dyn Error>> {
         let potential_file = read_to_string(path);
 
         let mut entries = Vec::<YoloEntry>::new();
