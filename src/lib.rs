@@ -6,6 +6,38 @@ use std::{collections::HashMap, fs, path::PathBuf};
 
 pub use crate::yolo_file::*;
 
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub struct ExportPaths {
+    pub train: String,
+    pub validation: String,
+    pub test: String,
+}
+
+impl Default for ExportPaths {
+    fn default() -> Self {
+        Self {
+            train: "train".to_string(),
+            validation: "validation".to_string(),
+            test: "test".to_string(),
+        }
+    }
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub struct SourcePaths {
+    pub images: String,
+    pub labels: String,
+}
+
+impl Default for SourcePaths {
+    fn default() -> Self {
+        Self {
+            images: "images".to_string(),
+            labels: "labels".to_string(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct YoloClass {
     pub id: usize,
@@ -19,8 +51,12 @@ pub struct FileMetadata {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct YoloProjectConfig {
-    pub image_path: String,
-    pub label_path: String,
+    pub source_paths: SourcePaths,
+    pub r#type: String,
+    pub project_name: String,
+    pub folder_paths: ExportPaths,
+    pub class_map: HashMap<u32, String>,
+    pub duplicate_tolerance: f32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -65,11 +101,12 @@ pub struct YoloProject {
 impl YoloProject {
     pub fn new(config: &YoloProjectConfig) -> Self {
         let image_paths = Self::get_filepaths_for_extension(
-            &config.image_path,
+            &config.source_paths.images,
             vec!["jpg", "png", "PNG", "JPEG"],
         );
 
-        let label_paths = Self::get_filepaths_for_extension(&config.label_path, vec!["txt"]);
+        let label_paths =
+            Self::get_filepaths_for_extension(&config.source_paths.labels, vec!["txt"]);
 
         let all_filepaths = image_paths
             .iter()
@@ -82,7 +119,19 @@ impl YoloProject {
         stems.sort();
         stems.dedup();
 
-        let pairs = Self::pair_images_and_labels(stems.clone(), label_paths, image_paths);
+        let metadata = FileMetadata {
+            classes: config
+                .class_map
+                .values()
+                .map(|name| YoloClass {
+                    id: 0,
+                    name: name.clone(),
+                })
+                .collect(),
+            duplicate_tolerance: 0.0,
+        };
+
+        let pairs = Self::pair_images_and_labels(metadata, stems.clone(), label_paths, image_paths);
 
         Self {
             data: YoloProjectData { stems, pairs },
@@ -138,6 +187,7 @@ impl YoloProject {
     }
 
     fn pair_images_and_labels(
+        file_metadata: FileMetadata,
         stems: Vec<String>,
         label_filenames: Vec<PathWithKey>,
         image_filenames: Vec<PathWithKey>,

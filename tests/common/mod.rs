@@ -1,8 +1,8 @@
-use std::{fs, path::Path};
+use std::{collections::HashMap, fs, path::Path};
 
 use image::{ImageBuffer, Rgb};
 use rstest::fixture;
-use yolo_io::{FileMetadata, YoloClass};
+use yolo_io::{ExportPaths, FileMetadata, SourcePaths, YoloClass, YoloProjectConfig};
 
 pub const TEST_SANDBOX_DIR: &str = "tests/sandbox";
 
@@ -62,4 +62,28 @@ pub fn create_image_file(path: &Path, image_data: &ImageBuffer<Rgb<u8>, Vec<u8>>
 pub fn create_yolo_label_file(path: &Path, content: &str) {
     fs::create_dir_all(path.parent().unwrap()).expect("Unable to create directory");
     fs::write(path, content).expect("Unable to write file");
+}
+
+#[fixture]
+pub fn create_yolo_project_config() -> YoloProjectConfig {
+    let mut class_map = HashMap::new();
+
+    class_map.insert(0, "person".to_string());
+    class_map.insert(1, "car".to_string());
+
+    YoloProjectConfig {
+        source_paths: SourcePaths {
+            images: String::from("tests/sandbox/images/"),
+            labels: String::from("tests/sandbox/labels/"),
+        },
+        r#type: String::from("yolo"),
+        project_name: String::from("test_project"),
+        folder_paths: ExportPaths {
+            train: String::from("train/"),
+            validation: String::from("validation/"),
+            test: String::from("test/"),
+        },
+        class_map,
+        duplicate_tolerance: 0.01,
+    }
 }

@@ -13,12 +13,11 @@
    <height>: The normalized height of the bounding box.
 */
 
-use std::{error::Error, fs::read_to_string};
-
 use serde::{Deserialize, Serialize};
+use std::{error::Error, fs::read_to_string};
 use thiserror::Error;
 
-use crate::{FileMetadata, YoloProjectConfig};
+use crate::FileMetadata;
 
 #[derive(Error, Debug, Serialize, Deserialize)]
 pub enum YoloFileParseError {
@@ -34,8 +33,8 @@ pub enum YoloFileParseError {
     ClassIdNotFound(String, i32),
     #[error("Invalid data value for '{2}' in file '{0}' on line {1}.  Value is '{3}'")]
     LabelDataOutOfRange(String, usize, String, String),
-    #[error("Class ID is greater than 79 in file '{0}' on line {1}")]
-    ClassIdGreaterThanMax(String, i32),
+    // #[error("Class ID is greater than 79 in file '{0}' on line {1}")]
+    // ClassIdGreaterThanMax(String, i32),
     #[error("Failed to parse '{1}' on line {2} in file '{0}'")]
     FailedToParseColumn(String, String, usize),
 }

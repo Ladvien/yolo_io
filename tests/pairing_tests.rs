@@ -6,10 +6,11 @@ mod tests {
     use image::{ImageBuffer, Rgb};
     use rstest::rstest;
     use std::path::PathBuf;
-    use yolo_io::{YoloClass, YoloProject, YoloProjectConfig};
+    use yolo_io::{ExportPaths, YoloClass, YoloProject, YoloProjectConfig};
 
     use crate::common::{
-        create_dir_and_write_file, create_image_file, image_data, TEST_SANDBOX_DIR,
+        create_dir_and_write_file, create_image_file, create_yolo_project_config, image_data,
+        TEST_SANDBOX_DIR,
     };
 
     /*
@@ -28,6 +29,7 @@ mod tests {
     #[rstest]
     fn test_project_validation_produces_one_valid_pair_for_one_image_one_label(
         image_data: ImageBuffer<Rgb<u8>, Vec<u8>>,
+        create_yolo_project_config: YoloProjectConfig,
     ) {
         let filename = "one";
         let this_test_directory = format!("{}/{}/", TEST_SANDBOX_DIR, filename);
@@ -38,12 +40,7 @@ mod tests {
         let file1 = PathBuf::from(format!("{}/test1.txt", this_test_directory));
         create_dir_and_write_file(&file1, "Hello, world!");
 
-        let config = YoloProjectConfig {
-            image_path: this_test_directory.clone(),
-            label_path: this_test_directory.clone(),
-        };
-
-        let project = YoloProject::new(&config);
+        let project = YoloProject::new(&create_yolo_project_config);
 
         let valid_pairs = project.get_valid_pairs();
         let invalid_pairs = project.get_invalid_pairs();
@@ -58,6 +55,7 @@ mod tests {
     #[rstest]
     fn test_project_validation_produces_one_invalid_pair_for_one_image_no_label(
         image_data: ImageBuffer<Rgb<u8>, Vec<u8>>,
+        create_yolo_project_config: YoloProjectConfig,
     ) {
         let filename = "two";
         let this_test_directory = format!("{}/{}/", TEST_SANDBOX_DIR, filename);
@@ -65,12 +63,7 @@ mod tests {
         let image_file = PathBuf::from(format!("{}/test2.jpg", this_test_directory));
         create_image_file(&image_file, &image_data);
 
-        let config = YoloProjectConfig {
-            image_path: this_test_directory.clone(),
-            label_path: this_test_directory.clone(),
-        };
-
-        let project = YoloProject::new(&config);
+        let project = YoloProject::new(&create_yolo_project_config);
 
         let valid_pairs = project.get_valid_pairs();
         let invalid_pairs = project.get_invalid_pairs();
@@ -85,6 +78,7 @@ mod tests {
     #[rstest]
     fn test_project_validation_produces_one_valid_pair_for_one_image_two_labels(
         image_data: ImageBuffer<Rgb<u8>, Vec<u8>>,
+        create_yolo_project_config: YoloProjectConfig,
     ) {
         let filename = "three";
         let this_test_directory = format!("{}/{}/", TEST_SANDBOX_DIR, filename);
@@ -98,12 +92,7 @@ mod tests {
         let file2 = PathBuf::from(format!("{}/test3_1.txt", this_test_directory));
         create_dir_and_write_file(&file2, "Hello, world!");
 
-        let config = YoloProjectConfig {
-            image_path: this_test_directory.clone(),
-            label_path: this_test_directory.clone(),
-        };
-
-        let project = YoloProject::new(&config);
+        let project = YoloProject::new(&create_yolo_project_config);
 
         let valid_pairs = project.get_valid_pairs();
         let invalid_pairs = project.get_invalid_pairs();
@@ -116,19 +105,16 @@ mod tests {
     }
 
     #[rstest]
-    fn test_project_validation_produces_one_invalid_pair_for_no_image_one_label() {
+    fn test_project_validation_produces_one_invalid_pair_for_no_image_one_label(
+        create_yolo_project_config: YoloProjectConfig,
+    ) {
         let filename = "four";
         let this_test_directory = format!("{}/{}/", TEST_SANDBOX_DIR, filename);
 
         let file1 = PathBuf::from(format!("{}/test4.txt", this_test_directory));
         create_dir_and_write_file(&file1, "Hello, world!");
 
-        let config = YoloProjectConfig {
-            image_path: this_test_directory.clone(),
-            label_path: this_test_directory.clone(),
-        };
-
-        let project = YoloProject::new(&config);
+        let project = YoloProject::new(&create_yolo_project_config);
 
         let valid_pairs = project.get_valid_pairs();
         let invalid_pairs = project.get_invalid_pairs();
@@ -141,16 +127,12 @@ mod tests {
     }
 
     #[rstest]
-    fn test_project_validation_produces_one_invalid_pair_for_no_image_no_label() {
+    fn test_project_validation_produces_one_invalid_pair_for_no_image_no_label(
+        create_yolo_project_config: YoloProjectConfig,
+    ) {
         let filename = "five";
-        let this_test_directory = format!("{}/{}/", TEST_SANDBOX_DIR, filename);
 
-        let config = YoloProjectConfig {
-            image_path: this_test_directory.clone(),
-            label_path: this_test_directory.clone(),
-        };
-
-        let project = YoloProject::new(&config);
+        let project = YoloProject::new(&create_yolo_project_config);
 
         let valid_pairs = project.get_valid_pairs();
         let invalid_pairs = project.get_invalid_pairs();
