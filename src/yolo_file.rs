@@ -14,7 +14,7 @@
 */
 
 use serde::{Deserialize, Serialize};
-use std::{error::Error, fs::read_to_string};
+use std::fs::read_to_string;
 use thiserror::Error;
 
 use crate::FileMetadata;

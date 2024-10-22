@@ -1,3 +1,4 @@
+mod report;
 mod yolo_file;
 
 use itertools::{EitherOrBoth, Itertools};
@@ -87,14 +88,12 @@ pub enum PairingError {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum PairingResult {
     Valid(ImageLabelPair),
-    Warning(ImageLabelPair),
     Invalid(PairingError),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PairingResults {
     pub valid: Vec<PairingResult>,
-    pub warning: Vec<PairingResult>,
     pub invalid: Vec<PairingResult>,
 }
 
@@ -233,7 +232,6 @@ impl YoloProject {
         // TODO: I should modify to collect pairs _and_ errors.
     ) -> PairingResults {
         let mut valid_pairs: Vec<PairingResult> = Vec::new();
-        let mut warning_pairs: Vec<PairingResult> = Vec::new();
         let mut invalid_pairs: Vec<PairingResult> = Vec::new();
 
         for stem in stems {
@@ -277,7 +275,7 @@ impl YoloProject {
 
         PairingResults {
             valid: valid_pairs,
-            warning: warning_pairs,
+
             invalid: invalid_pairs,
         }
     }
@@ -320,18 +318,12 @@ impl YoloProject {
                     label_path: Some(label_path),
                     message: None,
                 }),
-                (Ok(image_path), Err(_)) => PairingResult::Warning(ImageLabelPair {
-                    name: stem,
-                    image_path: Some(image_path),
-                    label_path: None,
-                    message: Some("Label file is missing.".to_string()),
-                }),
-                (Err(_), Ok(label_path)) => PairingResult::Warning(ImageLabelPair {
-                    name: stem,
-                    image_path: None,
-                    label_path: Some(label_path),
-                    message: Some("Image file is missing.".to_string()),
-                }),
+                (Ok(image_path), Err(_)) => {
+                    PairingResult::Invalid(PairingError::LabelFileMissing(image_path))
+                }
+                (Err(_), Ok(label_path)) => {
+                    PairingResult::Invalid(PairingError::ImageFileMissing(label_path))
+                }
                 (Err(_), Err(_)) => PairingResult::Invalid(PairingError::BothFilesMissing),
             },
             EitherOrBoth::Left(image_path) => match image_path {
