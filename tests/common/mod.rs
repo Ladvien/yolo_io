@@ -73,8 +73,8 @@ pub fn create_yolo_project_config() -> YoloProjectConfig {
 
     YoloProjectConfig {
         source_paths: SourcePaths {
-            images: String::from("tests/sandbox/images/"),
-            labels: String::from("tests/sandbox/labels/"),
+            images: String::from("tests/sandbox/"),
+            labels: String::from("tests/sandbox/"),
         },
         r#type: String::from("yolo"),
         project_name: String::from("test_project"),

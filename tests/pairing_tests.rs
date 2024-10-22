@@ -80,19 +80,19 @@ mod tests {
         image_data: ImageBuffer<Rgb<u8>, Vec<u8>>,
         create_yolo_project_config: YoloProjectConfig,
     ) {
+        let project = YoloProject::new(&create_yolo_project_config);
+
         let filename = "three";
         let this_test_directory = format!("{}/{}/", TEST_SANDBOX_DIR, filename);
 
         let image_file = PathBuf::from(format!("{}/test3.jpg", this_test_directory));
         create_image_file(&image_file, &image_data);
 
-        let file1 = PathBuf::from(format!("{}/test3.txt", this_test_directory));
-        create_dir_and_write_file(&file1, "Hello, world!");
+        let file1 = PathBuf::from(format!("{}/{}/test3.txt", this_test_directory, "one"));
+        create_dir_and_write_file(&file1, "0 0.5 0.5 0.5 0.5");
 
-        let file2 = PathBuf::from(format!("{}/test3_1.txt", this_test_directory));
-        create_dir_and_write_file(&file2, "Hello, world!");
-
-        let project = YoloProject::new(&create_yolo_project_config);
+        let file2 = PathBuf::from(format!("{}/{}/test3.txt", this_test_directory, "two"));
+        create_dir_and_write_file(&file2, "1 0.5 0.5 0.5 0.5");
 
         let valid_pairs = project.get_valid_pairs();
         let invalid_pairs = project.get_invalid_pairs();
@@ -101,7 +101,7 @@ mod tests {
         let invalid_pair = invalid_pairs.into_iter().find(|pair| pair.name == "test3");
 
         assert!(valid_pair.is_some());
-        assert!(invalid_pair.is_none());
+        assert!(invalid_pair.is_some());
     }
 
     #[rstest]
