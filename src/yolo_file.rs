@@ -19,7 +19,7 @@ use thiserror::Error;
 
 use crate::FileMetadata;
 
-#[derive(Error, Debug, Serialize, Deserialize)]
+#[derive(Error, Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub enum YoloFileParseError {
     #[error("Invalid format for file '{0}'")]
     InvalidFormat(String),
@@ -60,71 +60,66 @@ pub struct YoloFile {
 }
 
 impl YoloFile {
-    pub fn new(metadata: &FileMetadata, path: &String) -> Result<YoloFile, Box<dyn Error>> {
+    pub fn new(metadata: &FileMetadata, path: &String) -> Result<YoloFile, YoloFileParseError> {
         let potential_file = read_to_string(path);
 
         let mut entries = Vec::<YoloEntry>::new();
 
         if let Ok(file) = potential_file {
             if file.is_empty() {
-                return Err(Box::new(YoloFileParseError::EmptyFile(path.to_string())));
+                return Err(YoloFileParseError::EmptyFile(path.to_string()));
             }
 
             for (index, line) in file.lines().enumerate() {
                 let parts: Vec<&str> = line.split(" ").collect();
 
                 if parts.len() != 5 {
-                    return Err(Box::new(YoloFileParseError::InvalidFormat(
-                        path.to_string(),
-                    )));
+                    return Err(YoloFileParseError::InvalidFormat(path.to_string()));
                 }
 
                 let class = parts[0].parse::<i32>().map_err(|_| {
-                    Box::new(YoloFileParseError::FailedToParseClassId(
+                    YoloFileParseError::FailedToParseClassId(
                         path.to_string(),
                         parts[0].to_string(),
                         index,
-                    ))
+                    )
                 })?;
 
                 let found = metadata.classes.iter().any(|c| c.id == class as usize);
                 if !found {
-                    return Err(Box::new(YoloFileParseError::ClassIdNotFound(
-                        path.to_string(),
-                        class,
-                    )));
+                    return Err(YoloFileParseError::ClassIdNotFound(path.to_string(), class));
                 }
 
                 let x_center = parts[1].parse::<f32>().map_err(|_| {
-                    Box::new(YoloFileParseError::FailedToParseColumn(
+                    YoloFileParseError::FailedToParseColumn(
                         path.to_string(),
                         'x'.to_string(),
                         index,
-                    ))
+                    )
                 })?;
 
                 let y_center = parts[2].parse::<f32>().map_err(|_| {
-                    Box::new(YoloFileParseError::FailedToParseColumn(
+                    YoloFileParseError::FailedToParseColumn(
                         path.to_string(),
                         'y'.to_string(),
                         index,
-                    ))
+                    )
                 })?;
 
                 let width = parts[3].parse::<f32>().map_err(|_| {
-                    Box::new(YoloFileParseError::FailedToParseColumn(
+                    YoloFileParseError::FailedToParseColumn(
                         path.to_string(),
                         'w'.to_string(),
                         index,
-                    ))
+                    )
                 })?;
 
                 let height = parts[4].parse::<f32>().map_err(|_| {
-                    Box::new(YoloFileParseError::FailedToParseColumn(
+                    YoloFileParseError::FailedToParseColumn(
                         path.to_string(),
                         'h'.to_string(),
                         index,
-                    ))
+                    )
                 })?;
 
                 // if !(0..=79).contains(&class) {
@@ -135,39 +130,39 @@ impl YoloFile {
                 // }
 
                 if !(0.0..=1.0).contains(&x_center) {
-                    return Err(Box::new(YoloFileParseError::LabelDataOutOfRange(
+                    return Err(YoloFileParseError::LabelDataOutOfRange(
                         path.to_string(),
                         index,
                         "x".to_string(),
                         x_center.to_string(),
-                    )));
+                    ));
                 }
 
                 if !(0.0..=1.0).contains(&y_center) {
-                    return Err(Box::new(YoloFileParseError::LabelDataOutOfRange(
+                    return Err(YoloFileParseError::LabelDataOutOfRange(
                         path.to_string(),
                         index,
                         "y".to_string(),
                         y_center.to_string(),
-                    )));
+                    ));
                 }
 
                 if !(0.0..=1.0).contains(&width) {
-                    return Err(Box::new(YoloFileParseError::LabelDataOutOfRange(
+                    return Err(YoloFileParseError::LabelDataOutOfRange(
                         path.to_string(),
                         index,
                         "w".to_string(),
                         width.to_string(),
-                    )));
+                    ));
                 }
 
                 if !(0.0..=1.0).contains(&height) {
-                    return Err(Box::new(YoloFileParseError::LabelDataOutOfRange(
+                    return Err(YoloFileParseError::LabelDataOutOfRange(
                         path.to_string(),
                         index,
                         "h".to_string(),
                         height.to_string(),
-                    )));
+                    ));
                 }
 
                 entries.push(YoloEntry {
@@ -202,7 +197,7 @@ impl YoloFile {
         duplicated_labels: &[(f32, f32, f32, f32)],
         tolerance: f32,
         path: &str,
-    ) -> Result<(), Box<dyn std::error::Error>> {
+    ) -> Result<(), YoloFileParseError> {
         for (index, coordinates) in duplicated_labels.iter().enumerate() {
             let (x1, x2, y1, y2) = coordinates;
 
@@ -215,11 +210,11 @@ impl YoloFile {
                         && (y1 - oy1).abs() < tolerance
                         && (y2 - oy2).abs() < tolerance
                     {
-                        return Err(Box::new(YoloFileParseError::DuplicateEntries(
+                        return Err(YoloFileParseError::DuplicateEntries(
                             path.to_string(),
                             index,
                             other_index,
-                        )));
+                        ));
                     }
                 }
             }

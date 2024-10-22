@@ -11,6 +11,7 @@ A Rust library for loading, validating, and exporting YOLO project files.
    2. Check for corrupted format
    3. Check if duplicates exist in the same file.
    4. Check if invalid class ids exist
+   5. TODO: Compare labels in duplicate label files.  What if they are different?
 4. Export YOLO project
    1. Unlike RectLabel, let's make it so there isn't other types of imports.  We import a YOLO project, we export a YOLO project.  Don't create a separate folder for annotations.
 5. Data quality validation report

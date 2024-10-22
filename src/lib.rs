@@ -2,7 +2,8 @@ mod yolo_file;
 
 use itertools::{EitherOrBoth, Itertools};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, fs, path::PathBuf};
+use std::{collections::HashMap, path::PathBuf};
+use thiserror::Error;
 
 pub use crate::yolo_file::*;
 
@@ -67,11 +68,34 @@ pub struct ImageLabelPair {
     pub message: Option<String>,
 }
 
+#[derive(Error, Clone, PartialEq, Debug, Serialize, Deserialize)]
+pub enum PairingError {
+    #[error("Failed to parse label file: {0}")]
+    LabelFileError(YoloFileParseError),
+    #[error("Both image and label files are missing. This error should never be reached.")]
+    BothFilesMissing,
+    #[error("Label file is missing for image file '{0}'")]
+    LabelFileMissing(String),
+    #[error("Label file is missing and unable to unwrap image path.  This error should never be reached.")]
+    LabelFileMissingUnableToUnwrapImagePath,
+    #[error("Image file is missing for label file '{0}'")]
+    ImageFileMissing(String),
+    #[error("Image file is missing and unable to unwrap label path.  This error should never be reached.")]
+    ImageFileMissingUnableToUnwrapLabelPath,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum PairingResult {
     Valid(ImageLabelPair),
     Warning(ImageLabelPair),
-    Error(Vec<ImageLabelPair>),
+    Invalid(PairingError),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PairingResults {
+    pub valid: Vec<PairingResult>,
+    pub warning: Vec<PairingResult>,
+    pub invalid: Vec<PairingResult>,
 }
 
 #[derive(Debug, Clone)]
@@ -89,7 +113,7 @@ pub struct PathWithKey {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct YoloProjectData {
     pub stems: Vec<String>,
-    pub pairs: HashMap<String, Vec<PairingResult>>,
+    pub pairs: PairingResults,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -131,7 +155,7 @@ impl YoloProject {
             duplicate_tolerance: 0.0,
         };
 
-        let pairs = Self::pair_images_and_labels(metadata, stems.clone(), label_paths, image_paths);
+        let pairs = Self::pair(metadata, stems.clone(), label_paths, image_paths);
 
         Self {
             data: YoloProjectData { stems, pairs },
@@ -139,7 +163,22 @@ impl YoloProject {
         }
     }
 
-    fn validate_label_file() {}
+    pub fn get_valid_pairs(&self) -> Vec<ImageLabelPair> {
+        // Return a Vec of _only_ Valid ImageLabelPairs
+        self.data
+            .pairs
+            .valid
+            .iter()
+            .filter_map(|pair| match pair {
+                PairingResult::Valid(pair) => Some(pair.clone()),
+                _ => None,
+            })
+            .collect::<Vec<ImageLabelPair>>()
+    }
+
+    pub fn get_invalid_pairs(&self) -> Vec<PairingResult> {
+        self.data.pairs.invalid.to_vec()
+    }
 
     fn get_filepaths_for_extension(path: &str, extensions: Vec<&str>) -> Vec<PathWithKey> {
         let file_paths = std::fs::read_dir(path);
@@ -186,13 +225,16 @@ impl YoloProject {
             .collect::<Vec<String>>()
     }
 
-    fn pair_images_and_labels(
+    fn pair(
         file_metadata: FileMetadata,
         stems: Vec<String>,
         label_filenames: Vec<PathWithKey>,
         image_filenames: Vec<PathWithKey>,
-    ) -> HashMap<String, Vec<PairingResult>> {
-        let mut pairing_map = HashMap::<String, Vec<PairingResult>>::new();
+        // TODO: I should modify to collect pairs _and_ errors.
+    ) -> PairingResults {
+        let mut valid_pairs: Vec<PairingResult> = Vec::new();
+        let mut warning_pairs: Vec<PairingResult> = Vec::new();
+        let mut invalid_pairs: Vec<PairingResult> = Vec::new();
 
         for stem in stems {
             let image_paths_for_stem = image_filenames
@@ -205,7 +247,6 @@ impl YoloProject {
                 })
                 .collect::<Vec<Result<String, ()>>>();
 
-            // WILO: Working on filtering out invalid labels before pairing.
             let label_paths_for_stem = label_filenames
                 .clone()
                 .into_iter()
@@ -216,37 +257,17 @@ impl YoloProject {
                 })
                 .collect::<Vec<Result<String, ()>>>();
 
-            // TODO: Validate label files
-            let mut label_files = label_paths_for_stem.clone();
-            label_files.retain(|path| path.is_ok());
-
-            let test = label_files
-                .into_iter()
-                .filter_map(|path| {
-                    if let Ok(path) = path {
-                        let yolo_file = YoloFile::new(&file_metadata, &path);
-                        if let Ok(yolo_file) = yolo_file {
-                            Some(yolo_file)
-                        } else {
-                            None
-                        }
-                    } else {
-                        None
-                    }
-                })
-                .collect::<Vec<YoloFile>>();
-
-            println!("{:#?}", test);
-
-            // TODO: Remove invalid label files from pairing.
-            //       they go straight to errors.
+            Self::process_label_path(
+                &file_metadata,
+                label_paths_for_stem.clone(),
+                &mut invalid_pairs,
+            );
 
             let unconfirmed_pairs = image_paths_for_stem
                 .into_iter()
                 .zip_longest(label_paths_for_stem.into_iter());
 
-            pairing_map.insert(
-                stem.clone(),
+            valid_pairs.extend(
                 unconfirmed_pairs
                     .into_iter()
                     .map(|pair| Self::evaluate_pair(stem.clone(), pair))
@@ -254,7 +275,40 @@ impl YoloProject {
             );
         }
 
-        pairing_map
+        PairingResults {
+            valid: valid_pairs,
+            warning: warning_pairs,
+            invalid: invalid_pairs,
+        }
+    }
+
+    fn process_label_path(
+        file_metadata: &FileMetadata,
+        label_paths_for_stem: Vec<Result<String, ()>>,
+        invalid_pairs: &mut Vec<PairingResult>,
+    ) {
+        if label_paths_for_stem.is_empty() {
+            invalid_pairs.push(PairingResult::Invalid(
+                PairingError::LabelFileMissingUnableToUnwrapImagePath,
+            ));
+        } else {
+            for label_path in &label_paths_for_stem {
+                if let Ok(path) = label_path {
+                    let yolo_file = YoloFile::new(file_metadata, path);
+                    match yolo_file {
+                        Ok(_) => {}
+                        Err(error) => {
+                            invalid_pairs
+                                .push(PairingResult::Invalid(PairingError::LabelFileError(error)));
+                        }
+                    }
+                } else {
+                    invalid_pairs.push(PairingResult::Invalid(
+                        PairingError::LabelFileMissingUnableToUnwrapImagePath,
+                    ));
+                }
+            }
+        }
     }
 
     fn evaluate_pair(stem: String, pair: EitherOrBoth<Result<String, ()>>) -> PairingResult {
@@ -278,83 +332,24 @@ impl YoloProject {
                     label_path: Some(label_path),
                     message: Some("Image file is missing.".to_string()),
                 }),
-                (Err(_), Err(_)) => PairingResult::Error(vec![ImageLabelPair {
-                    name: stem,
-                    image_path: None,
-                    label_path: None,
-                    message: Some("Both image and label files are missing.".to_string()),
-                }]),
+                (Err(_), Err(_)) => PairingResult::Invalid(PairingError::BothFilesMissing),
             },
-            EitherOrBoth::Left(image_path) => PairingResult::Error(vec![ImageLabelPair {
-                name: stem,
-                image_path: Some(image_path.unwrap()),
-                label_path: None,
-                message: Some("Label file is missing.".to_string()),
-            }]),
-            EitherOrBoth::Right(label_path) => PairingResult::Error(vec![ImageLabelPair {
-                name: stem,
-                image_path: None,
-                label_path: Some(label_path.unwrap()),
-                message: Some("Image file is missing.".to_string()),
-            }]),
-        }
-    }
-
-    // pub fn validate_label_file(label_path: &String) -> bool {
-    //     // TODO:
-    // }
-
-    pub fn validate(
-        &self,
-    ) -> Result<(Vec<ImageLabelPair>, Vec<ImageLabelPair>), Box<dyn std::error::Error>> {
-        // 1. Check if file has a matching image.
-        // 2. Check if the file is duplicated
-        // 3. Check if file is empty
-        // 4. Check if file meets YOLO formatting
-        let mut valid_image_label_pairs = Vec::<ImageLabelPair>::new();
-        let mut invalid_image_label_pairs = Vec::<ImageLabelPair>::new();
-
-        let data_json = serde_json::to_string(&self.data).unwrap();
-        fs::write("validation.json", data_json)?;
-
-        // for (stem, results) in &self.pairs {
-        //     for result in results {
-        //         match result {
-        //             PairingResult::Valid(image_label_pair) => todo!(),
-        //             PairingResult::Warning(image_label_pair) => todo!(),
-        //             PairingResult::Error(vec) => todo!(),
-        //         }
-        //     }
-        // }
-
-        Ok((valid_image_label_pairs, invalid_image_label_pairs))
-    }
-
-    pub fn get_valid_pairs(&self) -> Vec<ImageLabelPair> {
-        let mut valid_pairs = Vec::<ImageLabelPair>::new();
-
-        for pair in &self.data.pairs {
-            for result in pair.1 {
-                if let PairingResult::Valid(image_label_pair) = result {
-                    valid_pairs.push(image_label_pair.clone());
+            EitherOrBoth::Left(image_path) => match image_path {
+                Ok(image_path) => {
+                    PairingResult::Invalid(PairingError::LabelFileMissing(image_path))
                 }
-            }
-        }
-
-        valid_pairs
-    }
-
-    pub fn get_invalid_pairs(&self) -> Vec<ImageLabelPair> {
-        let mut invalid_pairs = Vec::<ImageLabelPair>::new();
-
-        for pair in &self.data.pairs {
-            for result in pair.1 {
-                if let PairingResult::Error(vec) = result {
-                    invalid_pairs.extend(vec.clone());
+                Err(_) => {
+                    PairingResult::Invalid(PairingError::LabelFileMissingUnableToUnwrapImagePath)
                 }
-            }
+            },
+            EitherOrBoth::Right(label_path) => match label_path {
+                Ok(label_path) => {
+                    PairingResult::Invalid(PairingError::ImageFileMissing(label_path))
+                }
+                Err(_) => {
+                    PairingResult::Invalid(PairingError::ImageFileMissingUnableToUnwrapLabelPath)
+                }
+            },
         }
-
-        invalid_pairs
     }
 }
