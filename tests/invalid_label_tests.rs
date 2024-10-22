@@ -368,4 +368,40 @@ mod tests {
             panic!("Expected error");
         }
     }
+
+    #[rstest]
+    fn test_yolo_file_new_contains_duplicate_labels() {
+        let path = format!("{}/data/invalid14.txt", TEST_SANDBOX_DIR);
+        let content = format!(
+            "{}\n{}\n{}\n",
+            "0 0.25 0.5 0.25 0.5", "0 0.251 0.5 0.25 0.51", "0 0.5 0.5 0.5 0.35"
+        );
+        let content = content.as_ref();
+        create_yolo_label_file(&PathBuf::from(&path), content);
+
+        let metadata = FileMetadata {
+            classes: vec![
+                YoloClass {
+                    id: 0,
+                    name: "person".to_string(),
+                },
+                YoloClass {
+                    id: 1,
+                    name: "car".to_string(),
+                },
+            ],
+            duplicate_tolerance: 0.01,
+        };
+
+        let yolo_file = YoloFile::new(metadata, &path);
+
+        if let Err(err) = yolo_file {
+            assert_eq!(
+                err.to_string(),
+                "Duplicate entries found in file 'tests/sandbox/data/invalid14.txt' on row 0 and row 1"
+            );
+        } else {
+            panic!("Expected error");
+        }
+    }
 }

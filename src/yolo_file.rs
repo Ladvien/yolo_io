@@ -26,8 +26,8 @@ pub enum YoloFileParseError {
     InvalidFormat(String),
     #[error("File '{0}' is empty")]
     EmptyFile(String),
-    #[error("Duplicate entries found in file '{0}'")]
-    DuplicateEntries(String),
+    #[error("Duplicate entries found in file '{0}' on row {1} and row {2}")]
+    DuplicateEntries(String, usize, usize),
     #[error("Unable to parse value '{1}' in file '{0}' on line {2}")]
     FailedToParseClassId(String, String, usize),
     #[error("Invalid class id '{1}' in file '{0}'")]
@@ -207,8 +207,8 @@ impl YoloFile {
         for (index, coordinates) in duplicated_labels.iter().enumerate() {
             let (x1, x2, y1, y2) = coordinates;
 
-            for (i, other_coordinates) in duplicated_labels.iter().enumerate() {
-                if i != index {
+            for (other_index, other_coordinates) in duplicated_labels.iter().enumerate() {
+                if other_index != index {
                     let (ox1, ox2, oy1, oy2) = other_coordinates;
 
                     if (x1 - ox1).abs() < tolerance
@@ -218,6 +218,8 @@ impl YoloFile {
                     {
                         return Err(Box::new(YoloFileParseError::DuplicateEntries(
                             path.to_string(),
+                            index,
+                            other_index,
                         )));
                     }
                 }
