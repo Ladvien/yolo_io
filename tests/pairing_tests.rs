@@ -6,7 +6,7 @@ mod tests {
     use image::{ImageBuffer, Rgb};
     use rstest::rstest;
     use std::path::PathBuf;
-    use yolo_io::{ExportPaths, PairingError, YoloClass, YoloProject, YoloProjectConfig};
+    use yolo_io::{YoloProject, YoloProjectConfig};
 
     use crate::common::{
         create_dir_and_write_file, create_image_file, create_yolo_project_config, image_data,

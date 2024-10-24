@@ -1,13 +1,18 @@
 #[macro_use]
 mod report;
+mod export;
 mod yolo_file;
 
+pub use export::*;
 pub use report::YoloDataQualityReport;
 pub use yolo_file::{YoloFile, YoloFileParseError, YoloFileParseErrorDetails};
 
 use itertools::{EitherOrBoth, Itertools};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, path::PathBuf};
+use std::{
+    collections::HashMap,
+    path::{Path, PathBuf},
+};
 use thiserror::Error;
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -15,6 +20,7 @@ pub struct ExportPaths {
     pub train: String,
     pub validation: String,
     pub test: String,
+    pub root: String,
 }
 
 impl Default for ExportPaths {
@@ -23,6 +29,7 @@ impl Default for ExportPaths {
             train: "train".to_string(),
             validation: "validation".to_string(),
             test: "test".to_string(),
+            root: "yolo_io_export".to_string(),
         }
     }
 }
@@ -66,8 +73,8 @@ pub struct YoloProjectConfig {
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct ImageLabelPair {
     pub name: String,
-    pub image_path: Option<String>,
-    pub label_path: Option<String>,
+    pub image_path: Option<PathBuf>,
+    pub label_path: Option<PathBuf>,
 }
 
 #[derive(Error, Clone, PartialEq, Debug, Serialize, Deserialize)]
@@ -340,8 +347,8 @@ impl YoloProject {
             EitherOrBoth::Both(image_path, label_path) => match (image_path, label_path) {
                 (Ok(image_path), Ok(label_path)) => PairingResult::Valid(ImageLabelPair {
                     name: stem,
-                    image_path: Some(image_path),
-                    label_path: Some(label_path),
+                    image_path: Some(PathBuf::from(image_path)),
+                    label_path: Some(PathBuf::from(label_path)),
                 }),
                 (Ok(image_path), Err(_)) => {
                     PairingResult::Invalid(PairingError::LabelFileMissing(image_path))

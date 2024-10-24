@@ -82,6 +82,7 @@ pub fn create_yolo_project_config() -> YoloProjectConfig {
             train: String::from("train/"),
             validation: String::from("validation/"),
             test: String::from("test/"),
+            root: String::from("tests/sandbox/export/"),
         },
         class_map,
         duplicate_tolerance: 0.01,
