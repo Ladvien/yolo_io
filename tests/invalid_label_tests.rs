@@ -34,8 +34,6 @@ mod tests {
 
         let yolo_file = YoloFile::new(&metadata, &path);
 
-        println!("{:?}", yolo_file);
-
         assert!(yolo_file.is_ok());
     }
 
@@ -99,6 +97,8 @@ mod tests {
 
         let yolo_file = YoloFile::new(&metadata, &path);
 
+        println!("{:?}", yolo_file);
+
         if let Err(err) = yolo_file {
             assert_eq!(
                 err.to_string(),
@@ -154,7 +154,7 @@ mod tests {
         if let Err(err) = yolo_file {
             assert_eq!(
                 err.to_string(),
-                "Failed to parse 'x' on line 0 in file 'tests/sandbox/data/invalid5.txt'"
+                "Failed to parse 'x' column with value of '0' on line 0 in file 'tests/sandbox/data/invalid5.txt'"
             );
         } else {
             panic!("Expected error");
@@ -180,7 +180,7 @@ mod tests {
         if let Err(err) = yolo_file {
             assert_eq!(
                 err.to_string(),
-                "Failed to parse 'y' on line 0 in file 'tests/sandbox/data/invalid6.txt'"
+                "Failed to parse 'y' column with value of '0' on line 0 in file 'tests/sandbox/data/invalid6.txt'"
             );
         } else {
             panic!("Expected error");
@@ -206,7 +206,7 @@ mod tests {
         if let Err(err) = yolo_file {
             assert_eq!(
                 err.to_string(),
-                "Failed to parse 'w' on line 0 in file 'tests/sandbox/data/invalid7.txt'"
+                "Failed to parse 'w' column with value of '0' on line 0 in file 'tests/sandbox/data/invalid7.txt'"
             );
         } else {
             panic!("Expected error");
@@ -232,7 +232,7 @@ mod tests {
         if let Err(err) = yolo_file {
             assert_eq!(
                 err.to_string(),
-                "Failed to parse 'h' on line 0 in file 'tests/sandbox/data/invalid8.txt'"
+                "Failed to parse 'h' column with value of '0' on line 0 in file 'tests/sandbox/data/invalid8.txt'"
             );
         } else {
             panic!("Expected error");
@@ -394,6 +394,7 @@ mod tests {
         };
 
         let yolo_file = YoloFile::new(&metadata, &path);
+        println!("{:?}", yolo_file);
 
         if let Err(err) = yolo_file {
             assert_eq!(

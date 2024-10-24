@@ -1,12 +1,17 @@
+#[macro_use]
 mod report;
 mod yolo_file;
 
+pub use report::YoloDataQualityReport;
+pub use yolo_file::{YoloFile, YoloFileParseError, YoloFileParseErrorDetails};
+
 use itertools::{EitherOrBoth, Itertools};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, path::PathBuf};
+use std::{
+    collections::HashMap,
+    path::{Display, PathBuf},
+};
 use thiserror::Error;
-
-pub use crate::yolo_file::*;
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct ExportPaths {
@@ -57,35 +62,51 @@ pub struct YoloProjectConfig {
     pub r#type: String,
     pub project_name: String,
     pub export_paths: ExportPaths,
-    pub class_map: HashMap<u32, String>,
+    pub class_map: HashMap<usize, String>,
     pub duplicate_tolerance: f32,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct ImageLabelPair {
     pub name: String,
     pub image_path: Option<String>,
     pub label_path: Option<String>,
-    pub message: Option<String>,
 }
 
 #[derive(Error, Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub enum PairingError {
-    #[error("Failed to parse label file: {0}")]
     LabelFileError(YoloFileParseError),
-    #[error("Both image and label files are missing. This error should never be reached.")]
     BothFilesMissing,
-    #[error("Label file is missing for image file '{0}'")]
     LabelFileMissing(String),
-    #[error("Label file is missing and unable to unwrap image path.  This error should never be reached.")]
     LabelFileMissingUnableToUnwrapImagePath,
-    #[error("Image file is missing for label file '{0}'")]
     ImageFileMissing(String),
-    #[error("Image file is missing and unable to unwrap label path.  This error should never be reached.")]
     ImageFileMissingUnableToUnwrapLabelPath,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+impl std::fmt::Display for PairingError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            PairingError::LabelFileError(error) => {
+                write!(f, "Label file error: {}", error)
+            }
+            PairingError::BothFilesMissing => write!(f, "Both files missing"),
+            PairingError::LabelFileMissing(path) => {
+                write!(f, "Label file missing: {}", path)
+            }
+            PairingError::LabelFileMissingUnableToUnwrapImagePath => {
+                write!(f, "Label file missing; unable to unwrap image path")
+            }
+            PairingError::ImageFileMissing(path) => {
+                write!(f, "Image file missing: {}", path)
+            }
+            PairingError::ImageFileMissingUnableToUnwrapLabelPath => {
+                write!(f, "Image file missing; unable to unwrap label path")
+            }
+        }
+    }
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum PairingResult {
     Valid(ImageLabelPair),
     Invalid(PairingError),
@@ -145,9 +166,9 @@ impl YoloProject {
         let metadata = FileMetadata {
             classes: config
                 .class_map
-                .values()
-                .map(|name| YoloClass {
-                    id: 0,
+                .iter()
+                .map(|(id, name)| YoloClass {
+                    id: *id,
                     name: name.clone(),
                 })
                 .collect(),
@@ -175,8 +196,16 @@ impl YoloProject {
             .collect::<Vec<ImageLabelPair>>()
     }
 
-    pub fn get_invalid_pairs(&self) -> Vec<PairingResult> {
-        self.data.pairs.invalid.to_vec()
+    pub fn get_invalid_pairs(&self) -> Vec<PairingError> {
+        self.data
+            .pairs
+            .invalid
+            .iter()
+            .filter_map(|pair| match pair {
+                PairingResult::Invalid(error) => Some(error.clone()),
+                _ => None,
+            })
+            .collect::<Vec<PairingError>>()
     }
 
     fn get_filepaths_for_extension(path: &str, extensions: Vec<&str>) -> Vec<PathWithKey> {
@@ -316,7 +345,6 @@ impl YoloProject {
                     name: stem,
                     image_path: Some(image_path),
                     label_path: Some(label_path),
-                    message: None,
                 }),
                 (Ok(image_path), Err(_)) => {
                     PairingResult::Invalid(PairingError::LabelFileMissing(image_path))
