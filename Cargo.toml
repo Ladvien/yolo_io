@@ -1,6 +1,9 @@
 [package]
 edition = "2021"
+keywords = ["machine-learning", "yolo", "you-only-look-once", "loader", "validation"]
+license = "Apache-2.0"
 name = "yolo_io"
+publish = ["yolo_io"]
 version = "0.1.0"
 
 [dependencies]
@@ -14,3 +17,6 @@ thiserror = "1.0"
 image = "0.25.4" # https://docs.rs/image/latest/image/
 num-complex = "0.4.6" 
 rstest = "0.23.0" # https://docs.rs/rstest/latest/rstest/
+
+[lints.rust]
+unsafe_code = "forbid"

@@ -7,10 +7,7 @@ pub use yolo_file::{YoloFile, YoloFileParseError, YoloFileParseErrorDetails};
 
 use itertools::{EitherOrBoth, Itertools};
 use serde::{Deserialize, Serialize};
-use std::{
-    collections::HashMap,
-    path::{Display, PathBuf},
-};
+use std::{collections::HashMap, path::PathBuf};
 use thiserror::Error;
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
