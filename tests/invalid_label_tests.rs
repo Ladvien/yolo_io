@@ -97,8 +97,6 @@ mod tests {
 
         let yolo_file = YoloFile::new(&metadata, &path);
 
-        println!("{:?}", yolo_file);
-
         if let Err(err) = yolo_file {
             assert_eq!(
                 err.to_string(),
@@ -394,7 +392,6 @@ mod tests {
         };
 
         let yolo_file = YoloFile::new(&metadata, &path);
-        println!("{:?}", yolo_file);
 
         if let Err(err) = yolo_file {
             assert_eq!(

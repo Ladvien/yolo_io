@@ -1,6 +1,8 @@
 # yolo_io
 A Rust library for loading, validating, and exporting YOLO project files.
 
+## Working Progress
+This crate is very much a work-in-progress.  Features outlined may not be completed, working properly, or even listed.
 
 ## Features
 1. Automatic pairing based on filename

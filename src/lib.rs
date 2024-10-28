@@ -17,19 +17,19 @@ use thiserror::Error;
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct ExportPaths {
+    pub root: String,
     pub train: String,
     pub validation: String,
     pub test: String,
-    pub root: String,
 }
 
 impl Default for ExportPaths {
     fn default() -> Self {
         Self {
+            root: "export".to_string(),
             train: "train".to_string(),
             validation: "validation".to_string(),
             test: "test".to_string(),
-            root: "yolo_io_export".to_string(),
         }
     }
 }
@@ -85,6 +85,7 @@ pub enum PairingError {
     LabelFileMissingUnableToUnwrapImagePath,
     ImageFileMissing(String),
     ImageFileMissingUnableToUnwrapLabelPath,
+    DuplicatedImageFile((ImageLabelPair, ImageLabelPair)),
 }
 
 impl std::fmt::Display for PairingError {
@@ -105,6 +106,13 @@ impl std::fmt::Display for PairingError {
             }
             PairingError::ImageFileMissingUnableToUnwrapLabelPath => {
                 write!(f, "Image file missing; unable to unwrap label path")
+            }
+            PairingError::DuplicatedImageFile((image_label_pair, duplicate_image_label_pair)) => {
+                write!(
+                    f,
+                    "Duplicated image file: {:?} and {:?}",
+                    image_label_pair, duplicate_image_label_pair
+                )
             }
         }
     }
@@ -148,6 +156,8 @@ pub struct YoloProject {
 
 impl YoloProject {
     pub fn new(config: &YoloProjectConfig) -> Self {
+        println!("Creating new YoloProject from config: {:#?}", config);
+
         let image_paths = Self::get_filepaths_for_extension(
             &config.source_paths.images,
             vec!["jpg", "png", "PNG", "JPEG"],
@@ -180,6 +190,7 @@ impl YoloProject {
         };
 
         let pairs = Self::pair(metadata, stems.clone(), label_paths, image_paths);
+        // let duplicates = gather_duplicates(stems.clone(), pairs.clone());
 
         Self {
             data: YoloProjectData { stems, pairs },
@@ -298,17 +309,18 @@ impl YoloProject {
                 .into_iter()
                 .zip_longest(label_paths_for_stem.into_iter());
 
-            valid_pairs.extend(
-                unconfirmed_pairs
-                    .into_iter()
-                    .map(|pair| Self::evaluate_pair(stem.clone(), pair))
-                    .collect::<Vec<PairingResult>>(),
-            );
+            let unduplicated_pairs = unconfirmed_pairs
+                .into_iter()
+                .map(|pair| Self::evaluate_pair(stem.clone(), pair))
+                .collect::<Vec<PairingResult>>();
+
+            Self::check_for_duplicates(&mut valid_pairs, &mut invalid_pairs);
+
+            valid_pairs.extend(unduplicated_pairs);
         }
 
         PairingResults {
             valid: valid_pairs,
-
             invalid: invalid_pairs,
         }
     }
@@ -374,6 +386,37 @@ impl YoloProject {
                     PairingResult::Invalid(PairingError::ImageFileMissingUnableToUnwrapLabelPath)
                 }
             },
+        }
+    }
+
+    fn check_for_duplicates(
+        valid_pairs: &mut Vec<PairingResult>,
+        invalid_pairs: &mut Vec<PairingResult>,
+    ) {
+        for pair in valid_pairs.clone() {
+            let mut other_pairs = valid_pairs.clone();
+            other_pairs.retain(|other_pair| other_pair != &pair);
+
+            for other_pair in other_pairs {
+                if let (PairingResult::Valid(pair), PairingResult::Valid(other_pair)) =
+                    (pair.clone(), other_pair.clone())
+                {
+                    match (pair.name.clone(), other_pair.name.clone()) {
+                        (image_name, other_image_name) => {
+                            if image_name == other_image_name {
+                                valid_pairs.push(PairingResult::Valid(pair));
+                                invalid_pairs.push(PairingResult::Valid(other_pair));
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+            }
+
+            valid_pairs.retain(|pair| match pair {
+                PairingResult::Valid(pair) => !pair.name.is_empty(),
+                _ => true,
+            });
         }
     }
 }

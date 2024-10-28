@@ -53,7 +53,7 @@ pub struct YoloClass {
     pub name: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct YoloEntry {
     pub class: i32,
     pub x_center: f32,
@@ -62,7 +62,7 @@ pub struct YoloEntry {
     pub height: f32,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct YoloFile {
     entries: Vec<YoloEntry>,
 }
@@ -113,8 +113,6 @@ impl YoloFile {
                         value: None,
                     })
                 })?;
-
-                println!("Metadata: {:?}", metadata.classes);
 
                 let found = metadata.classes.iter().any(|c| c.id == class as usize);
                 if !found {

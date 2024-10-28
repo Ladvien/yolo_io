@@ -145,7 +145,6 @@ mod tests {
         let invalid_pairs = project.get_invalid_pairs();
 
         let valid_pair = valid_pairs.into_iter().find(|pair| pair.name == "test4");
-        println!("{:?}", invalid_pairs);
         let invalid_pair = invalid_pairs
             .into_iter()
             .find(|pair| matches!(pair, yolo_io::PairingError::LabelFileError(_)));
