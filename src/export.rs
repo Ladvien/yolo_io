@@ -62,10 +62,18 @@ impl YoloProjectExporter {
                 project.config.export.class_map.clone(),
             );
 
-            let mut valid_pairs = project.get_valid_pairs();
-            let train_pairs = valid_pairs.split_off(5);
+            let (train_pairs, validation_pairs, test_pairs) =
+                Self::split_pairs(project.get_valid_pairs(), project.config.export.split.train);
 
-            Self::copy_files(&train_path, train_pairs);
+            let splits: Vec<(String, Vec<ImageLabelPair>)> = vec![
+                (test_path, test_pairs),
+                (validation_path, validation_pairs),
+                (train_path, train_pairs),
+            ];
+
+            for split in splits {
+                Self::copy_files(&split.0, split.1)?
+            }
         } else {
             return Err(ExportError::UnableToCreateDirectory(
                 project.config.export.paths.root,
@@ -75,13 +83,32 @@ impl YoloProjectExporter {
         Ok(())
     }
 
+    fn split_pairs(
+        pairs: Vec<ImageLabelPair>,
+        split: f32,
+    ) -> (
+        Vec<ImageLabelPair>,
+        Vec<ImageLabelPair>,
+        Vec<ImageLabelPair>,
+    ) {
+        let mut rng = thread_rng();
+        let mut pairs = pairs;
+        pairs.shuffle(&mut rng);
+
+        let num_test_pairs = (split * pairs.len() as f32).round() as usize;
+
+        let test_pairs = pairs.split_off(num_test_pairs);
+
+        let num_val_pairs = (split * pairs.len() as f32).round() as usize;
+        let validation_pairs = pairs.split_off(num_val_pairs);
+
+        let train_pairs = pairs;
+
+        (train_pairs, validation_pairs, test_pairs)
+    }
+
     fn copy_files(export_path: &str, pairs: Vec<ImageLabelPair>) -> Result<(), ExportError> {
-        println!("Copying files to: {}", export_path);
-        println!("Copying {} files", pairs.len());
-
         for pair in pairs {
-            // WILO: Get back to work copying the files properly.
-
             let label_path = pair
                 .label_path
                 .ok_or(ExportError::FailedToUnwrapLabelPath)?;
