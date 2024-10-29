@@ -96,9 +96,9 @@ mod tests {
     ) {
         let filename = "three";
         create_yolo_project_config.source_paths.images =
-            format!("{}/{}/", TEST_SANDBOX_DIR, filename);
+            format!("{}/{}", TEST_SANDBOX_DIR, filename);
         create_yolo_project_config.source_paths.labels =
-            format!("{}/{}/", TEST_SANDBOX_DIR, filename);
+            format!("{}/{}", TEST_SANDBOX_DIR, filename);
 
         let this_test_directory = format!("{}/{}/", TEST_SANDBOX_DIR, filename);
 
@@ -134,7 +134,7 @@ mod tests {
         let this_test_directory = format!("{}/{}/", TEST_SANDBOX_DIR, filename);
 
         let file1 = PathBuf::from(format!("{}/test4.txt", this_test_directory));
-        create_dir_and_write_file(&file1, "Hello, world!");
+        create_dir_and_write_file(&file1, "0 0.5 0.5 0.5 0.5");
 
         create_yolo_project_config.source_paths.images = this_test_directory.clone();
         create_yolo_project_config.source_paths.labels = this_test_directory.clone();
@@ -144,10 +144,13 @@ mod tests {
         let valid_pairs = project.get_valid_pairs();
         let invalid_pairs = project.get_invalid_pairs();
 
+        println!("{:?}", valid_pairs);
+        println!("{:?}", invalid_pairs);
+
         let valid_pair = valid_pairs.into_iter().find(|pair| pair.name == "test4");
         let invalid_pair = invalid_pairs
             .into_iter()
-            .find(|pair| matches!(pair, yolo_io::PairingError::LabelFileError(_)));
+            .find(|pair| matches!(pair, yolo_io::PairingError::ImageFileMissing(_)));
 
         assert!(valid_pair.is_none());
         assert!(invalid_pair.is_some());

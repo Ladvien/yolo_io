@@ -124,12 +124,6 @@ pub enum PairingResult {
     Invalid(PairingError),
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct PairingResults {
-    pub valid: Vec<PairingResult>,
-    pub invalid: Vec<PairingResult>,
-}
-
 #[derive(Debug, Clone)]
 pub struct ValidationResults {
     pub valid_results: Vec<PairingResult>,
@@ -145,7 +139,7 @@ pub struct PathWithKey {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct YoloProjectData {
     pub stems: Vec<String>,
-    pub pairs: PairingResults,
+    pub pairs: Vec<PairingResult>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -202,7 +196,6 @@ impl YoloProject {
         // Return a Vec of _only_ Valid ImageLabelPairs
         self.data
             .pairs
-            .valid
             .iter()
             .filter_map(|pair| match pair {
                 PairingResult::Valid(pair) => Some(pair.clone()),
@@ -212,15 +205,27 @@ impl YoloProject {
     }
 
     pub fn get_invalid_pairs(&self) -> Vec<PairingError> {
-        self.data
+        println!("Getting invalid pairs: {:#?}", self.data.pairs);
+
+        let invalid_pairs = self
+            .data
             .pairs
-            .invalid
             .iter()
             .filter_map(|pair| match pair {
-                PairingResult::Invalid(error) => Some(error.clone()),
-                _ => None,
+                PairingResult::Invalid(error) => {
+                    println!("Invalid pair found: {:#?}", error);
+                    Some(error.clone())
+                }
+                _ => {
+                    println!("Valid pair found in invalid pairs: {:#?}", pair);
+                    None
+                }
             })
-            .collect::<Vec<PairingError>>()
+            .collect::<Vec<PairingError>>();
+
+        println!("Invalid pairs: {:#?}", invalid_pairs);
+
+        invalid_pairs
     }
 
     fn get_filepaths_for_extension(path: &str, extensions: Vec<&str>) -> Vec<PathWithKey> {
@@ -274,8 +279,8 @@ impl YoloProject {
         label_filenames: Vec<PathWithKey>,
         image_filenames: Vec<PathWithKey>,
         // TODO: I should modify to collect pairs _and_ errors.
-    ) -> PairingResults {
-        let mut valid_pairs: Vec<PairingResult> = Vec::new();
+    ) -> Vec<PairingResult> {
+        let mut pairs: Vec<PairingResult> = Vec::new();
         let mut invalid_pairs: Vec<PairingResult> = Vec::new();
 
         for stem in stems {
@@ -314,15 +319,14 @@ impl YoloProject {
                 .map(|pair| Self::evaluate_pair(stem.clone(), pair))
                 .collect::<Vec<PairingResult>>();
 
-            Self::check_for_duplicates(&mut valid_pairs, &mut invalid_pairs);
+            Self::check_for_duplicates(&mut pairs, &mut invalid_pairs);
 
-            valid_pairs.extend(unduplicated_pairs);
+            pairs.extend(unduplicated_pairs);
         }
 
-        PairingResults {
-            valid: valid_pairs,
-            invalid: invalid_pairs,
-        }
+        pairs.extend(invalid_pairs);
+
+        pairs
     }
 
     fn process_label_path(

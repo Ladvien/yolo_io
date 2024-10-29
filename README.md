@@ -21,4 +21,4 @@ This crate is very much a work-in-progress.  Features outlined may not be comple
 
 
 ## Reads
-- [YOLO Format](https://yolov8.org/yolov8-label-format/)
+- [YOLO Format](https://docs.ultralytics.com/yolov5/tutorials/train_custom_data/#21-create-datasetyaml)

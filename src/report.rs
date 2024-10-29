@@ -13,7 +13,7 @@ impl YoloDataQualityReport {
     pub fn generate(project: YoloProject) -> Option<String> {
         let mut errors = Vec::<DataQualityItem>::new();
 
-        for error in project.data.pairs.invalid.iter() {
+        for error in project.data.pairs.iter() {
             if let crate::PairingResult::Invalid(pairing_error) = error {
                 let dq_item = DataQualityItem {
                     source: Self::get_source_name(pairing_error),

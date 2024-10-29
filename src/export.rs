@@ -8,6 +8,8 @@ use crate::{ImageLabelPair, YoloProject};
 pub enum ExportError {
     #[error("Unable to create '{0}' directory")]
     UnableToCreateDirectory(String),
+    #[error("Failed to unwrap label path.")]
+    FailedToUnwrapLabelPath,
 }
 
 pub struct YoloProjectExporter {
@@ -68,22 +70,24 @@ impl YoloProjectExporter {
         Ok(())
     }
 
-    fn copy_files(export_path: &str, pairs: Vec<ImageLabelPair>)
-    // -> TODO: Return error, get rid of unwraps
-    {
+    fn copy_files(export_path: &str, pairs: Vec<ImageLabelPair>) -> Result<(), ExportError> {
+        println!("Copying files to: {}", export_path);
+        println!("Copying {} files", pairs.len());
+
         for pair in pairs {
             // WILO: Get back to work copying the files properly.
-            let label_path = pair.label_path.unwrap();
 
-            let export_path = format!(
-                "{}/{}",
-                export_path,
-                label_path.file_name().unwrap().to_string_lossy()
-            );
-            println!("Exporting to: {}", export_path);
+            let label_path = pair
+                .label_path
+                .ok_or(ExportError::FailedToUnwrapLabelPath)?;
+            let label_path_str = label_path
+                .to_str()
+                .ok_or(ExportError::FailedToUnwrapLabelPath)?;
 
-            fs::copy(pair.image_path.clone().unwrap(), export_path).unwrap();
+            fs::copy(label_path_str, format!("{}/{}.txt", export_path, pair.name)).ok();
         }
+
+        Ok(())
     }
 
     fn create_yolo_yaml(

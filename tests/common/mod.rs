@@ -49,9 +49,18 @@ pub fn image_data() -> ImageBuffer<Rgb<u8>, Vec<u8>> {
     imgbuf
 }
 
+pub fn create_dir(path: &str) {
+    fs::create_dir_all(path).expect("Unable to create directory");
+}
+
 pub fn create_dir_and_write_file(path: &Path, content: &str) {
     fs::create_dir_all(path.parent().unwrap()).expect("Unable to create directory");
-    fs::write(path, content).expect("Unable to write file");
+    println!("{:?}", path);
+
+    match fs::write(path, content) {
+        Ok(_) => (),
+        Err(e) => panic!("Unable to write file: {}", e),
+    }
 }
 
 pub fn create_image_file(path: &Path, image_data: &ImageBuffer<Rgb<u8>, Vec<u8>>) {
