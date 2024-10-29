@@ -19,26 +19,26 @@ mod tests {
         let export_source_dir = format!("{}/export_source", TEST_SANDBOX_DIR);
 
         create_dir(&export_source_dir);
-        println!("{:?}", export_source_dir);
+        // println!("{:?}", export_source_dir);
 
         create_yolo_project_config.source_paths.images = export_source_dir.clone();
         create_yolo_project_config.source_paths.labels = export_source_dir.clone();
 
-        create_yolo_project_config.export_paths.root = format!("{}/export", TEST_SANDBOX_DIR);
+        create_yolo_project_config.export.paths.root = format!("{}/export", TEST_SANDBOX_DIR);
 
-        let num_of_pairs = 20;
+        let num_of_pairs = 10;
         for i in 0..num_of_pairs {
-            let image_path = format!("{}/image_{}.jpg", export_source_dir, i);
-            let label_path = format!("{}/label_{}.txt", export_source_dir, i);
+            let image_path = format!("{}/test_{}.jpg", export_source_dir, i);
+            let label_path = format!("{}/test_{}.txt", export_source_dir, i);
             image_data.save(&image_path).expect("Unable to save image");
             create_dir_and_write_file(std::path::Path::new(&label_path), "0 0.5 0.5 0.5 0.5");
         }
 
         let project = YoloProject::new(&create_yolo_project_config);
-        println!("{:#?}", project.get_invalid_pairs());
+        // println!("{:#?}", project.get_invalid_pairs());
 
         YoloProjectExporter::export(project).expect("Unable to export project");
 
-        // assert!(false)
+        assert!(false)
     }
 }

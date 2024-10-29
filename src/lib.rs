@@ -16,14 +16,29 @@ use std::{
 use thiserror::Error;
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
-pub struct ExportPaths {
+pub struct Split {
+    pub train: f32,
+    pub validation: f32,
+    pub test: f32,
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub struct Export {
+    pub paths: Paths,
+    pub class_map: HashMap<usize, String>,
+    pub duplicate_tolerance: f32,
+    pub split: Split,
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub struct Paths {
     pub root: String,
     pub train: String,
     pub validation: String,
     pub test: String,
 }
 
-impl Default for ExportPaths {
+impl Default for Paths {
     fn default() -> Self {
         Self {
             root: "export".to_string(),
@@ -65,9 +80,7 @@ pub struct YoloProjectConfig {
     pub source_paths: SourcePaths,
     pub r#type: String,
     pub project_name: String,
-    pub export_paths: ExportPaths,
-    pub class_map: HashMap<usize, String>,
-    pub duplicate_tolerance: f32,
+    pub export: Export,
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -173,6 +186,7 @@ impl YoloProject {
 
         let metadata = FileMetadata {
             classes: config
+                .export
                 .class_map
                 .iter()
                 .map(|(id, name)| YoloClass {
@@ -205,25 +219,15 @@ impl YoloProject {
     }
 
     pub fn get_invalid_pairs(&self) -> Vec<PairingError> {
-        println!("Getting invalid pairs: {:#?}", self.data.pairs);
-
         let invalid_pairs = self
             .data
             .pairs
             .iter()
             .filter_map(|pair| match pair {
-                PairingResult::Invalid(error) => {
-                    println!("Invalid pair found: {:#?}", error);
-                    Some(error.clone())
-                }
-                _ => {
-                    println!("Valid pair found in invalid pairs: {:#?}", pair);
-                    None
-                }
+                PairingResult::Invalid(error) => Some(error.clone()),
+                _ => None,
             })
             .collect::<Vec<PairingError>>();
-
-        println!("Invalid pairs: {:#?}", invalid_pairs);
 
         invalid_pairs
     }

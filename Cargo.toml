@@ -18,6 +18,7 @@ repository = "https://github.com/Ladvien/yolo_io"
 
 [dependencies]
 itertools = "0.13.0"
+rand = "0.8.5"
 serde = {version = "1.0", features = ["derive"]}
 serde_json = "1.0.129"
 serde_yml = "0.0.12"

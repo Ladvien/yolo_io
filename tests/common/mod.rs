@@ -2,7 +2,7 @@ use std::{collections::HashMap, fs, path::Path};
 
 use image::{ImageBuffer, Rgb};
 use rstest::fixture;
-use yolo_io::{ExportPaths, FileMetadata, SourcePaths, YoloClass, YoloProjectConfig};
+use yolo_io::{Export, FileMetadata, Paths, SourcePaths, Split, YoloClass, YoloProjectConfig};
 
 pub const TEST_SANDBOX_DIR: &str = "tests/sandbox";
 
@@ -55,7 +55,6 @@ pub fn create_dir(path: &str) {
 
 pub fn create_dir_and_write_file(path: &Path, content: &str) {
     fs::create_dir_all(path.parent().unwrap()).expect("Unable to create directory");
-    println!("{:?}", path);
 
     match fs::write(path, content) {
         Ok(_) => (),
@@ -87,13 +86,20 @@ pub fn create_yolo_project_config() -> YoloProjectConfig {
         },
         r#type: String::from("yolo"),
         project_name: String::from("test_project"),
-        export_paths: ExportPaths {
-            train: String::from("train/"),
-            validation: String::from("validation/"),
-            test: String::from("test/"),
-            root: String::from("tests/sandbox/export/"),
+        export: Export {
+            paths: Paths {
+                train: String::from("train/"),
+                validation: String::from("validation/"),
+                test: String::from("test/"),
+                root: String::from("tests/sandbox/export/"),
+            },
+            class_map,
+            duplicate_tolerance: 0.01,
+            split: Split {
+                train: 0.80,
+                validation: 0.20,
+                test: 0.0,
+            },
         },
-        class_map,
-        duplicate_tolerance: 0.01,
     }
 }

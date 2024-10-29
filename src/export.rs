@@ -1,3 +1,5 @@
+use rand::seq::SliceRandom;
+use rand::thread_rng;
 use std::{collections::HashMap, fs};
 
 use thiserror::Error;
@@ -18,24 +20,24 @@ pub struct YoloProjectExporter {
 
 impl YoloProjectExporter {
     pub fn export(project: YoloProject) -> Result<(), ExportError> {
-        if fs::create_dir_all(project.config.export_paths.root.clone()).is_ok() {
+        if fs::create_dir_all(project.config.export.paths.root.clone()).is_ok() {
             let train_path = format!(
                 "{}/{}",
-                project.config.export_paths.root.clone(),
-                project.config.export_paths.train
+                project.config.export.paths.root.clone(),
+                project.config.export.paths.train
             )
             .replace("//", "/");
             let validation_path = format!(
                 "{}/{}",
-                project.config.export_paths.root.clone(),
-                project.config.export_paths.validation
+                project.config.export.paths.root.clone(),
+                project.config.export.paths.validation
             )
             .replace("//", "/");
 
             let test_path = format!(
                 "{}/{}",
-                project.config.export_paths.root.clone(),
-                project.config.export_paths.test
+                project.config.export.paths.root.clone(),
+                project.config.export.paths.test
             )
             .replace("//", "/");
 
@@ -53,17 +55,20 @@ impl YoloProjectExporter {
 
             Self::create_yolo_yaml(
                 &project.config.project_name,
-                &project.config.export_paths.root,
+                &project.config.export.paths.root,
                 &train_path,
                 &validation_path,
                 &test_path,
-                project.config.class_map.clone(),
+                project.config.export.class_map.clone(),
             );
 
-            Self::copy_files(&train_path, project.get_valid_pairs());
+            let mut valid_pairs = project.get_valid_pairs();
+            let train_pairs = valid_pairs.split_off(5);
+
+            Self::copy_files(&train_path, train_pairs);
         } else {
             return Err(ExportError::UnableToCreateDirectory(
-                project.config.export_paths.root,
+                project.config.export.paths.root,
             ));
         }
 
@@ -80,6 +85,7 @@ impl YoloProjectExporter {
             let label_path = pair
                 .label_path
                 .ok_or(ExportError::FailedToUnwrapLabelPath)?;
+
             let label_path_str = label_path
                 .to_str()
                 .ok_or(ExportError::FailedToUnwrapLabelPath)?;
