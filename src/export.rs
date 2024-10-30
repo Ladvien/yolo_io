@@ -4,7 +4,7 @@ use std::{collections::HashMap, fs};
 
 use thiserror::Error;
 
-use crate::{ImageLabelPair, YoloProject};
+use crate::{ImageLabelPair, Split, YoloProject};
 
 #[derive(Error, Debug)]
 pub enum ExportError {
@@ -63,7 +63,7 @@ impl YoloProjectExporter {
             );
 
             let (train_pairs, validation_pairs, test_pairs) =
-                Self::split_pairs(project.get_valid_pairs(), project.config.export.split.train);
+                Self::split_pairs(project.get_valid_pairs(), project.config.export.split);
 
             let splits: Vec<(String, Vec<ImageLabelPair>)> = vec![
                 (test_path, test_pairs),
@@ -85,7 +85,7 @@ impl YoloProjectExporter {
 
     fn split_pairs(
         pairs: Vec<ImageLabelPair>,
-        split: f32,
+        split: Split,
     ) -> (
         Vec<ImageLabelPair>,
         Vec<ImageLabelPair>,
@@ -95,11 +95,10 @@ impl YoloProjectExporter {
         let mut pairs = pairs;
         pairs.shuffle(&mut rng);
 
-        let num_test_pairs = (split * pairs.len() as f32).round() as usize;
-
+        let num_test_pairs = ((1.0 - split.test) * pairs.len() as f32).round() as usize;
         let test_pairs = pairs.split_off(num_test_pairs);
 
-        let num_val_pairs = (split * pairs.len() as f32).round() as usize;
+        let num_val_pairs = ((1.0 - split.validation) * pairs.len() as f32).round() as usize;
         let validation_pairs = pairs.split_off(num_val_pairs);
 
         let train_pairs = pairs;
