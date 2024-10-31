@@ -395,9 +395,12 @@ impl YoloProject {
                 .map(|pair| Self::evaluate_pair(stem.clone(), pair))
                 .collect::<Vec<PairingResult>>();
 
+            // WILO: There is a show stopping performance issue here.
             Self::check_for_duplicates(&mut pairs, &mut invalid_pairs);
-
             pairs.extend(unduplicated_pairs);
+            /////////////////////////////////////////////////
+
+            println!("Pairs: {:#?}", pairs);
         }
 
         pairs.extend(invalid_pairs);
