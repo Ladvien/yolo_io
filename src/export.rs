@@ -85,6 +85,8 @@ impl YoloProjectExporter {
         pairs: Vec<ImageLabelPair>,
     ) -> Result<(), ExportError> {
         for pair in pairs {
+            println!("pair: {:?}", pair);
+
             let image_path = pair
                 .image_path
                 .ok_or(ExportError::FailedToUnwrapLabelPath)?;

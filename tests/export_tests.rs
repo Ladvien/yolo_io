@@ -24,15 +24,16 @@ mod tests {
         create_dir(&export_source_dir);
 
         // Clean up old export directory
+        // let _ = fs::remove_dir_all(&export_source_dir);
         let _ = fs::remove_dir_all(&export_out_dir);
-
-        // create_yolo_project_config.source_paths.images = "train".to_string();
-        // create_yolo_project_config.source_paths.labels = "train".to_string();
 
         // Set split percentages
         create_yolo_project_config.export.split.train = 0.6;
         create_yolo_project_config.export.split.validation = 0.2;
         create_yolo_project_config.export.split.test = 0.2;
+
+        create_yolo_project_config.source_paths.images = export_source_dir.clone();
+        create_yolo_project_config.source_paths.labels = export_source_dir.clone();
 
         create_yolo_project_config.export.paths.root = format!("{}/export", TEST_SANDBOX_DIR);
 
@@ -54,28 +55,28 @@ mod tests {
             create_yolo_project_config.export.paths.root
         );
 
-        println!("train_image_path: {}", train_image_path);
-
         let num_train_image_files = fs::read_dir(train_image_path)
             .expect("Unable to read train folder")
             .count();
 
         // Check validation folder has 2 label, 2 image
         let num_validation_image_files = fs::read_dir(format!(
-            "{}/image/validation",
+            "{}/validation/images",
             create_yolo_project_config.export.paths.root
         ))
-        .expect("Unable to read validation folder")
+        .unwrap()
         .count();
 
         // Check test folder has 2 label, 2 image
         let num_test_image_files = fs::read_dir(format!(
-            "{}/image/test",
+            "{}/test/images",
             create_yolo_project_config.export.paths.root
-        ));
+        ))
+        .unwrap()
+        .count();
 
         assert_eq!(num_train_image_files, 6);
         assert_eq!(num_validation_image_files, 2);
-        assert_eq!(num_test_image_files.unwrap().count(), 2);
+        assert_eq!(num_test_image_files, 2);
     }
 }

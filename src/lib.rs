@@ -54,27 +54,27 @@ impl Paths {
     }
 
     pub fn get_train_images_path(&self) -> String {
-        format!("{}/images", self.root).replace("//", "/")
+        format!("{}/train/images", self.root).replace("//", "/")
     }
 
     pub fn get_train_label_images_path(&self) -> String {
-        format!("{}/labels", self.root).replace("//", "/")
+        format!("{}/train/labels", self.root).replace("//", "/")
     }
 
     pub fn get_validation_images_path(&self) -> String {
-        format!("{}/images", self.root).replace("//", "/")
+        format!("{}/validation/images", self.root).replace("//", "/")
     }
 
     pub fn get_validation_label_images_path(&self) -> String {
-        format!("{}/labels", self.root).replace("//", "/")
+        format!("{}/validation/labels", self.root).replace("//", "/")
     }
 
     pub fn get_test_images_path(&self) -> String {
-        format!("{}/images", self.root).replace("//", "/")
+        format!("{}/test/images", self.root).replace("//", "/")
     }
 
     pub fn get_test_label_images_path(&self) -> String {
-        format!("{}/labels", self.root).replace("//", "/")
+        format!("{}/test/labels", self.root).replace("//", "/")
     }
 
     pub fn get_train_stem(&self) -> String {
