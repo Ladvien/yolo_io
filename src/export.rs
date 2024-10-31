@@ -29,7 +29,7 @@ impl YoloProjectExporter {
         let project_name = &project.config.project_name;
         let classes = &project.config.export.class_map;
 
-        Self::create_yolo_yaml(project_name, paths, classes);
+        Self::create_yolo_yaml(project_name, paths, &classes);
 
         let (train_pairs, validation_pairs, test_pairs) =
             Self::split_pairs(project.get_valid_pairs(), project.config.export.split);
@@ -123,7 +123,12 @@ impl YoloProjectExporter {
     }
 
     fn create_yolo_yaml(project_name: &str, paths: &Paths, classes: &HashMap<usize, String>) {
-        let classes_as_yaml = classes
+        let mut classes_vec: Vec<(usize, String)> =
+            classes.iter().map(|(&k, v)| (k, v.clone())).collect();
+
+        classes_vec.sort_by(|a, b| a.0.cmp(&b.0));
+
+        let classes_as_yaml = classes_vec
             .iter()
             .map(|(key, value)| format!("  {}: {}", key, value))
             .collect::<Vec<String>>()
