@@ -80,6 +80,7 @@ pub fn create_yolo_project_config() -> YoloProjectConfig {
     class_map.insert(1, "car".to_string());
 
     YoloProjectConfig {
+        // TODO: Ensure no path has a `/` at the end
         source_paths: SourcePaths {
             images: String::from("tests/sandbox/"),
             labels: String::from("tests/sandbox/"),

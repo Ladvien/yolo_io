@@ -26,8 +26,8 @@ mod tests {
         // Clean up old export directory
         let _ = fs::remove_dir_all(&export_out_dir);
 
-        create_yolo_project_config.source_paths.images = export_source_dir.clone();
-        create_yolo_project_config.source_paths.labels = export_source_dir.clone();
+        // create_yolo_project_config.source_paths.images = "train".to_string();
+        // create_yolo_project_config.source_paths.labels = "train".to_string();
 
         // Set split percentages
         create_yolo_project_config.export.split.train = 0.6;
@@ -49,29 +49,33 @@ mod tests {
         YoloProjectExporter::export(project).expect("Unable to export project");
 
         // Check train folder has 6 labels, 6 images
-        let num_train_files = fs::read_dir(format!(
-            "{}/train",
+        let train_image_path = format!(
+            "{}/train/images",
             create_yolo_project_config.export.paths.root
-        ))
-        .expect("Unable to read train folder")
-        .count();
+        );
+
+        println!("train_image_path: {}", train_image_path);
+
+        let num_train_image_files = fs::read_dir(train_image_path)
+            .expect("Unable to read train folder")
+            .count();
 
         // Check validation folder has 2 label, 2 image
-        let num_validation_files = fs::read_dir(format!(
-            "{}/validation",
+        let num_validation_image_files = fs::read_dir(format!(
+            "{}/image/validation",
             create_yolo_project_config.export.paths.root
         ))
         .expect("Unable to read validation folder")
         .count();
 
         // Check test folder has 2 label, 2 image
-        let num_test_files = fs::read_dir(format!(
-            "{}/test",
+        let num_test_image_files = fs::read_dir(format!(
+            "{}/image/test",
             create_yolo_project_config.export.paths.root
         ));
 
-        assert_eq!(num_train_files, 6);
-        assert_eq!(num_validation_files, 2);
-        assert_eq!(num_test_files.unwrap().count(), 2);
+        assert_eq!(num_train_image_files, 6);
+        assert_eq!(num_validation_image_files, 2);
+        assert_eq!(num_test_image_files.unwrap().count(), 2);
     }
 }

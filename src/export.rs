@@ -1,10 +1,10 @@
 use rand::seq::SliceRandom;
 use rand::thread_rng;
-use std::{collections::HashMap, fs};
+use std::{collections::HashMap, fs, path::Path};
 
 use thiserror::Error;
 
-use crate::{ImageLabelPair, Split, YoloProject};
+use crate::{ImageLabelPair, Paths, Split, YoloProject};
 
 #[derive(Error, Debug)]
 pub enum ExportError {
@@ -12,6 +12,8 @@ pub enum ExportError {
     UnableToCreateDirectory(String),
     #[error("Failed to unwrap label path.")]
     FailedToUnwrapLabelPath,
+    #[error("Failed to copy file '{0}' to '{0}'.")]
+    FailedToCopyFile(String, String),
 }
 
 pub struct YoloProjectExporter {
@@ -20,64 +22,35 @@ pub struct YoloProjectExporter {
 
 impl YoloProjectExporter {
     pub fn export(project: YoloProject) -> Result<(), ExportError> {
-        if fs::create_dir_all(project.config.export.paths.root.clone()).is_ok() {
-            let train_path = format!(
-                "{}/{}",
-                project.config.export.paths.root.clone(),
-                project.config.export.paths.train
-            )
-            .replace("//", "/");
-            let validation_path = format!(
-                "{}/{}",
-                project.config.export.paths.root.clone(),
-                project.config.export.paths.validation
-            )
-            .replace("//", "/");
+        let paths = &project.config.export.paths;
 
-            let test_path = format!(
-                "{}/{}",
-                project.config.export.paths.root.clone(),
-                project.config.export.paths.test
-            )
-            .replace("//", "/");
+        paths.create_all_directories()?;
 
-            let paths_to_create = vec![
-                train_path.clone(),
-                validation_path.clone(),
-                test_path.clone(),
-            ];
+        let project_name = &project.config.project_name;
+        let classes = &project.config.export.class_map;
 
-            for path in paths_to_create {
-                if fs::create_dir_all(path.clone()).is_err() {
-                    return Err(ExportError::UnableToCreateDirectory(path));
-                }
-            }
+        Self::create_yolo_yaml(project_name, paths, classes);
 
-            Self::create_yolo_yaml(
-                &project.config.project_name,
-                &project.config.export.paths.root,
-                &train_path,
-                &validation_path,
-                &test_path,
-                project.config.export.class_map.clone(),
-            );
+        let (train_pairs, validation_pairs, test_pairs) =
+            Self::split_pairs(project.get_valid_pairs(), project.config.export.split);
 
-            let (train_pairs, validation_pairs, test_pairs) =
-                Self::split_pairs(project.get_valid_pairs(), project.config.export.split);
+        let test_image_path = &paths.get_test_images_path();
+        let test_label_path = &paths.get_test_label_images_path();
 
-            let splits: Vec<(String, Vec<ImageLabelPair>)> = vec![
-                (test_path, test_pairs),
-                (validation_path, validation_pairs),
-                (train_path, train_pairs),
-            ];
+        let train_image_path = &paths.get_train_images_path();
+        let train_label_path = &paths.get_train_label_images_path();
 
-            for split in splits {
-                Self::copy_files(&split.0, split.1)?
-            }
-        } else {
-            return Err(ExportError::UnableToCreateDirectory(
-                project.config.export.paths.root,
-            ));
+        let val_image_path = &paths.get_validation_images_path();
+        let val_label_path = &paths.get_validation_label_images_path();
+
+        let splits: Vec<(&str, &str, Vec<ImageLabelPair>)> = vec![
+            (test_image_path, test_label_path, test_pairs),
+            (train_image_path, train_label_path, train_pairs),
+            (val_image_path, val_label_path, validation_pairs),
+        ];
+
+        for (images_path, labels_path, pairs) in splits {
+            Self::copy_files(images_path, labels_path, pairs)?;
         }
 
         Ok(())
@@ -106,35 +79,58 @@ impl YoloProjectExporter {
         (train_pairs, validation_pairs, test_pairs)
     }
 
-    fn copy_files(export_path: &str, pairs: Vec<ImageLabelPair>) -> Result<(), ExportError> {
+    fn copy_files(
+        export_images_path: &str,
+        export_labels_path: &str,
+        pairs: Vec<ImageLabelPair>,
+    ) -> Result<(), ExportError> {
         for pair in pairs {
+            let image_path = pair
+                .image_path
+                .ok_or(ExportError::FailedToUnwrapLabelPath)?;
+
+            let image_path = image_path
+                .as_os_str()
+                .to_str()
+                .ok_or(ExportError::FailedToUnwrapLabelPath)?;
+
             let label_path = pair
                 .label_path
                 .ok_or(ExportError::FailedToUnwrapLabelPath)?;
 
-            let label_path_str = label_path
+            let label_path = label_path
+                .as_os_str()
                 .to_str()
                 .ok_or(ExportError::FailedToUnwrapLabelPath)?;
 
-            fs::copy(label_path_str, format!("{}/{}.txt", export_path, pair.name)).ok();
+            let image_stem = pair.name.clone();
+            let label_stem = pair.name;
+
+            let new_image_path = format!("{}/{}", export_images_path, image_stem);
+            let new_label_path = format!("{}/{}", export_labels_path, label_stem);
+
+            fs::copy(image_path, new_image_path.clone()).map_err(|_| {
+                ExportError::FailedToCopyFile(image_path.to_string(), new_image_path)
+            })?;
+            fs::copy(label_path, new_label_path.clone()).map_err(|_| {
+                ExportError::FailedToCopyFile(label_path.to_string(), new_label_path)
+            })?;
         }
 
         Ok(())
     }
 
-    fn create_yolo_yaml(
-        project_name: &str,
-        root_path: &str,
-        train_path: &str,
-        val_path: &str,
-        test_path: &str,
-        classes: HashMap<usize, String>,
-    ) {
+    fn create_yolo_yaml(project_name: &str, paths: &Paths, classes: &HashMap<usize, String>) {
         let classes_as_yaml = classes
             .iter()
             .map(|(key, value)| format!("  {}: {}", key, value))
             .collect::<Vec<String>>()
             .join("\n");
+
+        let root_path = paths.get_root();
+        let train_path = paths.get_train_stem();
+        let val_path = paths.get_validation_stem();
+        let test_path = paths.get_test_stem();
 
         let yolo_yaml = format!(
             "# Generate by yolo_io - https://github.com/Ladvien/yolo_io

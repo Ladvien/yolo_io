@@ -11,6 +11,7 @@ use itertools::{EitherOrBoth, Itertools};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
+    fs,
     path::{Path, PathBuf},
 };
 use thiserror::Error;
@@ -36,6 +37,77 @@ pub struct Paths {
     pub train: String,
     pub validation: String,
     pub test: String,
+}
+
+impl Paths {
+    pub fn new(root: &str, train: &str, validation: &str, test: &str) -> Self {
+        Paths {
+            root: root.to_string(),
+            train: train.to_string(),
+            validation: validation.to_string(),
+            test: test.to_string(),
+        }
+    }
+
+    pub fn get_root(&self) -> String {
+        self.root.clone()
+    }
+
+    pub fn get_train_images_path(&self) -> String {
+        format!("{}/images", self.root).replace("//", "/")
+    }
+
+    pub fn get_train_label_images_path(&self) -> String {
+        format!("{}/labels", self.root).replace("//", "/")
+    }
+
+    pub fn get_validation_images_path(&self) -> String {
+        format!("{}/images", self.root).replace("//", "/")
+    }
+
+    pub fn get_validation_label_images_path(&self) -> String {
+        format!("{}/labels", self.root).replace("//", "/")
+    }
+
+    pub fn get_test_images_path(&self) -> String {
+        format!("{}/images", self.root).replace("//", "/")
+    }
+
+    pub fn get_test_label_images_path(&self) -> String {
+        format!("{}/labels", self.root).replace("//", "/")
+    }
+
+    pub fn get_train_stem(&self) -> String {
+        self.train.clone()
+    }
+
+    pub fn get_validation_stem(&self) -> String {
+        self.validation.clone()
+    }
+
+    pub fn get_test_stem(&self) -> String {
+        self.test.clone()
+    }
+
+    pub fn create_all_directories(&self) -> Result<(), ExportError> {
+        let paths_to_create = vec![
+            self.get_root(),
+            self.get_train_images_path(),
+            self.get_train_label_images_path(),
+            self.get_validation_images_path(),
+            self.get_validation_label_images_path(),
+            self.get_test_images_path(),
+            self.get_test_label_images_path(),
+        ];
+
+        for path in paths_to_create {
+            if fs::create_dir_all(path.clone()).is_err() {
+                return Err(ExportError::UnableToCreateDirectory(path));
+            }
+        }
+
+        Ok(())
+    }
 }
 
 impl Default for Paths {
