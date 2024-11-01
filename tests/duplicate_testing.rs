@@ -21,6 +21,9 @@ mod duplicate_tests {
         let filename = "dup_one";
         let this_test_directory = format!("{}/{}/", TEST_SANDBOX_DIR, filename);
 
+        // Remove the directory if it exists
+        let _ = std::fs::remove_dir_all(&this_test_directory);
+
         let image_file = PathBuf::from(format!("{}/test1.jpg", this_test_directory));
         create_image_file(&image_file, &image_data);
 

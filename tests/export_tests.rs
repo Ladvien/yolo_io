@@ -10,7 +10,7 @@ mod tests {
         TEST_SANDBOX_DIR,
     };
     use image::{ImageBuffer, Rgb};
-    use rstest::{fixture, rstest};
+    use rstest::rstest;
     use yolo_io::{YoloProject, YoloProjectConfig, YoloProjectExporter};
 
     fn run_export(

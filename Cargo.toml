@@ -4,7 +4,7 @@ edition = "2021"
 license = "Apache-2.0"
 name = "yolo_io"
 publish = ["crates-io"]
-version = "0.1.1"
+version = "0.1.101"
 
 description = "A library for loading and validating YOLO data."
 documentation = "https://docs.rs/yolo_io/latest/yolo_io/"

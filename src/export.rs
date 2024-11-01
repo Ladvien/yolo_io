@@ -1,6 +1,6 @@
 use rand::seq::SliceRandom;
 use rand::thread_rng;
-use std::{collections::HashMap, fs, path::Path};
+use std::{collections::HashMap, fs};
 
 use thiserror::Error;
 
@@ -29,7 +29,7 @@ impl YoloProjectExporter {
         let project_name = &project.config.project_name;
         let classes = &project.config.export.class_map;
 
-        Self::create_yolo_yaml(project_name, paths, &classes);
+        Self::create_yolo_yaml(project_name, paths, classes);
 
         let (train_pairs, validation_pairs, test_pairs) =
             Self::split_pairs(project.get_valid_pairs(), project.config.export.split);

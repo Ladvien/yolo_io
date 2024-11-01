@@ -1,7 +1,7 @@
 mod common;
 
 #[cfg(test)]
-mod tests {
+mod pairing_tests {
 
     use image::{ImageBuffer, Rgb};
     use rstest::rstest;
