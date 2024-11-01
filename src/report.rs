@@ -1,4 +1,8 @@
-use crate::{PairingError, YoloProject};
+use crate::{
+    types::{PairingError, PairingResult},
+    YoloFileParseError, YoloProject,
+};
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
@@ -14,9 +18,9 @@ impl YoloDataQualityReport {
         let mut errors = Vec::<DataQualityItem>::new();
 
         for error in project.data.pairs.iter() {
-            if let crate::PairingResult::Invalid(pairing_error) = error {
+            if let PairingResult::Invalid(pairing_error) = error {
                 let dq_item = DataQualityItem {
-                    source: Self::get_source_name(pairing_error),
+                    source: Self::get_source_name(&pairing_error),
                     message: pairing_error.to_string(),
                 };
 
@@ -30,25 +34,23 @@ impl YoloDataQualityReport {
     fn get_source_name(pairing_error: &PairingError) -> String {
         match pairing_error {
             PairingError::LabelFileError(yolo_file_parse_error) => match yolo_file_parse_error {
-                crate::yolo_file::YoloFileParseError::InvalidFormat(_) => {
+                YoloFileParseError::InvalidFormat(_) => {
                     String::from("YoloFileParseError::InvalidFormat")
                 }
-                crate::yolo_file::YoloFileParseError::EmptyFile(_) => {
-                    String::from("YoloFileParseError::EmptyFile")
-                }
-                crate::yolo_file::YoloFileParseError::DuplicateEntries(_) => {
+                YoloFileParseError::EmptyFile(_) => String::from("YoloFileParseError::EmptyFile"),
+                YoloFileParseError::DuplicateEntries(_) => {
                     String::from("YoloFileParseError::DuplicateEntries")
                 }
-                crate::yolo_file::YoloFileParseError::FailedToParseClassId(_) => {
+                YoloFileParseError::FailedToParseClassId(_) => {
                     String::from("YoloFileParseError::FailedToParseClassId")
                 }
-                crate::yolo_file::YoloFileParseError::ClassIdNotFound(_) => {
+                YoloFileParseError::ClassIdNotFound(_) => {
                     String::from("YoloFileParseError::ClassIdNotFound")
                 }
-                crate::yolo_file::YoloFileParseError::LabelDataOutOfRange(_) => {
+                YoloFileParseError::LabelDataOutOfRange(_) => {
                     String::from("YoloFileParseError::LabelDataOutOfRange")
                 }
-                crate::yolo_file::YoloFileParseError::FailedToParseColumn(_) => {
+                YoloFileParseError::FailedToParseColumn(_) => {
                     String::from("YoloFileParseError::FailedToParseColumn")
                 }
             },

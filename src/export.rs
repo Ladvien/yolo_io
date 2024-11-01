@@ -4,7 +4,10 @@ use std::{collections::HashMap, fs};
 
 use thiserror::Error;
 
-use crate::{ImageLabelPair, Paths, Split, YoloProject};
+use crate::{
+    types::{ImageLabelPair, Paths, Split},
+    YoloProject,
+};
 
 #[derive(Error, Debug)]
 pub enum ExportError {

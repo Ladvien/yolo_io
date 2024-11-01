@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 use std::fs::read_to_string;
 use thiserror::Error;
 
-use crate::FileMetadata;
+use crate::types::FileMetadata;
 
 #[derive(Error, Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub enum YoloFileParseError {
