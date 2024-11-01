@@ -143,6 +143,26 @@ pub struct YoloProjectConfig {
     pub export: Export,
 }
 
+impl Default for YoloProjectConfig {
+    fn default() -> Self {
+        Self {
+            source_paths: SourcePaths::default(),
+            r#type: "yolo".to_string(),
+            project_name: "default".to_string(),
+            export: Export {
+                paths: Paths::default(),
+                class_map: HashMap::new(),
+                duplicate_tolerance: 0.0,
+                split: Split {
+                    train: 0.7,
+                    validation: 0.2,
+                    test: 0.1,
+                },
+            },
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct ImageLabelPair {
     pub name: String,
@@ -198,12 +218,6 @@ impl std::fmt::Display for PairingError {
 pub enum PairingResult {
     Valid(ImageLabelPair),
     Invalid(PairingError),
-}
-
-#[derive(Debug, Clone)]
-pub struct ValidationResults {
-    pub valid_results: Vec<PairingResult>,
-    pub invalid_results: Vec<PairingResult>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]

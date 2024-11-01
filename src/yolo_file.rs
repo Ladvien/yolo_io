@@ -90,6 +90,8 @@ impl YoloFile {
             for (index, line) in file.lines().enumerate() {
                 let parts: Vec<&str> = line.split(" ").collect();
 
+                println!("parts: {:#?}", parts);
+
                 if parts.len() != 5 {
                     return Err(YoloFileParseError::InvalidFormat(
                         YoloFileParseErrorDetails {

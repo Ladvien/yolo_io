@@ -1,73 +1,89 @@
 mod common;
 
 #[cfg(test)]
-mod tests {
+mod invalid_label_tests {
     use rstest::rstest;
     use std::path::PathBuf;
 
-    use crate::common::{create_yolo_label_file, TEST_SANDBOX_DIR};
-    use yolo_io::{FileMetadata, YoloClass, YoloFile};
+    use crate::common::TEST_SANDBOX_DIR;
+    use yolo_io::{
+        FileMetadata, YoloClass, YoloFile, YoloFileParseError, YoloFileParseErrorDetails,
+    };
 
-    #[rstest]
-    fn test_yolo_file_new_parses_valid_file_correctly() {
-        let path = format!("{}/data/valid1.txt", TEST_SANDBOX_DIR);
-        let content = format!(
-            "{}\n{}\n{}\n",
-            "0 0.25 0.5 0.25 0.5", "0 0.5 0.5 0.15 0.5", "1 0.5 0.5 0.5 0.35"
-        );
-        let content = content.as_ref();
-        create_yolo_label_file(&PathBuf::from(&path), content);
-
-        let metadata = FileMetadata {
-            classes: vec![
-                YoloClass {
-                    id: 0,
-                    name: "person".to_string(),
-                },
-                YoloClass {
-                    id: 1,
-                    name: "car".to_string(),
-                },
-            ],
-            duplicate_tolerance: 0.01,
-        };
-
-        let yolo_file = YoloFile::new(&metadata, &path);
-
-        assert!(yolo_file.is_ok());
+    fn create_yolo_classes(classes: Vec<(usize, &str)>) -> Vec<YoloClass> {
+        classes
+            .iter()
+            .map(|(id, name)| YoloClass {
+                id: *id,
+                name: name.to_string(),
+            })
+            .collect()
     }
 
-    #[rstest]
-    fn test_yolo_file_new_invalid_file_format_due_to_missing_column() {
-        let path = format!("{}/data/invalid1.txt", TEST_SANDBOX_DIR);
-        let content = r#"0 0.5 0.5 0.5"#;
-        create_yolo_label_file(&PathBuf::from(&path), content);
+    fn create_yolo_label_file(
+        filename: &str,
+        classes: Vec<YoloClass>,
+        content: &str,
+    ) -> (FileMetadata, String) {
+        let path = format!("{}/data/{}", TEST_SANDBOX_DIR, filename);
+        let mut file_content = String::new();
+
+        file_content.push_str(content);
+
+        std::fs::write(&path, file_content).unwrap();
 
         let metadata = FileMetadata {
-            classes: vec![YoloClass {
-                id: 0,
-                name: "person".to_string(),
-            }],
+            classes,
+            duplicate_tolerance: 0.01,
+        };
+
+        (metadata, path)
+    }
+
+    #[test]
+    fn test_yolo_file_new_parses_valid_file_correctly() {
+        let filename = "valid1.txt";
+        let classes_raw = vec![(0, "person"), (1, "car")];
+        let classes = create_yolo_classes(classes_raw.clone());
+        let (metadata, path) = create_yolo_label_file(
+            "valid1.txt",
+            classes.clone(),
+            "0 0.25 0.5 0.25 0.5\n0 0.5 0.5 0.15 0.5\n1 0.5 0.5 0.5 0.35",
+        );
+
+        let expected_result: Result<YoloFile, YoloFileParseError> = YoloFile::new(&metadata, &path);
+
+        let path = format!("{}/data/{}", TEST_SANDBOX_DIR, filename);
+
+        let metadata = FileMetadata {
+            classes,
             duplicate_tolerance: 0.01,
         };
 
         let yolo_file = YoloFile::new(&metadata, &path);
+
+        assert_eq!(yolo_file, expected_result);
+    }
+
+    #[test]
+    fn test_yolo_file_new_invalid_file_format_due_to_missing_column() {
+        let filename = "invalid1.txt";
+        let classes_raw = vec![(0, "person")];
+        let classes = create_yolo_classes(classes_raw.clone());
+        let (metadata, path) = create_yolo_label_file(filename, classes.clone(), "0 0.5 0.5");
+
+        let yolo_file = YoloFile::new(&metadata, &path);
+
         assert!(yolo_file.is_err());
     }
 
-    #[rstest]
+    #[test]
     fn test_yolo_file_new_invalid_file_format_due_unparsable_class_id() {
-        let path = format!("{}/data/invalid2.txt", TEST_SANDBOX_DIR);
-        let content = r#"a 0.5 0.5 0.5 0.5"#;
-        create_yolo_label_file(&PathBuf::from(&path), content);
-
-        let metadata = FileMetadata {
-            classes: vec![YoloClass {
-                id: 0,
-                name: "person".to_string(),
-            }],
-            duplicate_tolerance: 0.01,
-        };
+        let filename = "invalid2.txt";
+        let classes_raw = vec![(0, "person")];
+        let classes = create_yolo_classes(classes_raw.clone());
+        let (metadata, path) =
+            create_yolo_label_file(filename, classes.clone(), "a 0.5 0.5 0.5 0.5");
 
         let yolo_file = YoloFile::new(&metadata, &path);
 
@@ -83,17 +99,11 @@ mod tests {
 
     #[test]
     pub fn test_yolo_file_new_invalid_file_format_due_to_invalid_class_id() {
-        let path = format!("{}/data/invalid3.txt", TEST_SANDBOX_DIR);
-        let content = r#"2 0.5 0.5 0.5 0.5"#;
-        create_yolo_label_file(&PathBuf::from(&path), content);
-
-        let metadata = FileMetadata {
-            classes: vec![YoloClass {
-                id: 0,
-                name: "person".to_string(),
-            }],
-            duplicate_tolerance: 0.01,
-        };
+        let filename = "invalid3.txt";
+        let classes_raw = vec![(0, "person")];
+        let classes = create_yolo_classes(classes_raw.clone());
+        let (metadata, path) =
+            create_yolo_label_file(filename, classes.clone(), "2 0.5 0.5 0.5 0.5");
 
         let yolo_file = YoloFile::new(&metadata, &path);
 
@@ -109,17 +119,11 @@ mod tests {
 
     #[test]
     pub fn test_yolo_file_new_invalid_file_format_due_class_id_not_found() {
-        let path = format!("{}/data/invalid4.txt", TEST_SANDBOX_DIR);
-        let content = r#"1 0.5 0.5 0.5 0.5"#;
-        create_yolo_label_file(&PathBuf::from(&path), content);
-
-        let metadata = FileMetadata {
-            classes: vec![YoloClass {
-                id: 0,
-                name: "person".to_string(),
-            }],
-            duplicate_tolerance: 0.01,
-        };
+        let filename = "invalid4.txt";
+        let classes_raw = vec![(0, "person")];
+        let classes = create_yolo_classes(classes_raw.clone());
+        let (metadata, path) =
+            create_yolo_label_file(filename, classes.clone(), "1 0.5 0.5 0.5 0.5");
 
         let yolo_file = YoloFile::new(&metadata, &path);
 
@@ -135,17 +139,10 @@ mod tests {
 
     #[test]
     pub fn test_yolo_file_new_invalid_column_data_in_x_center() {
-        let path = format!("{}/data/invalid5.txt", TEST_SANDBOX_DIR);
-        let content = r#"0 a 0.5 0.5 0.5"#;
-        create_yolo_label_file(&PathBuf::from(&path), content);
-
-        let metadata = FileMetadata {
-            classes: vec![YoloClass {
-                id: 0,
-                name: "person".to_string(),
-            }],
-            duplicate_tolerance: 0.01,
-        };
+        let filename = "invalid5.txt";
+        let classes_raw = vec![(0, "person")];
+        let classes = create_yolo_classes(classes_raw.clone());
+        let (metadata, path) = create_yolo_label_file(filename, classes.clone(), "0 a 0.5 0.5 0.5");
 
         let yolo_file = YoloFile::new(&metadata, &path);
 
@@ -161,17 +158,10 @@ mod tests {
 
     #[test]
     pub fn test_yolo_file_new_invalid_column_data_in_y_center() {
-        let path = format!("{}/data/invalid6.txt", TEST_SANDBOX_DIR);
-        let content = r#"0 0.5 a 0.5 0.5"#;
-        create_yolo_label_file(&PathBuf::from(&path), content);
-
-        let metadata = FileMetadata {
-            classes: vec![YoloClass {
-                id: 0,
-                name: "person".to_string(),
-            }],
-            duplicate_tolerance: 0.01,
-        };
+        let filename = "invalid6.txt";
+        let classes_raw = vec![(0, "person")];
+        let classes = create_yolo_classes(classes_raw.clone());
+        let (metadata, path) = create_yolo_label_file(filename, classes.clone(), "0 0.5 a 0.5 0.5");
 
         let yolo_file = YoloFile::new(&metadata, &path);
 
@@ -187,17 +177,10 @@ mod tests {
 
     #[test]
     pub fn test_yolo_file_new_invalid_column_data_in_width() {
-        let path = format!("{}/data/invalid7.txt", TEST_SANDBOX_DIR);
-        let content = r#"0 0.5 0.5 a 0.5"#;
-        create_yolo_label_file(&PathBuf::from(&path), content);
-
-        let metadata = FileMetadata {
-            classes: vec![YoloClass {
-                id: 0,
-                name: "person".to_string(),
-            }],
-            duplicate_tolerance: 0.01,
-        };
+        let filename = "invalid7.txt";
+        let classes_raw = vec![(0, "person")];
+        let classes = create_yolo_classes(classes_raw.clone());
+        let (metadata, path) = create_yolo_label_file(filename, classes.clone(), "0 0.5 0.5 a 0.5");
 
         let yolo_file = YoloFile::new(&metadata, &path);
 
@@ -213,18 +196,10 @@ mod tests {
 
     #[test]
     pub fn test_yolo_file_new_invalid_column_data_in_height() {
-        let path = format!("{}/data/invalid8.txt", TEST_SANDBOX_DIR);
-        let content = r#"0 0.5 0.5 0.5 a"#;
-        create_yolo_label_file(&PathBuf::from(&path), content);
-
-        let metadata = FileMetadata {
-            classes: vec![YoloClass {
-                id: 0,
-                name: "person".to_string(),
-            }],
-            duplicate_tolerance: 0.01,
-        };
-
+        let filename = "invalid8.txt";
+        let classes_raw = vec![(0, "person")];
+        let classes = create_yolo_classes(classes_raw.clone());
+        let (metadata, path) = create_yolo_label_file(filename, classes.clone(), "0 0.5 0.5 0.5 a");
         let yolo_file = YoloFile::new(&metadata, &path);
 
         if let Err(err) = yolo_file {
@@ -239,17 +214,11 @@ mod tests {
 
     #[test]
     pub fn test_yolo_file_new_x_column_contains_value_out_of_range() {
-        let path = format!("{}/data/invalid9.txt", TEST_SANDBOX_DIR);
-        let content = r#"0 1.5 0.5 0.5 0.5"#;
-        create_yolo_label_file(&PathBuf::from(&path), content);
-
-        let metadata = FileMetadata {
-            classes: vec![YoloClass {
-                id: 0,
-                name: "person".to_string(),
-            }],
-            duplicate_tolerance: 0.01,
-        };
+        let filename = "invalid9.txt";
+        let classes_raw = vec![(0, "person")];
+        let classes = create_yolo_classes(classes_raw.clone());
+        let (metadata, path) =
+            create_yolo_label_file(filename, classes.clone(), "0 1.5 0.5 0.5 0.5");
 
         let yolo_file = YoloFile::new(&metadata, &path);
 
@@ -265,17 +234,11 @@ mod tests {
 
     #[test]
     pub fn test_yolo_file_new_y_column_contains_value_out_of_range() {
-        let path = format!("{}/data/invalid10.txt", TEST_SANDBOX_DIR);
-        let content = r#"0 0.5 1.5 0.5 0.5"#;
-        create_yolo_label_file(&PathBuf::from(&path), content);
-
-        let metadata = FileMetadata {
-            classes: vec![YoloClass {
-                id: 0,
-                name: "person".to_string(),
-            }],
-            duplicate_tolerance: 0.01,
-        };
+        let filename = "invalid10.txt";
+        let classes_raw = vec![(0, "person")];
+        let classes = create_yolo_classes(classes_raw.clone());
+        let (metadata, path) =
+            create_yolo_label_file(filename, classes.clone(), "0 0.5 1.5 0.5 0.5");
 
         let yolo_file = YoloFile::new(&metadata, &path);
 
@@ -291,17 +254,11 @@ mod tests {
 
     #[test]
     pub fn test_yolo_file_new_width_column_contains_value_out_of_range() {
-        let path = format!("{}/data/invalid11.txt", TEST_SANDBOX_DIR);
-        let content = r#"0 0.5 0.5 1.5 0.5"#;
-        create_yolo_label_file(&PathBuf::from(&path), content);
-
-        let metadata = FileMetadata {
-            classes: vec![YoloClass {
-                id: 0,
-                name: "person".to_string(),
-            }],
-            duplicate_tolerance: 0.01,
-        };
+        let filename = "invalid11.txt";
+        let classes_raw = vec![(0, "person")];
+        let classes = create_yolo_classes(classes_raw.clone());
+        let (metadata, path) =
+            create_yolo_label_file(filename, classes.clone(), "0 0.5 0.5 1.5 0.5");
 
         let yolo_file = YoloFile::new(&metadata, &path);
 
@@ -317,17 +274,11 @@ mod tests {
 
     #[test]
     pub fn test_yolo_file_new_height_column_contains_value_out_of_range() {
-        let path = format!("{}/data/invalid12.txt", TEST_SANDBOX_DIR);
-        let content = r#"0 0.5 0.5 0.5 1.5"#;
-        create_yolo_label_file(&PathBuf::from(&path), content);
-
-        let metadata = FileMetadata {
-            classes: vec![YoloClass {
-                id: 0,
-                name: "person".to_string(),
-            }],
-            duplicate_tolerance: 0.01,
-        };
+        let filename = "invalid12.txt";
+        let classes_raw = vec![(0, "person")];
+        let classes = create_yolo_classes(classes_raw.clone());
+        let (metadata, path) =
+            create_yolo_label_file(filename, classes.clone(), "0 0.5 0.5 0.5 1.5");
 
         let yolo_file = YoloFile::new(&metadata, &path);
 
@@ -343,17 +294,10 @@ mod tests {
 
     #[test]
     pub fn test_yolo_file_new_invalid_file_format_due_to_empty_file() {
-        let path = format!("{}/data/invalid13.txt", TEST_SANDBOX_DIR);
-        let content = "";
-        create_yolo_label_file(&PathBuf::from(&path), content);
-
-        let metadata = FileMetadata {
-            classes: vec![YoloClass {
-                id: 0,
-                name: "person".to_string(),
-            }],
-            duplicate_tolerance: 0.01,
-        };
+        let filename = "invalid13.txt";
+        let classes_raw = vec![(0, "person")];
+        let classes = create_yolo_classes(classes_raw.clone());
+        let (metadata, path) = create_yolo_label_file(filename, classes.clone(), "");
 
         let yolo_file = YoloFile::new(&metadata, &path);
 
@@ -369,27 +313,14 @@ mod tests {
 
     #[rstest]
     fn test_yolo_file_new_contains_duplicate_labels() {
-        let path = format!("{}/data/invalid14.txt", TEST_SANDBOX_DIR);
-        let content = format!(
-            "{}\n{}\n{}\n",
-            "0 0.25 0.5 0.25 0.5", "0 0.251 0.5 0.25 0.51", "0 0.5 0.5 0.5 0.35"
+        let filename = "invalid14.txt";
+        let classes_raw = vec![(0, "person"), (1, "car")];
+        let classes = create_yolo_classes(classes_raw.clone());
+        let (metadata, path) = create_yolo_label_file(
+            filename,
+            classes.clone(),
+            "0 0.25 0.5 0.25 0.5\n0 0.25 0.5 0.25 0.5",
         );
-        let content = content.as_ref();
-        create_yolo_label_file(&PathBuf::from(&path), content);
-
-        let metadata = FileMetadata {
-            classes: vec![
-                YoloClass {
-                    id: 0,
-                    name: "person".to_string(),
-                },
-                YoloClass {
-                    id: 1,
-                    name: "car".to_string(),
-                },
-            ],
-            duplicate_tolerance: 0.01,
-        };
 
         let yolo_file = YoloFile::new(&metadata, &path);
 

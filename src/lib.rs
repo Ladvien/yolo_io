@@ -9,10 +9,11 @@ mod yolo_file;
 pub use export::*;
 use file_utils::get_filepaths_for_extension;
 use pairing::pair;
+pub use report::DataQualityItem;
 pub use report::YoloDataQualityReport;
 pub use types::{
-    Export, FileMetadata, ImageLabelPair, PairingError, PairingResult, PathWithKey, Paths,
-    SourcePaths, Split, YoloClass, YoloProjectConfig,
+    DuplicateImageLabelPair, Export, FileMetadata, ImageLabelPair, PairingError, PairingResult,
+    PathWithKey, Paths, SourcePaths, Split, YoloClass, YoloProjectConfig,
 };
 pub use yolo_file::{YoloFile, YoloFileParseError, YoloFileParseErrorDetails};
 
@@ -28,6 +29,18 @@ pub struct YoloProjectData {
 pub struct YoloProject {
     pub data: YoloProjectData,
     pub config: YoloProjectConfig,
+}
+
+impl Default for YoloProject {
+    fn default() -> Self {
+        Self {
+            data: YoloProjectData {
+                stems: vec![],
+                pairs: vec![],
+            },
+            config: Default::default(),
+        }
+    }
 }
 
 impl YoloProject {

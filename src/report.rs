@@ -20,7 +20,7 @@ impl YoloDataQualityReport {
         for error in project.data.pairs.iter() {
             if let PairingResult::Invalid(pairing_error) = error {
                 let dq_item = DataQualityItem {
-                    source: Self::get_source_name(&pairing_error),
+                    source: Self::get_source_name(pairing_error),
                     message: pairing_error.to_string(),
                 };
 
@@ -63,9 +63,7 @@ impl YoloDataQualityReport {
             PairingError::ImageFileMissingUnableToUnwrapLabelPath => {
                 String::from("ImageFileMissingUnableToUnwrapLabelPath")
             }
-            PairingError::Duplicate(pair) => {
-                format!("Duplicate: {:#?}", pair)
-            }
+            PairingError::Duplicate(_) => String::from("Duplicate"),
         }
     }
 }
