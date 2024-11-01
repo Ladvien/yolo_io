@@ -1,41 +1,125 @@
-// mod common;
+mod common;
 
-// #[cfg(test)]
-// mod tests {
+#[cfg(test)]
+mod duplicate_tests {
 
-//     use std::path::PathBuf;
+    use std::path::PathBuf;
 
-//     use crate::common::{
-//         create_dir_and_write_file, create_image_file, create_yolo_project_config, image_data,
-//         TEST_SANDBOX_DIR,
-//     };
-//     use image::{ImageBuffer, Rgb};
-//     use rstest::rstest;
-//     use yolo_io::{YoloProject, YoloProjectConfig};
+    use crate::common::{
+        create_dir_and_write_file, create_image_file, create_yolo_project_config, image_data,
+        TEST_SANDBOX_DIR,
+    };
+    use image::{ImageBuffer, Rgb};
+    use rstest::rstest;
+    use yolo_io::{YoloProject, YoloProjectConfig};
 
-//     #[rstest]
-//     fn test_duplicates_found_when_duplicate_images_exist(
-//         mut create_yolo_project_config: YoloProjectConfig,
-//         image_data: ImageBuffer<Rgb<u8>, Vec<u8>>,
-//     ) {
-//         let filename = "dup_one";
-//         let this_test_directory = format!("{}/{}/", TEST_SANDBOX_DIR, filename);
+    #[rstest]
+    fn test_duplicate_pairs_found(
+        mut create_yolo_project_config: YoloProjectConfig,
+        image_data: ImageBuffer<Rgb<u8>, Vec<u8>>,
+    ) {
+        let filename = "dup_one";
+        let this_test_directory = format!("{}/{}/", TEST_SANDBOX_DIR, filename);
 
-//         let image_file = PathBuf::from(format!("{}/test1.jpg", this_test_directory));
-//         create_image_file(&image_file, &image_data);
+        let image_file = PathBuf::from(format!("{}/test1.jpg", this_test_directory));
+        create_image_file(&image_file, &image_data);
 
-//         let image_file_duplicate =
-//             PathBuf::from(format!("{}/elsewhere/test2.jpg", this_test_directory));
-//         create_image_file(&image_file_duplicate, &image_data);
+        let image_file_duplicate =
+            PathBuf::from(format!("{}/elsewhere/test1.jpg", this_test_directory));
+        create_image_file(&image_file_duplicate, &image_data);
 
-//         let file1 = PathBuf::from(format!("{}/test1.txt", this_test_directory));
-//         create_dir_and_write_file(&file1, "0 0.5 0.5 0.5 0.5");
+        let label_file = PathBuf::from(format!("{}/test1.txt", this_test_directory));
+        create_dir_and_write_file(&label_file, "0 0.5 0.5 0.5 0.5");
 
-//         create_yolo_project_config.source_paths.images = this_test_directory.clone();
-//         create_yolo_project_config.source_paths.labels = this_test_directory.clone();
+        let label_file_duplicate =
+            PathBuf::from(format!("{}/elsewhere/test1.txt", this_test_directory));
+        create_dir_and_write_file(&label_file_duplicate, "0 0.5 0.5 0.5 0.5");
 
-//         let project = YoloProject::new(&create_yolo_project_config);
+        create_yolo_project_config.source_paths.images = this_test_directory.clone();
+        create_yolo_project_config.source_paths.labels = this_test_directory.clone();
 
-//         assert!(false)
-//     }
-// }
+        let project = YoloProject::new(&create_yolo_project_config);
+
+        let valid_pairs = project.get_valid_pairs();
+        let invalid_pairs = project.get_invalid_pairs();
+
+        println!("{:#?}", valid_pairs);
+        println!("{:#?}", invalid_pairs);
+
+        let valid_pair = valid_pairs.into_iter().find(|pair| pair.name == "test1");
+        let invalid_pair = invalid_pairs
+            .into_iter()
+            .find(|pair| matches!(pair, yolo_io::PairingError::Duplicate(_)));
+
+        assert!(valid_pair.is_some());
+        assert!(invalid_pair.is_some());
+    }
+
+    #[rstest]
+    fn test_multiple_duplicate_pairs_found(
+        mut create_yolo_project_config: YoloProjectConfig,
+        image_data: ImageBuffer<Rgb<u8>, Vec<u8>>,
+    ) {
+        let filename = "dup_two";
+
+        let file_key = "test_duplicate";
+
+        let this_test_directory = format!("{}/{}/", TEST_SANDBOX_DIR, filename);
+
+        let image_file = PathBuf::from(format!("{}/{}.png", this_test_directory, file_key));
+        create_image_file(&image_file, &image_data);
+
+        let image_file_duplicate = PathBuf::from(format!(
+            "{}/elsewhere/{}.png",
+            this_test_directory, file_key
+        ));
+        create_image_file(&image_file_duplicate, &image_data);
+
+        let label_file = PathBuf::from(format!("{}/{}.txt", this_test_directory, file_key));
+        create_dir_and_write_file(&label_file, "0 0.5 0.5 0.5 0.5");
+
+        let label_file_duplicate = PathBuf::from(format!(
+            "{}/elsewhere/{}.txt",
+            this_test_directory, file_key
+        ));
+        create_dir_and_write_file(&label_file_duplicate, "0 0.5 0.5 0.5 0.5");
+
+        let image_file2 = PathBuf::from(format!("{}/{}.png", this_test_directory, file_key));
+        create_image_file(&image_file2, &image_data);
+
+        let image_file_duplicate2 = PathBuf::from(format!(
+            "{}/not_there/{}.png",
+            this_test_directory, file_key
+        ));
+        create_image_file(&image_file_duplicate2, &image_data);
+
+        let label_file2 = PathBuf::from(format!("{}/{}.txt", this_test_directory, file_key));
+        create_dir_and_write_file(&label_file2, "0 0.5 0.5 0.5 0.5");
+
+        let label_file_duplicate2 = PathBuf::from(format!(
+            "{}/not_there/{}.txt",
+            this_test_directory, file_key
+        ));
+        create_dir_and_write_file(&label_file_duplicate2, "0 0.5 0.5 0.5 0.5");
+
+        create_yolo_project_config.source_paths.images = this_test_directory.clone();
+        create_yolo_project_config.source_paths.labels = this_test_directory.clone();
+
+        let project = YoloProject::new(&create_yolo_project_config);
+
+        let valid_pairs = project.get_valid_pairs();
+        let invalid_pairs = project.get_invalid_pairs();
+
+        println!("{:#?}", valid_pairs);
+        println!("{:#?}", invalid_pairs);
+
+        let valid_pair = valid_pairs.into_iter().find(|pair| pair.name == file_key);
+        let invalid_pairs = invalid_pairs
+            .into_iter()
+            .filter(|pair| matches!(pair, yolo_io::PairingError::Duplicate(_)))
+            .collect::<Vec<_>>();
+
+        assert!(valid_pair.is_some());
+        assert_eq!(invalid_pairs.len(), 2);
+    }
+}

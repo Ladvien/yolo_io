@@ -61,12 +61,8 @@ impl YoloDataQualityReport {
             PairingError::ImageFileMissingUnableToUnwrapLabelPath => {
                 String::from("ImageFileMissingUnableToUnwrapLabelPath")
             }
-            PairingError::DuplicatedImageFile((pair, duplicate_pair)) => {
-                format!(
-                    "DuplicatedImageFile: {:?} and {:?}",
-                    pair.image_path.to_owned(),
-                    duplicate_pair.image_path.to_owned()
-                )
+            PairingError::Duplicate(pair) => {
+                format!("Duplicate: {:#?}", pair)
             }
         }
     }
