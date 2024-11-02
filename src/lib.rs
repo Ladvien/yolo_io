@@ -8,9 +8,11 @@ mod yolo_file;
 
 pub use export::*;
 use file_utils::get_filepaths_for_extension;
+use file_utils::FileError;
 use pairing::pair;
 pub use report::DataQualityItem;
 pub use report::YoloDataQualityReport;
+use thiserror::Error;
 pub use types::{
     DuplicateImageLabelPair, Export, FileMetadata, ImageLabelPair, PairingError, PairingResult,
     PathWithKey, Paths, SourcePaths, Split, YoloClass, YoloProjectConfig,
@@ -44,15 +46,15 @@ impl Default for YoloProject {
 }
 
 impl YoloProject {
-    pub fn new(config: &YoloProjectConfig) -> Self {
+    pub fn new(config: &YoloProjectConfig) -> Result<Self, FileError> {
         println!("Creating new YoloProject from config: {:#?}", config);
 
         let image_paths = get_filepaths_for_extension(
             &config.source_paths.images,
             vec!["jpg", "png", "PNG", "JPEG"],
-        );
+        )?;
 
-        let label_paths = get_filepaths_for_extension(&config.source_paths.labels, vec!["txt"]);
+        let label_paths = get_filepaths_for_extension(&config.source_paths.labels, vec!["txt"])?;
 
         let all_filepaths = image_paths
             .iter()
@@ -80,10 +82,10 @@ impl YoloProject {
 
         let pairs = pair(metadata, stems.clone(), label_paths, image_paths);
 
-        Self {
+        Ok(Self {
             data: YoloProjectData { stems, pairs },
             config: config.clone(),
-        }
+        })
     }
 
     pub fn get_valid_pairs(&self) -> Vec<ImageLabelPair> {

@@ -5,7 +5,7 @@ mod pairing_tests {
 
     use image::{ImageBuffer, Rgb};
     use rstest::rstest;
-    use std::path::PathBuf;
+    use std::{fs, path::PathBuf};
     use yolo_io::{YoloProject, YoloProjectConfig};
 
     use crate::common::{
@@ -43,7 +43,8 @@ mod pairing_tests {
         create_yolo_project_config.source_paths.images = this_test_directory.clone();
         create_yolo_project_config.source_paths.labels = this_test_directory.clone();
 
-        let project = YoloProject::new(&create_yolo_project_config);
+        let project =
+            YoloProject::new(&create_yolo_project_config).expect("Unable to create project");
 
         let valid_pairs = project.get_valid_pairs();
         let invalid_pairs = project.get_invalid_pairs();
@@ -71,7 +72,8 @@ mod pairing_tests {
         create_yolo_project_config.source_paths.images = this_test_directory.clone();
         create_yolo_project_config.source_paths.labels = this_test_directory.clone();
 
-        let project = YoloProject::new(&create_yolo_project_config);
+        let project =
+            YoloProject::new(&create_yolo_project_config).expect("Unable to create project");
 
         let valid_pairs = project.get_valid_pairs();
         let invalid_pairs = project.get_invalid_pairs();
@@ -113,7 +115,8 @@ mod pairing_tests {
         // '3' isn't a valid class ID.
         create_dir_and_write_file(&file2, "3 0.5 0.5 0.5 0.5");
 
-        let project = YoloProject::new(&create_yolo_project_config);
+        let project =
+            YoloProject::new(&create_yolo_project_config).expect("Unable to create project");
         let valid_pairs = project.get_valid_pairs();
         let invalid_pairs = project.get_invalid_pairs();
 
@@ -139,7 +142,8 @@ mod pairing_tests {
         create_yolo_project_config.source_paths.images = this_test_directory.clone();
         create_yolo_project_config.source_paths.labels = this_test_directory.clone();
 
-        let project = YoloProject::new(&create_yolo_project_config);
+        let project =
+            YoloProject::new(&create_yolo_project_config).expect("Unable to create project");
 
         let valid_pairs = project.get_valid_pairs();
         let invalid_pairs = project.get_invalid_pairs();
@@ -161,10 +165,13 @@ mod pairing_tests {
         let filename = "five";
         let this_test_directory = format!("{}/{}/", TEST_SANDBOX_DIR, filename);
 
+        fs::create_dir_all(&this_test_directory).expect("Unable to create directory");
+
         create_yolo_project_config.source_paths.images = this_test_directory.clone();
         create_yolo_project_config.source_paths.labels = this_test_directory.clone();
 
-        let project = YoloProject::new(&create_yolo_project_config);
+        let project =
+            YoloProject::new(&create_yolo_project_config).expect("Unable to create project");
 
         let valid_pairs = project.get_valid_pairs();
         let valid_pair = valid_pairs.into_iter().find(|pair| pair.name == "test5");

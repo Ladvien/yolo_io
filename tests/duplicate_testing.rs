@@ -41,7 +41,8 @@ mod duplicate_tests {
         create_yolo_project_config.source_paths.images = this_test_directory.clone();
         create_yolo_project_config.source_paths.labels = this_test_directory.clone();
 
-        let project = YoloProject::new(&create_yolo_project_config);
+        let project =
+            YoloProject::new(&create_yolo_project_config).expect("Unable to create project");
 
         let valid_pairs = project.get_valid_pairs();
         let invalid_pairs = project.get_invalid_pairs();
@@ -108,7 +109,7 @@ mod duplicate_tests {
         create_yolo_project_config.source_paths.images = this_test_directory.clone();
         create_yolo_project_config.source_paths.labels = this_test_directory.clone();
 
-        let project = YoloProject::new(&create_yolo_project_config);
+        let project = YoloProject::new(&create_yolo_project_config).unwrap();
 
         let valid_pairs = project.get_valid_pairs();
         let invalid_pairs = project.get_invalid_pairs();

@@ -12,7 +12,6 @@ pub fn pair(
     stems: Vec<String>,
     label_filenames: Vec<PathWithKey>,
     image_filenames: Vec<PathWithKey>,
-    // TODO: I should modify to collect pairs _and_ errors.
 ) -> Vec<PairingResult> {
     let mut pairs: Vec<PairingResult> = Vec::new();
 

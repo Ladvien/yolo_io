@@ -45,7 +45,8 @@ mod tests {
             create_dir_and_write_file(std::path::Path::new(&label_path), "0 0.5 0.5 0.5 0.5");
         }
 
-        let project = YoloProject::new(&create_yolo_project_config);
+        let project =
+            YoloProject::new(&create_yolo_project_config).expect("Unable to create project");
 
         YoloProjectExporter::export(project).expect("Unable to export project");
 
@@ -87,10 +88,6 @@ mod tests {
 
     #[rstest]
     fn test_yolo_yaml_created(create_yolo_project_config: YoloProjectConfig) {
-        // TODO: Hacky, the first test builds the export directory.  Making
-        //       this test dependent on the first test. Not cool.
-        // let exported_config = run_export(create_yolo_project_config, image_data());
-
         let exported_config = run_export(
             create_yolo_project_config,
             "test_yolo_yaml_created".to_string(),
