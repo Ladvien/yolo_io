@@ -15,10 +15,11 @@ mod tests {
 
     fn run_export(
         mut create_yolo_project_config: YoloProjectConfig,
+        export_name: String,
         image_data: ImageBuffer<Rgb<u8>, Vec<u8>>,
     ) -> YoloProjectConfig {
-        let export_source_dir = format!("{}/export_source", TEST_SANDBOX_DIR);
-        let export_out_dir = format!("{}/export", TEST_SANDBOX_DIR);
+        let export_source_dir = format!("{}/export_source_{}", TEST_SANDBOX_DIR, export_name);
+        let export_out_dir = format!("{}/export_{}", TEST_SANDBOX_DIR, export_name);
 
         // Clean up old export directory
         let _ = fs::remove_dir_all(&export_source_dir);
@@ -34,7 +35,7 @@ mod tests {
         create_yolo_project_config.source_paths.images = export_source_dir.clone();
         create_yolo_project_config.source_paths.labels = export_source_dir.clone();
 
-        create_yolo_project_config.export.paths.root = format!("{}/export", TEST_SANDBOX_DIR);
+        create_yolo_project_config.export.paths.root = export_out_dir.clone();
 
         let num_of_pairs = 10;
         for i in 0..num_of_pairs {
@@ -54,7 +55,11 @@ mod tests {
     #[rstest]
     fn test_splits_correctly(create_yolo_project_config: YoloProjectConfig) {
         // Check train folder has 6 labels, 6 images
-        let exported_config = run_export(create_yolo_project_config, image_data());
+        let exported_config = run_export(
+            create_yolo_project_config,
+            "test_splits_correctly".to_string(),
+            image_data(),
+        );
         let train_image_path = format!("{}/train/images", exported_config.export.paths.root);
 
         let num_train_image_files = fs::read_dir(train_image_path)
@@ -86,13 +91,18 @@ mod tests {
         //       this test dependent on the first test. Not cool.
         // let exported_config = run_export(create_yolo_project_config, image_data());
 
-        let yolo_yaml_path = format!(
-            "{}/test_project.yaml",
-            create_yolo_project_config.export.paths.root
+        let exported_config = run_export(
+            create_yolo_project_config,
+            "test_yolo_yaml_created".to_string(),
+            image_data(),
         );
 
+        let yolo_yaml_path = format!("{}/test_project.yaml", exported_config.export.paths.root);
+
+        println!("Yolo YAML Path: {}", yolo_yaml_path);
+
         let expected_yaml = r#"# Generate by yolo_io - https://github.com/Ladvien/yolo_io
-path: tests/sandbox/export
+path: tests/sandbox/export_test_yolo_yaml_created
 train: train/
 val: validation/
 test: test/

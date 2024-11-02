@@ -25,11 +25,13 @@ mod invalid_label_tests {
         classes: Vec<YoloClass>,
         content: &str,
     ) -> (FileMetadata, String) {
-        let path = format!("{}/data/{}", TEST_SANDBOX_DIR, filename);
+        let dir = format!("{}/data", TEST_SANDBOX_DIR);
+        let path = format!("{}/{}", dir, filename);
         let mut file_content = String::new();
 
         file_content.push_str(content);
 
+        std::fs::create_dir_all(&dir).unwrap();
         std::fs::write(&path, file_content).unwrap();
 
         let metadata = FileMetadata {
