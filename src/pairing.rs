@@ -50,7 +50,7 @@ pub fn pair(
         let mut primary_pair: Option<ImageLabelPair> = None;
 
         for pair in unconfirmed_pairs {
-            let result = evaluate_pair(stem.clone(), pair.clone());
+            let result = evaluate_pair(stem.clone(), pair.clone(), &file_metadata);
 
             match result {
                 PairingResult::Valid(pair) => match primary_pair {
@@ -112,14 +112,27 @@ pub fn process_label_path(
     invalid_pairs
 }
 
-pub fn evaluate_pair(stem: String, pair: EitherOrBoth<Result<String, ()>>) -> PairingResult {
+pub fn evaluate_pair(
+    stem: String,
+    pair: EitherOrBoth<Result<String, ()>>,
+    metadata: &FileMetadata,
+) -> PairingResult {
     match pair {
         EitherOrBoth::Both(image_path, label_path) => match (image_path, label_path) {
-            (Ok(image_path), Ok(label_path)) => PairingResult::Valid(ImageLabelPair {
-                name: stem,
-                image_path: Some(PathBuf::from(image_path)),
-                label_path: Some(PathBuf::from(label_path)),
-            }),
+            (Ok(image_path), Ok(label_path)) => {
+                let label_file = match YoloFile::new(metadata, &label_path) {
+                    Ok(file) => Some(file),
+                    Err(error) => {
+                        return PairingResult::Invalid(PairingError::LabelFileError(error))
+                    }
+                };
+
+                PairingResult::Valid(ImageLabelPair {
+                    name: stem,
+                    image_path: Some(PathBuf::from(image_path)),
+                    label_file,
+                })
+            }
             (Ok(image_path), Err(_)) => {
                 PairingResult::Invalid(PairingError::LabelFileMissing(image_path))
             }

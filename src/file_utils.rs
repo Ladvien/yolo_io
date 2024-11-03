@@ -17,7 +17,7 @@ pub enum FileError {
     WriteFile,
 }
 
-fn get_file_stem(file_path: &Path) -> Result<&str, FileError> {
+pub fn get_file_stem(file_path: &Path) -> Result<&str, FileError> {
     file_path
         .file_stem()
         .ok_or_else(|| FileError::GetFileStem(file_path.display().to_string()))?

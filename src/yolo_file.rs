@@ -14,10 +14,10 @@
 */
 
 use serde::{Deserialize, Serialize};
-use std::fs::read_to_string;
+use std::{fs::read_to_string, path::Path};
 use thiserror::Error;
 
-use crate::types::FileMetadata;
+use crate::{file_utils::get_file_stem, types::FileMetadata};
 
 #[derive(Error, Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub enum YoloFileParseError {
@@ -35,6 +35,8 @@ pub enum YoloFileParseError {
     LabelDataOutOfRange(YoloFileParseErrorDetails),
     #[error("Failed to parse '{}' column with value of '{}' on line {} in file '{}'", .0.column.clone().unwrap(), .0.class.clone().unwrap(), .0.row.unwrap(), .0.path)]
     FailedToParseColumn(YoloFileParseErrorDetails),
+    #[error("Failed to get file stem for file '{}'", .0.path)]
+    FailedToGetFileStem(YoloFileParseErrorDetails),
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
@@ -64,7 +66,9 @@ pub struct YoloEntry {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct YoloFile {
-    entries: Vec<YoloEntry>,
+    pub stem: String,
+    pub path: String,
+    pub entries: Vec<YoloEntry>,
 }
 
 impl YoloFile {
@@ -89,8 +93,6 @@ impl YoloFile {
 
             for (index, line) in file.lines().enumerate() {
                 let parts: Vec<&str> = line.split(" ").collect();
-
-                println!("parts: {:#?}", parts);
 
                 if parts.len() != 5 {
                     return Err(YoloFileParseError::InvalidFormat(
@@ -269,7 +271,24 @@ impl YoloFile {
             };
         }
 
-        Ok(YoloFile { entries })
+        let stem = get_file_stem(Path::new(path))
+            .map_err(|_| {
+                YoloFileParseError::FailedToGetFileStem(YoloFileParseErrorDetails {
+                    path: path.to_string(),
+                    class: None,
+                    row: None,
+                    other_row: None,
+                    column: None,
+                    value: None,
+                })
+            })?
+            .to_string();
+
+        Ok(YoloFile {
+            stem,
+            path: path.to_string(),
+            entries,
+        })
     }
 
     fn get_duplicate_index(

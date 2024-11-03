@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 pub struct DataQualityItem {
     pub source: String,
     pub message: String,
+    pub data: crate::PairingError,
 }
 
 pub struct YoloDataQualityReport;
@@ -22,6 +23,7 @@ impl YoloDataQualityReport {
                 let dq_item = DataQualityItem {
                     source: Self::get_source_name(pairing_error),
                     message: pairing_error.to_string(),
+                    data: pairing_error.clone(),
                 };
 
                 errors.push(dq_item.clone());
@@ -53,6 +55,9 @@ impl YoloDataQualityReport {
                 YoloFileParseError::FailedToParseColumn(_) => {
                     String::from("YoloFileParseError::FailedToParseColumn")
                 }
+                YoloFileParseError::FailedToGetFileStem(_) => {
+                    String::from("YoloFileParseError::FailedToGetFileStem")
+                }
             },
             PairingError::BothFilesMissing => String::from("BothFilesMissing"),
             PairingError::LabelFileMissing(_) => String::from("LabelFileMissing"),
@@ -63,7 +68,7 @@ impl YoloDataQualityReport {
             PairingError::ImageFileMissingUnableToUnwrapLabelPath => {
                 String::from("ImageFileMissingUnableToUnwrapLabelPath")
             }
-            PairingError::Duplicate(_) => String::from("Duplicate"),
+            PairingError::Duplicate(_) => String::from("DuplicateImageLabelPair"),
         }
     }
 }

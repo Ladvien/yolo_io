@@ -99,14 +99,11 @@ impl YoloProjectExporter {
                 .to_str()
                 .ok_or(ExportError::FailedToUnwrapLabelPath)?;
 
-            let label_path = pair
-                .label_path
+            let label_file = pair
+                .label_file
                 .ok_or(ExportError::FailedToUnwrapLabelPath)?;
 
-            let label_path = label_path
-                .as_os_str()
-                .to_str()
-                .ok_or(ExportError::FailedToUnwrapLabelPath)?;
+            let label_path = label_file.path;
 
             let image_stem = pair.name.clone();
             let label_stem = pair.name;
@@ -117,7 +114,7 @@ impl YoloProjectExporter {
             fs::copy(image_path, new_image_path.clone()).map_err(|_| {
                 ExportError::FailedToCopyFile(image_path.to_string(), new_image_path)
             })?;
-            fs::copy(label_path, new_label_path.clone()).map_err(|_| {
+            fs::copy(label_path.clone(), new_label_path.clone()).map_err(|_| {
                 ExportError::FailedToCopyFile(label_path.to_string(), new_label_path)
             })?;
         }

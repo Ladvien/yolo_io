@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fs, path::PathBuf};
 use thiserror::Error;
 
-use crate::{ExportError, YoloFileParseError};
+use crate::{ExportError, YoloFile, YoloFileParseError};
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Split {
@@ -167,7 +167,7 @@ impl Default for YoloProjectConfig {
 pub struct ImageLabelPair {
     pub name: String,
     pub image_path: Option<PathBuf>,
-    pub label_path: Option<PathBuf>,
+    pub label_file: Option<YoloFile>,
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -207,8 +207,8 @@ impl std::fmt::Display for PairingError {
             PairingError::ImageFileMissingUnableToUnwrapLabelPath => {
                 write!(f, "Image file missing; unable to unwrap label path")
             }
-            PairingError::Duplicate(duplicate) => {
-                write!(f, "Duplicate image and label files: {:#?}", duplicate)
+            PairingError::Duplicate(_) => {
+                write!(f, "Duplicate image and label files")
             }
         }
     }

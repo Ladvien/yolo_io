@@ -12,7 +12,6 @@ use file_utils::FileError;
 use pairing::pair;
 pub use report::DataQualityItem;
 pub use report::YoloDataQualityReport;
-use thiserror::Error;
 pub use types::{
     DuplicateImageLabelPair, Export, FileMetadata, ImageLabelPair, PairingError, PairingResult,
     PathWithKey, Paths, SourcePaths, Split, YoloClass, YoloProjectConfig,
@@ -47,8 +46,6 @@ impl Default for YoloProject {
 
 impl YoloProject {
     pub fn new(config: &YoloProjectConfig) -> Result<Self, FileError> {
-        println!("Creating new YoloProject from config: {:#?}", config);
-
         let image_paths = get_filepaths_for_extension(
             &config.source_paths.images,
             vec!["jpg", "png", "PNG", "JPEG"],
