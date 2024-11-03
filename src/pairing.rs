@@ -1,6 +1,5 @@
-use std::path::PathBuf;
-
 use itertools::{EitherOrBoth, Itertools};
+use std::path::PathBuf;
 
 use crate::types::{
     DuplicateImageLabelPair, FileMetadata, ImageLabelPair, PairingError, PairingResult, PathWithKey,

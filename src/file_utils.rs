@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -17,7 +17,7 @@ pub enum FileError {
     WriteFile,
 }
 
-fn get_file_stem(file_path: &PathBuf) -> Result<&str, FileError> {
+fn get_file_stem(file_path: &Path) -> Result<&str, FileError> {
     file_path
         .file_stem()
         .ok_or_else(|| FileError::GetFileStem(file_path.display().to_string()))?
@@ -25,7 +25,7 @@ fn get_file_stem(file_path: &PathBuf) -> Result<&str, FileError> {
         .ok_or_else(|| FileError::ConvertPathToString(file_path.display().to_string()))
 }
 
-fn get_file_extension(file_path: &PathBuf) -> Result<&str, FileError> {
+fn get_file_extension(file_path: &Path) -> Result<&str, FileError> {
     let file_extension = file_path
         .extension()
         .ok_or(FileError::ReadFile(file_path.display().to_string()))?;
@@ -38,7 +38,7 @@ fn get_file_extension(file_path: &PathBuf) -> Result<&str, FileError> {
     Ok(extension_str)
 }
 
-fn get_filepath_as_string(file_path: &PathBuf) -> Result<String, FileError> {
+fn get_filepath_as_string(file_path: &Path) -> Result<String, FileError> {
     let file_path = file_path.to_str().ok_or(FileError::ConvertPathToString(
         file_path.display().to_string(),
     ))?;
@@ -68,8 +68,15 @@ pub fn get_filepaths_for_extension(
             continue;
         }
 
-        let extension = get_file_extension(&file_path)?;
-        let stem = get_file_stem(&file_path)?;
+        let extension = match get_file_extension(&file_path) {
+            Ok(extension) => extension,
+            Err(_) => continue,
+        };
+
+        let stem = match get_file_stem(&file_path) {
+            Ok(stem) => stem,
+            Err(_) => continue,
+        };
 
         if extensions.contains(&extension) {
             paths.push(PathWithKey {
