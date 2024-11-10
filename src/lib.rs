@@ -24,6 +24,7 @@ use serde::{Deserialize, Serialize};
 pub struct YoloProjectData {
     pub stems: Vec<String>,
     pub pairs: Vec<PairingResult>,
+    pub number_of_classes: usize,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -38,6 +39,7 @@ impl Default for YoloProject {
             data: YoloProjectData {
                 stems: vec![],
                 pairs: vec![],
+                number_of_classes: 0,
             },
             config: Default::default(),
         }
@@ -64,23 +66,29 @@ impl YoloProject {
         stems.sort();
         stems.dedup();
 
+        let classes = config
+            .export
+            .class_map
+            .iter()
+            .map(|(id, name)| YoloClass {
+                id: *id,
+                name: name.clone(),
+            })
+            .collect::<Vec<YoloClass>>();
+
         let metadata = FileMetadata {
-            classes: config
-                .export
-                .class_map
-                .iter()
-                .map(|(id, name)| YoloClass {
-                    id: *id,
-                    name: name.clone(),
-                })
-                .collect(),
+            classes: classes.clone(),
             duplicate_tolerance: 0.0,
         };
 
         let pairs = pair(metadata, stems.clone(), label_paths, image_paths);
 
         Ok(Self {
-            data: YoloProjectData { stems, pairs },
+            data: YoloProjectData {
+                stems,
+                pairs,
+                number_of_classes: classes.len(),
+            },
             config: config.clone(),
         })
     }
@@ -108,6 +116,17 @@ impl YoloProject {
             .collect::<Vec<PairingError>>();
 
         invalid_pairs
+    }
+
+    pub fn get_pair(&self, stem: &str) -> Option<ImageLabelPair> {
+        self.get_valid_pairs()
+            .iter()
+            .find(|pair| pair.name == stem)
+            .cloned()
+    }
+
+    pub fn pair_at_index(&self, index: isize) -> Option<ImageLabelPair> {
+        self.get_valid_pairs().get(index as usize).cloned()
     }
 
     fn get_file_stems(filenames: &[&PathWithKey]) -> Vec<String> {

@@ -1,5 +1,6 @@
-use std::{collections::HashMap, fs, path::Path};
+use std::{fs, path::Path};
 
+use hashbrown::HashMap;
 use image::{ImageBuffer, Rgb};
 use rstest::fixture;
 use yolo_io::{Export, Paths, SourcePaths, Split, YoloProjectConfig};

@@ -51,13 +51,13 @@ pub struct YoloFileParseErrorDetails {
 
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct YoloClass {
-    pub id: usize,
+    pub id: isize,
     pub name: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct YoloEntry {
-    pub class: i32,
+    pub class: isize,
     pub x_center: f32,
     pub y_center: f32,
     pub width: f32,
@@ -107,7 +107,7 @@ impl YoloFile {
                     ));
                 }
 
-                let class = parts[0].parse::<i32>().map_err(|_| {
+                let class = parts[0].parse::<isize>().map_err(|_| {
                     YoloFileParseError::FailedToParseClassId(YoloFileParseErrorDetails {
                         path: path.to_string(),
                         class: Some(parts[0].to_string()),
@@ -118,7 +118,7 @@ impl YoloFile {
                     })
                 })?;
 
-                let found = metadata.classes.iter().any(|c| c.id == class as usize);
+                let found = metadata.classes.iter().any(|c| c.id == class);
                 if !found {
                     return Err(YoloFileParseError::ClassIdNotFound(
                         YoloFileParseErrorDetails {

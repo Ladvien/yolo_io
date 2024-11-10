@@ -14,6 +14,7 @@ repository = "https://github.com/Ladvien/yolo_io"
 # categories = ["machine-learning", "image-processing", "data-validation"]
 
 [dependencies]
+hashbrown = {version = "0.15.1", features = ["serde"]}
 itertools = "0.13.0"
 rand = "0.8.5"
 serde = {version = "1.0", features = ["derive"]}

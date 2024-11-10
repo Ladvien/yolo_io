@@ -10,7 +10,7 @@ mod invalid_label_tests {
         FileMetadata, YoloClass, YoloFile, YoloFileParseError, YoloFileParseErrorDetails,
     };
 
-    fn create_yolo_classes(classes: Vec<(usize, &str)>) -> Vec<YoloClass> {
+    fn create_yolo_classes(classes: Vec<(isize, &str)>) -> Vec<YoloClass> {
         classes
             .iter()
             .map(|(id, name)| YoloClass {

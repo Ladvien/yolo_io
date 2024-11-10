@@ -1,5 +1,6 @@
+use hashbrown::HashMap;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, fs, path::PathBuf};
+use std::{fs, path::PathBuf};
 use thiserror::Error;
 
 use crate::{ExportError, YoloFile, YoloFileParseError};
@@ -14,7 +15,7 @@ pub struct Split {
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Export {
     pub paths: Paths,
-    pub class_map: HashMap<usize, String>,
+    pub class_map: HashMap<isize, String>,
     pub duplicate_tolerance: f32,
     pub split: Split,
 }
@@ -126,7 +127,7 @@ impl Default for SourcePaths {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct YoloClass {
-    pub id: usize,
+    pub id: isize,
     pub name: String,
 }
 

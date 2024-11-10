@@ -1,6 +1,7 @@
+use hashbrown::HashMap;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
-use std::{collections::HashMap, fs};
+use std::fs;
 
 use thiserror::Error;
 
@@ -122,8 +123,8 @@ impl YoloProjectExporter {
         Ok(())
     }
 
-    fn create_yolo_yaml(project_name: &str, paths: &Paths, classes: &HashMap<usize, String>) {
-        let mut classes_vec: Vec<(usize, String)> =
+    fn create_yolo_yaml(project_name: &str, paths: &Paths, classes: &HashMap<isize, String>) {
+        let mut classes_vec: Vec<(isize, String)> =
             classes.iter().map(|(&k, v)| (k, v.clone())).collect();
 
         classes_vec.sort_by(|a, b| a.0.cmp(&b.0));
