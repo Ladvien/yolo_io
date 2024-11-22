@@ -16,7 +16,7 @@ pub use types::{
     DuplicateImageLabelPair, Export, FileMetadata, ImageLabelPair, PairingError, PairingResult,
     PathWithKey, Paths, SourcePaths, Split, YoloClass, YoloProjectConfig,
 };
-pub use yolo_file::{YoloFile, YoloFileParseError, YoloFileParseErrorDetails};
+pub use yolo_file::{YoloEntry, YoloFile, YoloFileParseError, YoloFileParseErrorDetails};
 
 use serde::{Deserialize, Serialize};
 
