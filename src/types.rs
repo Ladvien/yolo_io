@@ -164,6 +164,14 @@ impl Default for YoloProjectConfig {
     }
 }
 
+impl YoloProjectConfig {
+    pub fn new(path: &str) -> Result<Self, ExportError> {
+        let data = fs::read_to_string(path).expect("Unable to read file");
+        let config: YoloProjectConfig = serde_yml::from_str(&data).expect("Unable to parse YAML");
+        Ok(config)
+    }
+}
+
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct ImageLabelPair {
     pub name: String,
