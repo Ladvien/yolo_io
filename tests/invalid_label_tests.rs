@@ -3,9 +3,12 @@ mod common;
 #[cfg(test)]
 mod invalid_label_tests {
     use rstest::rstest;
+    use std::path::PathBuf;
 
     use crate::common::TEST_SANDBOX_DIR;
-    use yolo_io::{FileMetadata, YoloClass, YoloFile, YoloFileParseError};
+    use yolo_io::{
+        FileMetadata, YoloClass, YoloFile, YoloFileParseError, YoloFileParseErrorDetails,
+    };
 
     fn create_yolo_classes(classes: Vec<(isize, &str)>) -> Vec<YoloClass> {
         classes
@@ -334,7 +337,10 @@ mod invalid_label_tests {
     }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ef8cf112772ee387eb40674c9a50d3eac3745eee
 
     #[test]
     fn test_yolo_file_new_allows_duplicates_when_tolerance_zero() {
@@ -353,8 +359,11 @@ mod invalid_label_tests {
 
         assert!(yolo_file.is_ok());
     }
+<<<<<<< HEAD
 =======
 >>>>>>> 88c6208b5242bb685205ed0cd2acd75901f72741
+=======
+>>>>>>> ef8cf112772ee387eb40674c9a50d3eac3745eee
 
     fn create_yolo_label_file_with_tolerance(
         filename: &str,
@@ -400,6 +409,7 @@ mod invalid_label_tests {
             Err(YoloFileParseError::DuplicateEntries(_))
         ));
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
     }
 
@@ -422,4 +432,7 @@ mod invalid_label_tests {
 >>>>>>> 88c6208b5242bb685205ed0cd2acd75901f72741
     }
 >>>>>>> 296ef2ce047247f51f7750eb57a5ee55d9f55b59
+=======
+    }
+>>>>>>> ef8cf112772ee387eb40674c9a50d3eac3745eee
 }

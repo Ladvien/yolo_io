@@ -212,11 +212,14 @@ mod pairing_tests {
         let valid_pairs = project.get_valid_pairs();
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
 >>>>>>> 296ef2ce047247f51f7750eb57a5ee55d9f55b59
 =======
 >>>>>>> 88c6208b5242bb685205ed0cd2acd75901f72741
+=======
+>>>>>>> ef8cf112772ee387eb40674c9a50d3eac3745eee
         let valid_pair = valid_pairs
             .into_iter()
             .find(|pair| pair.name == "testMiXeD");

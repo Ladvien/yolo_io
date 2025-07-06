@@ -134,6 +134,7 @@ mod duplicate_tests {
     #[rstest]
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 88c6208b5242bb685205ed0cd2acd75901f72741
     fn test_duplicate_label_files_with_different_data(
@@ -158,6 +159,8 @@ mod duplicate_tests {
         create_dir_and_write_file(&label_file_duplicate, "0 0.6 0.6 0.5 0.5");
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> ef8cf112772ee387eb40674c9a50d3eac3745eee
     fn test_duplicate_pairs_with_different_labels(
         mut create_yolo_project_config: YoloProjectConfig,
         image_data: ImageBuffer<Rgb<u8>, Vec<u8>>,
@@ -176,15 +179,19 @@ mod duplicate_tests {
 
         let label_file_duplicate = PathBuf::from(format!("{}/else/test1.txt", this_test_directory));
         create_dir_and_write_file(&label_file_duplicate, "1 0.5 0.5 0.5 0.5");
+<<<<<<< HEAD
 >>>>>>> 296ef2ce047247f51f7750eb57a5ee55d9f55b59
 =======
 >>>>>>> 88c6208b5242bb685205ed0cd2acd75901f72741
+=======
+>>>>>>> ef8cf112772ee387eb40674c9a50d3eac3745eee
 
         create_yolo_project_config.source_paths.images = this_test_directory.clone();
         create_yolo_project_config.source_paths.labels = this_test_directory.clone();
 
         let project = YoloProject::new(&create_yolo_project_config).unwrap();
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
@@ -201,14 +208,19 @@ mod duplicate_tests {
         assert!(duplicate_error.is_some());
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> ef8cf112772ee387eb40674c9a50d3eac3745eee
         let invalid_pairs = project.get_invalid_pairs();
         let mismatch = invalid_pairs
             .into_iter()
             .find(|pair| matches!(pair, yolo_io::PairingError::DuplicateLabelMismatch(_)));
 
         assert!(mismatch.is_some());
+<<<<<<< HEAD
 >>>>>>> 296ef2ce047247f51f7750eb57a5ee55d9f55b59
 =======
 >>>>>>> 88c6208b5242bb685205ed0cd2acd75901f72741
+=======
+>>>>>>> ef8cf112772ee387eb40674c9a50d3eac3745eee
     }
 }
