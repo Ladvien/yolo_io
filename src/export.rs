@@ -31,6 +31,10 @@ pub struct YoloProjectExporter {
 
 impl YoloProjectExporter {
     /// Write the given [`YoloProject`] to disk according to its configuration.
+    ///
+    /// The dataset is copied into the directory structure defined by
+    /// [`crate::Export::paths`]. Existing files are overwritten. Any errors
+    /// during file operations are reported via [`ExportError`].
     pub fn export(project: YoloProject) -> Result<(), ExportError> {
         let paths = &project.config.export.paths;
 
