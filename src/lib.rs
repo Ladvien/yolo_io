@@ -78,7 +78,7 @@ impl YoloProject {
 
         let metadata = FileMetadata {
             classes: classes.clone(),
-            duplicate_tolerance: 0.0,
+            duplicate_tolerance: config.export.duplicate_tolerance,
         };
 
         let pairs = pair(metadata, stems.clone(), label_paths, image_paths);
