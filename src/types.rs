@@ -1,6 +1,9 @@
 use hashbrown::HashMap;
 use serde::{Deserialize, Serialize};
-use std::{fs, path::PathBuf};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 use thiserror::Error;
 
 use crate::{ExportError, YoloFile, YoloFileParseError};
@@ -207,8 +210,9 @@ impl Default for YoloProjectConfig {
 
 impl YoloProjectConfig {
     /// Read a YAML configuration from disk.
-    pub fn new(path: &str) -> Result<Self, ExportError> {
-        let data = fs::read_to_string(path).map_err(|e| ExportError::ReadConfig(e.to_string()))?;
+    pub fn new(path: impl AsRef<Path>) -> Result<Self, ExportError> {
+        let data = fs::read_to_string(path.as_ref())
+            .map_err(|e| ExportError::ReadConfig(e.to_string()))?;
         let config =
             serde_yml::from_str(&data).map_err(|e| ExportError::ParseConfig(e.to_string()))?;
         Ok(config)
