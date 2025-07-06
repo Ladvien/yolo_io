@@ -30,16 +30,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = YoloProjectConfig::new(cli.config.to_str().unwrap())?;
     let project = YoloProject::new(&config)?;
 
-    if let Some(report_json) = YoloDataQualityReport::generate(project) {
-        let data = match cli.format {
-            Format::Json => report_json,
-            Format::Yaml => {
-                let value: serde_json::Value = serde_json::from_str(&report_json)?;
-                serde_yml::to_string(&value)?
-            }
-        };
-
-        std::fs::write(cli.output, data)?;
+    if cli.format == Format::Yaml {
+        if let Some(report_yaml) = YoloDataQualityReport::generate_yaml(project) {
+            std::fs::write(cli.output, report_yaml)?;
+        }
+    } else if let Some(report_json) = YoloDataQualityReport::generate(project) {
+        std::fs::write(cli.output, report_json)?;
     }
 
     Ok(())

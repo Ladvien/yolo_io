@@ -43,16 +43,11 @@ if let Some(report) = YoloDataQualityReport::generate(project.clone()) {
 }
 ```
 
-To create a YAML version, deserialize the JSON into `DataQualityItem` values and
-re-serialize with `serde_yml`:
+To create a YAML version, call `YoloDataQualityReport::generate_yaml`:
 
 ```rust
-use serde_yml;
-use yolo_io::*;
-
-if let Some(json) = YoloDataQualityReport::generate(project.clone()) {
-    let items: Vec<DataQualityItem> = serde_json::from_str(&json).unwrap();
-    let yaml = serde_yml::to_string(&items).unwrap();
+// from examples/basic.rs
+if let Some(yaml) = YoloDataQualityReport::generate_yaml(project.clone()) {
     fs::write("report.yaml", yaml).expect("Unable to write YAML report");
 }
 ```
