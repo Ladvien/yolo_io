@@ -333,6 +333,27 @@ mod invalid_label_tests {
         }
     }
 
+<<<<<<< HEAD
+=======
+    #[test]
+    fn test_yolo_file_new_allows_duplicates_when_tolerance_zero() {
+        let filename = "tolerance_zero.txt";
+        let classes_raw = vec![(0, "person")];
+        let classes = create_yolo_classes(classes_raw.clone());
+        let (mut metadata, path) = create_yolo_label_file(
+            filename,
+            classes.clone(),
+            "0 0.25 0.5 0.25 0.5\n0 0.25 0.5 0.25 0.5",
+        );
+
+        metadata.duplicate_tolerance = 0.0;
+
+        let yolo_file = YoloFile::new(&metadata, &path);
+
+        assert!(yolo_file.is_ok());
+    }
+
+>>>>>>> c9cf85d60740a6510ca489f36753e559018a9dbe
     fn create_yolo_label_file_with_tolerance(
         filename: &str,
         classes: Vec<YoloClass>,
@@ -392,6 +413,9 @@ mod invalid_label_tests {
             yolo_file,
             Err(YoloFileParseError::DuplicateEntries(_))
         ));
+<<<<<<< HEAD
 >>>>>>> 41a5c29104dc33c0f0f2a3a1576287e6710baaeb
+=======
+>>>>>>> c9cf85d60740a6510ca489f36753e559018a9dbe
     }
 }

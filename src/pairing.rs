@@ -16,6 +16,7 @@ pub fn pair(
 
     for stem in stems {
 <<<<<<< HEAD
+<<<<<<< HEAD
         let image_paths_for_stem = image_filenames
             .clone()
             .into_iter()
@@ -33,11 +34,19 @@ pub fn pair(
             .iter()
             .map(|image| match image.to_str() {
 >>>>>>> 41a5c29104dc33c0f0f2a3a1576287e6710baaeb
+=======
+        let image_paths_for_stem = image_filenames
+            .clone()
+            .into_iter()
+            .filter(|image| image.key == *stem)
+            .map(|image| match image.clone().path.to_str() {
+>>>>>>> c9cf85d60740a6510ca489f36753e559018a9dbe
                 Some(path) => Ok(path.to_string()),
                 None => Err(()),
             })
             .collect::<Vec<Result<String, ()>>>();
 
+<<<<<<< HEAD
 <<<<<<< HEAD
         let label_paths_for_stem = label_filenames
             .clone()
@@ -62,11 +71,19 @@ pub fn pair(
             .iter()
             .map(|label| match label.to_str() {
 >>>>>>> 41a5c29104dc33c0f0f2a3a1576287e6710baaeb
+=======
+        let label_paths_for_stem = label_filenames
+            .clone()
+            .into_iter()
+            .filter(|label| label.key == *stem)
+            .map(|label| match label.clone().path.to_str() {
+>>>>>>> c9cf85d60740a6510ca489f36753e559018a9dbe
                 Some(path) => Ok(path.to_string()),
                 None => Err(()),
             })
             .collect::<Vec<Result<String, ()>>>();
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
         label_paths_for_stem.sort_by(|a, b| {
@@ -75,6 +92,8 @@ pub fn pair(
             a_str.cmp(b_str)
         });
 >>>>>>> 41a5c29104dc33c0f0f2a3a1576287e6710baaeb
+=======
+>>>>>>> c9cf85d60740a6510ca489f36753e559018a9dbe
         let (invalid_pairs, valid_label_paths) =
             process_label_path(&file_metadata, label_paths_for_stem);
 
