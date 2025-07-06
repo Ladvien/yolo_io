@@ -73,7 +73,6 @@ impl YoloDataQualityReport {
                     String::from("YoloFileParseError::FailedToGetFileStem")
                 }
             },
-            PairingError::BothFilesMissing => String::from("BothFilesMissing"),
             PairingError::LabelFileMissing(_) => String::from("LabelFileMissing"),
             PairingError::LabelFileMissingUnableToUnwrapImagePath => {
                 String::from("LabelFileMissingUnableToUnwrapImagePath")
