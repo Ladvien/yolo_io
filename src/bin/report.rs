@@ -27,7 +27,7 @@ pub enum Format {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
 
-    let config = YoloProjectConfig::new(cli.config.to_str().unwrap())?;
+    let config = YoloProjectConfig::new(&cli.config)?;
     let project = YoloProject::new(&config)?;
 
     if cli.format == Format::Yaml {
