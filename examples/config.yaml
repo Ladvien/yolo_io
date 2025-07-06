@@ -1,0 +1,19 @@
+source_paths:
+  images: examples/images
+  labels: examples/labels
+"type": yolo
+project_name: demo_project
+export:
+  paths:
+    root: examples/export
+    train: train
+    validation: validation
+    test: test
+  class_map:
+    0: person
+    1: car
+  duplicate_tolerance: 0.0
+  split:
+    train: 0.8
+    validation: 0.2
+    test: 0.0

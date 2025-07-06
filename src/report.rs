@@ -6,15 +6,21 @@ use crate::{
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
+/// Entry describing a single data quality issue.
 pub struct DataQualityItem {
+    /// Source of the issue (error type).
     pub source: String,
+    /// Human readable error message.
     pub message: String,
+    /// Structured data backing the error.
     pub data: crate::PairingError,
 }
 
+/// Utility for turning pairing results into JSON reports.
 pub struct YoloDataQualityReport;
 
 impl YoloDataQualityReport {
+    /// Create a JSON report from a [`YoloProject`].
     pub fn generate(project: YoloProject) -> Option<String> {
         let mut errors = Vec::<DataQualityItem>::new();
 
@@ -30,7 +36,11 @@ impl YoloDataQualityReport {
             }
         }
 
-        serde_json::to_string(&errors).ok()
+        if errors.is_empty() {
+            None
+        } else {
+            serde_json::to_string(&errors).ok()
+        }
     }
 
     fn get_source_name(pairing_error: &PairingError) -> String {
@@ -69,6 +79,7 @@ impl YoloDataQualityReport {
                 String::from("ImageFileMissingUnableToUnwrapLabelPath")
             }
             PairingError::Duplicate(_) => String::from("DuplicateImageLabelPair"),
+            PairingError::DuplicateLabelMismatch(_) => String::from("DuplicateImageLabelMismatch"),
         }
     }
 }

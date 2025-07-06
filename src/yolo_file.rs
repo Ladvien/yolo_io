@@ -19,7 +19,10 @@ use thiserror::Error;
 
 use crate::{file_utils::get_file_stem, types::FileMetadata};
 
+/// Errors that can occur when parsing a YOLO label file.
+
 #[derive(Error, Clone, PartialEq, Debug, Serialize, Deserialize)]
+/// Detailed reasons a label file failed to parse.
 pub enum YoloFileParseError {
     #[error("Invalid format for file '{}'", .0.path)]
     InvalidFormat(YoloFileParseErrorDetails),
@@ -40,38 +43,59 @@ pub enum YoloFileParseError {
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
+/// Additional information associated with a [`YoloFileParseError`].
 pub struct YoloFileParseErrorDetails {
+    /// Path of the file that failed.
     pub path: String,
+    /// Class value being parsed when the error occurred.
     pub class: Option<String>,
+    /// Line number of the offending entry.
     pub row: Option<usize>,
+    /// Line number of a duplicate entry if relevant.
     pub other_row: Option<usize>,
+    /// Column name associated with the error.
     pub column: Option<String>,
+    /// The offending numeric value if available.
     pub value: Option<f32>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+/// Class definition used when validating label files.
 pub struct YoloClass {
+    /// Numeric class identifier.
     pub id: isize,
+    /// Human readable class name.
     pub name: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+/// A single label entry in a YOLO file.
 pub struct YoloEntry {
+    /// Class identifier.
     pub class: isize,
+    /// Normalized x coordinate of the bounding box centre.
     pub x_center: f32,
+    /// Normalized y coordinate of the bounding box centre.
     pub y_center: f32,
+    /// Normalized bounding box width.
     pub width: f32,
+    /// Normalized bounding box height.
     pub height: f32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+/// Representation of a `.txt` label file in YOLO format.
 pub struct YoloFile {
+    /// File stem without extension.
     pub stem: String,
+    /// Full path to the label file on disk.
     pub path: String,
+    /// Parsed label entries.
     pub entries: Vec<YoloEntry>,
 }
 
 impl YoloFile {
+    /// Read and validate a label file.
     pub fn new(metadata: &FileMetadata, path: &String) -> Result<YoloFile, YoloFileParseError> {
         let potential_file = read_to_string(path);
 
@@ -256,7 +280,7 @@ impl YoloFile {
                 label_coordinates.push((x1, x2, y1, y2))
             }
 
-            let tolerance = 0.01;
+            let tolerance = metadata.duplicate_tolerance;
             if let Some(indices) = Self::get_duplicate_index(&label_coordinates, tolerance) {
                 return Err(YoloFileParseError::DuplicateEntries(
                     YoloFileParseErrorDetails {
@@ -295,23 +319,30 @@ impl YoloFile {
         duplicated_labels: &[(f32, f32, f32, f32)],
         tolerance: f32,
     ) -> Option<(usize, usize)> {
-        for (index, coordinates) in duplicated_labels.iter().enumerate() {
-            let (x1, x2, y1, y2) = coordinates;
+        use hashbrown::HashMap;
 
-            for (duplicate_index, other_coordinates) in duplicated_labels.iter().enumerate() {
-                if duplicate_index != index {
-                    let (ox1, ox2, oy1, oy2) = other_coordinates;
-
-                    if (x1 - ox1).abs() < tolerance
-                        && (x2 - ox2).abs() < tolerance
-                        && (y1 - oy1).abs() < tolerance
-                        && (y2 - oy2).abs() < tolerance
-                    {
-                        return Some((index, duplicate_index));
-                    }
-                }
-            }
+        if tolerance <= 0.0 {
+            return None;
         }
+
+        let scale = 1.0 / tolerance;
+        let mut seen: HashMap<(i32, i32, i32, i32), usize> = HashMap::new();
+
+        for (index, (x1, x2, y1, y2)) in duplicated_labels.iter().cloned().enumerate() {
+            let key = (
+                (x1 * scale).round() as i32,
+                (x2 * scale).round() as i32,
+                (y1 * scale).round() as i32,
+                (y2 * scale).round() as i32,
+            );
+
+            if let Some(prev_index) = seen.get(&key) {
+                return Some((*prev_index, index));
+            }
+
+            seen.insert(key, index);
+        }
+
         None
     }
 }

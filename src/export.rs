@@ -1,4 +1,5 @@
 use hashbrown::HashMap;
+use log::debug;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use std::fs;
@@ -10,21 +11,26 @@ use crate::{
     YoloProject,
 };
 
+/// Errors that may occur while exporting a project.
+
 #[derive(Error, Debug)]
 pub enum ExportError {
     #[error("Unable to create '{0}' directory")]
     UnableToCreateDirectory(String),
     #[error("Failed to unwrap label path.")]
     FailedToUnwrapLabelPath,
-    #[error("Failed to copy file '{0}' to '{0}'.")]
+    #[error("Failed to copy file '{0}' to '{1}'.")]
     FailedToCopyFile(String, String),
 }
 
+/// Handles writing a [`YoloProject`] to disk.
 pub struct YoloProjectExporter {
+    /// Project to be exported.
     pub project: YoloProject,
 }
 
 impl YoloProjectExporter {
+    /// Write the given [`YoloProject`] to disk according to its configuration.
     pub fn export(project: YoloProject) -> Result<(), ExportError> {
         let paths = &project.config.export.paths;
 
@@ -89,7 +95,7 @@ impl YoloProjectExporter {
         pairs: Vec<ImageLabelPair>,
     ) -> Result<(), ExportError> {
         for pair in pairs {
-            println!("pair: {:?}", pair);
+            debug!("pair: {:?}", pair);
 
             let image_path = pair
                 .image_path

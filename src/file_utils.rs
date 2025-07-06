@@ -5,6 +5,8 @@ use thiserror::Error;
 
 use crate::types::PathWithKey;
 
+/// Errors returned when reading from or writing to the file system.
+
 #[derive(Debug, Error, PartialEq, Clone, Serialize, Deserialize)]
 pub enum FileError {
     #[error("Unable to convert {0} to string.")]
@@ -17,6 +19,7 @@ pub enum FileError {
     WriteFile,
 }
 
+/// Return the file stem for a path.
 pub fn get_file_stem(file_path: &Path) -> Result<&str, FileError> {
     file_path
         .file_stem()
@@ -46,6 +49,7 @@ fn get_filepath_as_string(file_path: &Path) -> Result<String, FileError> {
     Ok(file_path.to_string())
 }
 
+/// Recursively gather all files under `path` with the given extensions.
 pub fn get_filepaths_for_extension(
     path: &str,
     extensions: Vec<&str>,
@@ -53,6 +57,7 @@ pub fn get_filepaths_for_extension(
     let file_paths = std::fs::read_dir(path).map_err(|err| FileError::ReadFile(err.to_string()))?;
 
     let mut paths = Vec::<PathWithKey>::new();
+    let extensions_lower: Vec<String> = extensions.iter().map(|ext| ext.to_lowercase()).collect();
 
     for file_path in file_paths {
         let file_path = file_path
@@ -69,7 +74,7 @@ pub fn get_filepaths_for_extension(
         }
 
         let extension = match get_file_extension(&file_path) {
-            Ok(extension) => extension,
+            Ok(extension) => extension.to_lowercase(),
             Err(_) => continue,
         };
 
@@ -78,13 +83,20 @@ pub fn get_filepaths_for_extension(
             Err(_) => continue,
         };
 
-        if extensions.contains(&extension) {
+        if extensions_lower.contains(&extension) {
             paths.push(PathWithKey {
                 path: file_path.clone(),
                 key: String::from(stem),
             });
         }
     }
+
+<<<<<<< HEAD
+    // Ensure deterministic order of returned paths
+=======
+    // Ensure deterministic ordering
+>>>>>>> a15e54f336d7a1622e4e078ede83bbfac7bb626c
+    paths.sort_by(|a, b| a.path.cmp(&b.path));
 
     Ok(paths)
 }
