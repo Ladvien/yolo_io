@@ -30,6 +30,10 @@ pub enum ExportError {
 }
 
 /// Handles writing a [`YoloProject`] to disk.
+///
+/// The exporter creates the directory layout, generates the YAML
+/// configuration and copies all files into the appropriate train,
+/// validation and test folders.
 pub struct YoloProjectExporter {
     /// Project to be exported.
     pub project: YoloProject,
@@ -37,6 +41,11 @@ pub struct YoloProjectExporter {
 
 impl YoloProjectExporter {
     /// Write the given [`YoloProject`] to disk according to its configuration.
+    ///
+    /// The project is split into training, validation and test sets
+    /// based on the configured ratio. A `data.yaml` file is produced
+    /// alongside the copied images and labels so the dataset can be
+    /// consumed directly by YOLO tooling.
     pub fn export(project: YoloProject) -> Result<(), ExportError> {
         let paths = &project.config.export.paths;
 
