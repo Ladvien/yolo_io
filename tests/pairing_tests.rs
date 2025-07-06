@@ -158,17 +158,35 @@ mod pairing_tests {
     }
 
     #[rstest]
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> c3b6efd01ea4f59079e5734f0465ca98e4559444
-=======
->>>>>>> 0b309e9da26ac872d7ffa5dc0125e56dd2d7e65d
-=======
->>>>>>> 4f3b3d75592e0b37becbaae01f804963cc209459
+    fn test_project_validation_produces_one_invalid_pair_for_no_image_no_label(
+        mut create_yolo_project_config: YoloProjectConfig,
+    ) {
+        // THIS ERROR IS IMPOSSIBLE TO TRIGGER
+        let filename = "five";
+        let this_test_directory = format!("{}/{}/", TEST_SANDBOX_DIR, filename);
+
+        fs::create_dir_all(&this_test_directory).expect("Unable to create directory");
+
+        create_yolo_project_config.source_paths.images = this_test_directory.clone();
+        create_yolo_project_config.source_paths.labels = this_test_directory.clone();
+
+        let project =
+            YoloProject::new(&create_yolo_project_config).expect("Unable to create project");
+
+        let valid_pairs = project.get_valid_pairs();
+        let valid_pair = valid_pairs.into_iter().find(|pair| pair.name == "test5");
+
+        let invalid_pairs = project.get_invalid_pairs();
+
+        let invalid_pair = invalid_pairs
+            .into_iter()
+            .find(|pair| matches!(pair, yolo_io::PairingError::BothFilesMissing));
+
+        assert!(valid_pair.is_none());
+        assert!(invalid_pair.is_none());
+    }
+
+    #[rstest]
     fn test_pairing_with_mixed_case_extensions(
         image_data: ImageBuffer<Rgb<u8>, Vec<u8>>,
         mut create_yolo_project_config: YoloProjectConfig,
@@ -180,40 +198,6 @@ mod pairing_tests {
         create_image_file(&image_file, &image_data);
 
         let label_file = PathBuf::from(format!("{}/testMiXeD.TxT", this_test_directory));
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-
->>>>>>> 41a5c29104dc33c0f0f2a3a1576287e6710baaeb
-=======
->>>>>>> c9cf85d60740a6510ca489f36753e559018a9dbe
-=======
-=======
->>>>>>> d5f8f38db09703cc0d2b505bc98688e51c43f07b
-    fn test_project_validation_handles_mixed_case_extensions(
-        image_data: ImageBuffer<Rgb<u8>, Vec<u8>>,
-        mut create_yolo_project_config: YoloProjectConfig,
-    ) {
-        let filename = "mixed_case";
-        let this_test_directory = format!("{}/{}/", TEST_SANDBOX_DIR, filename);
-
-        let image_file = PathBuf::from(format!("{}/test1.JpG", this_test_directory));
-        create_image_file(&image_file, &image_data);
-
-        let label_file = PathBuf::from(format!("{}/test1.TxT", this_test_directory));
-<<<<<<< HEAD
->>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b
-=======
->>>>>>> c3b6efd01ea4f59079e5734f0465ca98e4559444
-=======
->>>>>>> 0b309e9da26ac872d7ffa5dc0125e56dd2d7e65d
-=======
->>>>>>> d5f8f38db09703cc0d2b505bc98688e51c43f07b
-=======
->>>>>>> 4f3b3d75592e0b37becbaae01f804963cc209459
         create_dir_and_write_file(&label_file, "0 0.5 0.5 0.5 0.5");
 
         create_yolo_project_config.source_paths.images = this_test_directory.clone();
@@ -223,38 +207,10 @@ mod pairing_tests {
             YoloProject::new(&create_yolo_project_config).expect("Unable to create project");
 
         let valid_pairs = project.get_valid_pairs();
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-        let valid_pair = valid_pairs
-            .into_iter()
-            .find(|pair| pair.name == "testMiXeD");
-=======
-
-        let valid_pair = valid_pairs.into_iter().find(|pair| pair.name == "test1");
->>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b
-=======
-=======
->>>>>>> 4f3b3d75592e0b37becbaae01f804963cc209459
 
         let valid_pair = valid_pairs
             .into_iter()
             .find(|pair| pair.name == "testMiXeD");
-<<<<<<< HEAD
->>>>>>> c3b6efd01ea4f59079e5734f0465ca98e4559444
-=======
-        let valid_pair = valid_pairs
-            .into_iter()
-            .find(|pair| pair.name == "testMiXeD");
->>>>>>> 0b309e9da26ac872d7ffa5dc0125e56dd2d7e65d
-=======
-
-        let valid_pair = valid_pairs.into_iter().find(|pair| pair.name == "test1");
->>>>>>> d5f8f38db09703cc0d2b505bc98688e51c43f07b
-=======
->>>>>>> 4f3b3d75592e0b37becbaae01f804963cc209459
 
         assert!(valid_pair.is_some());
     }

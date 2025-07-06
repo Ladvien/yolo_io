@@ -85,9 +85,6 @@ pub struct YoloEntry {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 /// Representation of a `.txt` label file in YOLO format.
-///
-/// Each entry corresponds to a bounding box annotation. Instances of
-/// this struct are typically created via [`YoloFile::new`].
 pub struct YoloFile {
     /// File stem without extension.
     pub stem: String,
@@ -99,11 +96,6 @@ pub struct YoloFile {
 
 impl YoloFile {
     /// Read and validate a label file.
-    ///
-    /// The contents are parsed and checked against the supplied
-    /// [`FileMetadata`]. If validation succeeds the parsed file is
-    /// returned, otherwise a [`YoloFileParseError`] describing the
-    /// issue is produced.
     pub fn new(metadata: &FileMetadata, path: &String) -> Result<YoloFile, YoloFileParseError> {
         let potential_file = read_to_string(path);
 
