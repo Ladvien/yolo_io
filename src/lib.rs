@@ -14,6 +14,7 @@ pub use export::*;
 use file_utils::get_filepaths_for_extension;
 use file_utils::FileError;
 use pairing::pair;
+pub use report::generate_yaml;
 pub use report::DataQualityItem;
 pub use report::YoloDataQualityReport;
 pub use types::{

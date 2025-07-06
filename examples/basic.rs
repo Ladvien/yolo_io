@@ -8,9 +8,13 @@ fn main() {
     // Build a project using the configuration
     let project = YoloProject::new(&config).expect("Failed to create project");
 
-    // Generate a data quality report
+    // Generate data quality reports
     if let Some(report) = YoloDataQualityReport::generate(project.clone()) {
-        fs::write("report.json", report).expect("Unable to write report");
+        fs::write("report.json", &report).expect("Unable to write report");
+    }
+
+    if let Some(report) = YoloDataQualityReport::generate_yaml(project.clone()) {
+        fs::write("report.yml", &report).expect("Unable to write report");
     }
 
     // Export the validated project to the configured paths
