@@ -91,8 +91,8 @@ pub fn get_filepaths_for_extension(
         }
     }
 
-<<<<<<< HEAD
     // Ensure deterministic order of returned paths
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 
@@ -100,6 +100,8 @@ pub fn get_filepaths_for_extension(
 =======
     // Ensure deterministic ordering
 >>>>>>> c9cf85d60740a6510ca489f36753e559018a9dbe
+=======
+>>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b
     paths.sort_by(|a, b| a.path.cmp(&b.path));
 
     Ok(paths)

@@ -334,7 +334,10 @@ mod invalid_label_tests {
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b
     #[test]
     fn test_yolo_file_new_allows_duplicates_when_tolerance_zero() {
         let filename = "tolerance_zero.txt";
@@ -351,6 +354,7 @@ mod invalid_label_tests {
         let yolo_file = YoloFile::new(&metadata, &path);
 
         assert!(yolo_file.is_ok());
+<<<<<<< HEAD
     }
 
 >>>>>>> c9cf85d60740a6510ca489f36753e559018a9dbe
@@ -417,5 +421,7 @@ mod invalid_label_tests {
 >>>>>>> 41a5c29104dc33c0f0f2a3a1576287e6710baaeb
 =======
 >>>>>>> c9cf85d60740a6510ca489f36753e559018a9dbe
+=======
+>>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b
     }
 }

@@ -2,8 +2,12 @@ use hashbrown::HashMap;
 use log::debug;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
+<<<<<<< HEAD
 use std::fs;
 use std::path::{Path, PathBuf};
+=======
+use std::{fs, path::PathBuf};
+>>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b
 
 use thiserror::Error;
 
@@ -113,10 +117,21 @@ impl YoloProjectExporter {
                 .and_then(|e| e.to_str())
                 .unwrap_or("");
 
+<<<<<<< HEAD
             let label_ext = label_path
                 .extension()
                 .and_then(|e| e.to_str())
                 .unwrap_or("");
+=======
+            let new_image_path = PathBuf::from(export_images_path)
+                .join(&image_stem)
+                .to_string_lossy()
+                .into_owned();
+            let new_label_path = PathBuf::from(export_labels_path)
+                .join(&label_stem)
+                .to_string_lossy()
+                .into_owned();
+>>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b
 
             let new_image_path = PathBuf::from(export_images_path)
                 .join(PathBuf::from(&pair.name).with_extension(image_ext));
@@ -171,7 +186,7 @@ names:
 "
         );
 
-        let yolo_yaml_path = format!("{root_path}/{project_name}.yaml");
+        let yolo_yaml_path = PathBuf::from(&root_path).join(format!("{project_name}.yaml"));
         fs::write(yolo_yaml_path, yolo_yaml).unwrap();
     }
 }

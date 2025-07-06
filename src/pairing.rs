@@ -17,16 +17,20 @@ pub fn pair(
     for stem in stems {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         let image_paths_for_stem = image_filenames
             .clone()
             .into_iter()
             .filter(|image| image.key == *stem)
             .map(|image| match image.clone().path.to_str() {
 =======
+=======
+>>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b
         let mut image_paths_for_stem = image_filenames
             .clone()
             .into_iter()
             .filter(|image| image.key == *stem)
+<<<<<<< HEAD
             .map(|image| image.path.clone())
             .collect::<Vec<PathBuf>>();
         image_paths_for_stem.sort();
@@ -41,11 +45,15 @@ pub fn pair(
             .filter(|image| image.key == *stem)
             .map(|image| match image.clone().path.to_str() {
 >>>>>>> c9cf85d60740a6510ca489f36753e559018a9dbe
+=======
+            .map(|image| match image.clone().path.to_str() {
+>>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b
                 Some(path) => Ok(path.to_string()),
                 None => Err(()),
             })
             .collect::<Vec<Result<String, ()>>>();
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
         let label_paths_for_stem = label_filenames
@@ -54,6 +62,8 @@ pub fn pair(
             .filter(|label| label.key == *stem)
             .map(|label| match label.clone().path.to_str() {
 =======
+=======
+>>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b
         image_paths_for_stem.sort_by(|a, b| {
             let a_str = a.as_ref().map(|s| s.as_str()).unwrap_or("");
             let b_str = b.as_ref().map(|s| s.as_str()).unwrap_or("");
@@ -64,6 +74,7 @@ pub fn pair(
             .clone()
             .into_iter()
             .filter(|label| label.key == *stem)
+<<<<<<< HEAD
             .map(|label| label.path.clone())
             .collect::<Vec<PathBuf>>();
         label_paths_for_stem.sort();
@@ -78,6 +89,9 @@ pub fn pair(
             .filter(|label| label.key == *stem)
             .map(|label| match label.clone().path.to_str() {
 >>>>>>> c9cf85d60740a6510ca489f36753e559018a9dbe
+=======
+            .map(|label| match label.clone().path.to_str() {
+>>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b
                 Some(path) => Ok(path.to_string()),
                 None => Err(()),
             })
@@ -85,21 +99,30 @@ pub fn pair(
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b
         label_paths_for_stem.sort_by(|a, b| {
             let a_str = a.as_ref().map(|s| s.as_str()).unwrap_or("");
             let b_str = b.as_ref().map(|s| s.as_str()).unwrap_or("");
             a_str.cmp(b_str)
         });
+<<<<<<< HEAD
 >>>>>>> 41a5c29104dc33c0f0f2a3a1576287e6710baaeb
 =======
 >>>>>>> c9cf85d60740a6510ca489f36753e559018a9dbe
         let (invalid_pairs, valid_label_paths) =
             process_label_path(&file_metadata, label_paths_for_stem);
+=======
 
-        let label_paths_for_stem = valid_label_paths
+        let invalid_pairs = process_label_path(&file_metadata, label_paths_for_stem.clone());
+>>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b
+
+        // Remove invalid paths from label_paths_for_stem
+        let label_paths_for_stem = label_paths_for_stem
             .into_iter()
-            .map(Ok)
+            .filter(|path| path.is_ok())
             .collect::<Vec<Result<String, ()>>>();
 
         let unconfirmed_pairs = image_paths_for_stem
@@ -142,30 +165,33 @@ pub fn pair(
 pub fn process_label_path(
     file_metadata: &FileMetadata,
     label_paths_for_stem: Vec<Result<String, ()>>,
-) -> (Vec<PairingResult>, Vec<String>) {
+) -> Vec<PairingResult> {
     let mut invalid_pairs = Vec::<PairingResult>::new();
-    let mut valid_paths = Vec::<String>::new();
 
     if label_paths_for_stem.is_empty() {
         invalid_pairs.push(PairingResult::Invalid(
             PairingError::LabelFileMissingUnableToUnwrapImagePath,
         ));
     } else {
-        for label_path in label_paths_for_stem {
-            match label_path {
-                Ok(path) => match YoloFile::new(file_metadata, &path) {
-                    Ok(_) => valid_paths.push(path),
-                    Err(error) => invalid_pairs
-                        .push(PairingResult::Invalid(PairingError::LabelFileError(error))),
-                },
-                Err(_) => invalid_pairs.push(PairingResult::Invalid(
+        for label_path in &label_paths_for_stem {
+            if let Ok(path) = label_path {
+                let yolo_file = YoloFile::new(file_metadata, path);
+                match yolo_file {
+                    Ok(_) => {}
+                    Err(error) => {
+                        invalid_pairs
+                            .push(PairingResult::Invalid(PairingError::LabelFileError(error)));
+                    }
+                }
+            } else {
+                invalid_pairs.push(PairingResult::Invalid(
                     PairingError::LabelFileMissingUnableToUnwrapImagePath,
-                )),
+                ));
             }
         }
     }
 
-    (invalid_pairs, valid_paths)
+    invalid_pairs
 }
 
 pub fn evaluate_pair(
