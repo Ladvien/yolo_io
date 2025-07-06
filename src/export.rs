@@ -21,10 +21,15 @@ pub enum ExportError {
     FailedToUnwrapLabelPath,
     #[error("Failed to copy file '{0}' to '{1}'.")]
     FailedToCopyFile(String, String),
+<<<<<<< HEAD
     #[error("Failed to read config: {0}")]
     ReadConfig(String),
     #[error("Failed to parse config: {0}")]
     ParseConfig(String),
+=======
+    #[error("Failed to read config file: {0}")]
+    ReadConfig(String),
+>>>>>>> 88c6208b5242bb685205ed0cd2acd75901f72741
 }
 
 /// Handles writing a [`YoloProject`] to disk.
@@ -116,10 +121,27 @@ impl YoloProjectExporter {
                 .and_then(|e| e.to_str())
                 .unwrap_or("");
 
+<<<<<<< HEAD
             let label_ext = label_path
                 .extension()
                 .and_then(|e| e.to_str())
                 .unwrap_or("");
+=======
+            let image_extension = std::path::Path::new(image_path)
+                .extension()
+                .and_then(|e| e.to_str())
+                .unwrap_or("");
+
+            let label_extension = std::path::Path::new(&label_path)
+                .extension()
+                .and_then(|e| e.to_str())
+                .unwrap_or("");
+
+            let new_image_path =
+                format!("{}/{}.{}", export_images_path, image_stem, image_extension);
+            let new_label_path =
+                format!("{}/{}.{}", export_labels_path, label_stem, label_extension);
+>>>>>>> 88c6208b5242bb685205ed0cd2acd75901f72741
 
             let new_image_path = PathBuf::from(export_images_path)
                 .join(PathBuf::from(&pair.name).with_extension(image_ext));

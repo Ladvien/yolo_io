@@ -3,12 +3,9 @@ mod common;
 #[cfg(test)]
 mod invalid_label_tests {
     use rstest::rstest;
-    use std::path::PathBuf;
 
     use crate::common::TEST_SANDBOX_DIR;
-    use yolo_io::{
-        FileMetadata, YoloClass, YoloFile, YoloFileParseError, YoloFileParseErrorDetails,
-    };
+    use yolo_io::{FileMetadata, YoloClass, YoloFile, YoloFileParseError};
 
     fn create_yolo_classes(classes: Vec<(isize, &str)>) -> Vec<YoloClass> {
         classes
@@ -336,6 +333,7 @@ mod invalid_label_tests {
         }
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
     #[test]
@@ -355,6 +353,8 @@ mod invalid_label_tests {
 
         assert!(yolo_file.is_ok());
     }
+=======
+>>>>>>> 88c6208b5242bb685205ed0cd2acd75901f72741
 
     fn create_yolo_label_file_with_tolerance(
         filename: &str,
@@ -384,8 +384,13 @@ mod invalid_label_tests {
         let (metadata, path) = create_yolo_label_file_with_tolerance(
             filename,
             classes,
+<<<<<<< HEAD
             "0 0.5 0.5 0.2 0.2\n0 0.515 0.5 0.2 0.2",
             0.05,
+=======
+            "0 0.5 0.5 0.2 0.2\n0 0.505 0.5 0.2 0.2",
+            0.02,
+>>>>>>> 88c6208b5242bb685205ed0cd2acd75901f72741
         );
 
         let yolo_file = YoloFile::new(&metadata, &path);
@@ -394,6 +399,27 @@ mod invalid_label_tests {
             yolo_file,
             Err(YoloFileParseError::DuplicateEntries(_))
         ));
+<<<<<<< HEAD
+=======
+    }
+
+    #[test]
+    fn test_yolo_file_new_allows_duplicates_when_tolerance_zero() {
+        let filename = "tolerance_zero.txt";
+        let classes_raw = vec![(0, "person")];
+        let classes = create_yolo_classes(classes_raw.clone());
+        let (mut metadata, path) = create_yolo_label_file(
+            filename,
+            classes.clone(),
+            "0 0.25 0.5 0.25 0.5\n0 0.25 0.5 0.25 0.5",
+        );
+
+        metadata.duplicate_tolerance = 0.0;
+
+        let yolo_file = YoloFile::new(&metadata, &path);
+
+        assert!(yolo_file.is_ok());
+>>>>>>> 88c6208b5242bb685205ed0cd2acd75901f72741
     }
 >>>>>>> 296ef2ce047247f51f7750eb57a5ee55d9f55b59
 }

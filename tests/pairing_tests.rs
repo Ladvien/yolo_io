@@ -193,7 +193,10 @@ mod pairing_tests {
     ) {
         let filename = "mixed_ext";
         let this_test_directory = format!("{}/{}/", TEST_SANDBOX_DIR, filename);
+<<<<<<< HEAD
 
+=======
+>>>>>>> 88c6208b5242bb685205ed0cd2acd75901f72741
         let image_file = PathBuf::from(format!("{}/testMiXeD.JpG", this_test_directory));
         create_image_file(&image_file, &image_data);
 
@@ -208,9 +211,12 @@ mod pairing_tests {
 
         let valid_pairs = project.get_valid_pairs();
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
 >>>>>>> 296ef2ce047247f51f7750eb57a5ee55d9f55b59
+=======
+>>>>>>> 88c6208b5242bb685205ed0cd2acd75901f72741
         let valid_pair = valid_pairs
             .into_iter()
             .find(|pair| pair.name == "testMiXeD");
