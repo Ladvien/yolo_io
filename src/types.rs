@@ -176,7 +176,7 @@ pub struct FileMetadata {
 
 /// Configuration for a YOLO project.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-/// Top level configuration for a [`YoloProject`].
+/// Top level configuration for a [`crate::YoloProject`].
 pub struct YoloProjectConfig {
     /// Location of images and labels to scan.
     pub source_paths: SourcePaths,
