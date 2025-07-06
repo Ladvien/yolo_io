@@ -83,6 +83,7 @@ impl YoloDataQualityReport {
             }
             PairingError::Duplicate(_) => String::from("DuplicateImageLabelPair"),
             PairingError::DuplicateLabelMismatch(_) => String::from("DuplicateImageLabelMismatch"),
+            PairingError::BothFilesMissing => String::from("BothFilesMissing"),
         }
     }
 }

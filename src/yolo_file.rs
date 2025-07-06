@@ -124,7 +124,7 @@ impl YoloFile {
             }
 
             let tolerance = metadata.duplicate_tolerance;
-            let mut coords: Vec<(f32, f32, f32, f32)> = Vec::new();
+            let mut seen_bboxes: Vec<(f32, f32, f32, f32)> = Vec::new();
 
             for (index, line) in file.lines().enumerate() {
                 let parts: Vec<&str> = line.split(" ").collect();
@@ -270,17 +270,19 @@ impl YoloFile {
                     ));
                 }
 
-                if tolerance > 0.0 {
-                    let x1 = x_center - width / 2.0;
-                    let x2 = x_center + width / 2.0;
-                    let y1 = y_center - height / 2.0;
-                    let y2 = y_center + height / 2.0;
+                let bbox = (
+                    x_center - width / 2.0,
+                    x_center + width / 2.0,
+                    y_center - height / 2.0,
+                    y_center + height / 2.0,
+                );
 
-                    for (prev_index, (px1, px2, py1, py2)) in coords.iter().enumerate() {
-                        if (x1 - *px1).abs() <= tolerance
-                            && (x2 - *px2).abs() <= tolerance
-                            && (y1 - *py1).abs() <= tolerance
-                            && (y2 - *py2).abs() <= tolerance
+                if tolerance > 0.0 {
+                    for (prev_index, (px1, px2, py1, py2)) in seen_bboxes.iter().enumerate() {
+                        if (bbox.0 - *px1).abs() <= tolerance
+                            && (bbox.1 - *px2).abs() <= tolerance
+                            && (bbox.2 - *py1).abs() <= tolerance
+                            && (bbox.3 - *py2).abs() <= tolerance
                         {
                             return Err(YoloFileParseError::DuplicateEntries(
                                 YoloFileParseErrorDetails {
@@ -294,9 +296,9 @@ impl YoloFile {
                             ));
                         }
                     }
-
-                    coords.push((x1, x2, y1, y2));
                 }
+
+                seen_bboxes.push(bbox);
 
                 entries.push(YoloEntry {
                     class,
