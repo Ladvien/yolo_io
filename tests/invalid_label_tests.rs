@@ -336,9 +336,12 @@ mod invalid_label_tests {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 =======
 >>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b
+=======
+>>>>>>> 0b309e9da26ac872d7ffa5dc0125e56dd2d7e65d
     #[test]
     fn test_yolo_file_new_allows_duplicates_when_tolerance_zero() {
         let filename = "tolerance_zero.txt";
@@ -356,9 +359,14 @@ mod invalid_label_tests {
 
         assert!(yolo_file.is_ok());
 <<<<<<< HEAD
+<<<<<<< HEAD
     }
 
 >>>>>>> c9cf85d60740a6510ca489f36753e559018a9dbe
+=======
+    }
+
+>>>>>>> 0b309e9da26ac872d7ffa5dc0125e56dd2d7e65d
     fn create_yolo_label_file_with_tolerance(
         filename: &str,
         classes: Vec<YoloClass>,
@@ -388,7 +396,7 @@ mod invalid_label_tests {
             filename,
             classes,
             "0 0.5 0.5 0.2 0.2\n0 0.515 0.5 0.2 0.2",
-            0.02,
+            0.05,
         );
 
         let yolo_file = YoloFile::new(&metadata, &path);
@@ -419,11 +427,14 @@ mod invalid_label_tests {
             Err(YoloFileParseError::DuplicateEntries(_))
         ));
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> 41a5c29104dc33c0f0f2a3a1576287e6710baaeb
 =======
 >>>>>>> c9cf85d60740a6510ca489f36753e559018a9dbe
 =======
 >>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b
+=======
+>>>>>>> 0b309e9da26ac872d7ffa5dc0125e56dd2d7e65d
     }
 =======
 >>>>>>> c3b6efd01ea4f59079e5734f0465ca98e4559444

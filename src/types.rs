@@ -212,6 +212,7 @@ pub struct YoloProjectConfig {
     pub source_paths: SourcePaths,
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     /// Identifies the project format. Currently only "yolo" is supported but
     /// this field is reserved for future project types.
 <<<<<<< HEAD
@@ -227,6 +228,10 @@ pub struct YoloProjectConfig {
     /// Identifies the project format. Currently only "yolo" is supported,
     /// but this field is reserved for future project types.
 >>>>>>> f81ccc4939ee178da75b073df90b7d5c05d68f4f
+=======
+    /// Identifies the project format. Currently only "yolo" is supported but
+    /// this field is reserved for future project types.
+>>>>>>> 0b309e9da26ac872d7ffa5dc0125e56dd2d7e65d
     pub r#type: String,
     /// Name of the project.
     pub project_name: String,
