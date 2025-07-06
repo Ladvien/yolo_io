@@ -2,7 +2,7 @@ use hashbrown::HashMap;
 use log::debug;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
-use std::fs;
+use std::{fs, path::PathBuf};
 
 use thiserror::Error;
 
@@ -115,8 +115,14 @@ impl YoloProjectExporter {
             let image_stem = pair.name.clone();
             let label_stem = pair.name;
 
-            let new_image_path = format!("{}/{}", export_images_path, image_stem);
-            let new_label_path = format!("{}/{}", export_labels_path, label_stem);
+            let new_image_path = PathBuf::from(export_images_path)
+                .join(&image_stem)
+                .to_string_lossy()
+                .into_owned();
+            let new_label_path = PathBuf::from(export_labels_path)
+                .join(&label_stem)
+                .to_string_lossy()
+                .into_owned();
 
             fs::copy(image_path, new_image_path.clone()).map_err(|_| {
                 ExportError::FailedToCopyFile(image_path.to_string(), new_image_path)
@@ -158,7 +164,7 @@ names:
 "
         );
 
-        let yolo_yaml_path = format!("{root_path}/{project_name}.yaml");
+        let yolo_yaml_path = PathBuf::from(&root_path).join(format!("{project_name}.yaml"));
         fs::write(yolo_yaml_path, yolo_yaml).unwrap();
     }
 }

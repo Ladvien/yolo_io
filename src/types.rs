@@ -60,32 +60,56 @@ impl Paths {
 
     /// Path to the training images directory.
     pub fn get_train_images_path(&self) -> String {
-        format!("{}/train/images", self.root).replace("//", "/")
+        PathBuf::from(&self.root)
+            .join("train")
+            .join("images")
+            .to_string_lossy()
+            .into_owned()
     }
 
     /// Path to the training labels directory.
     pub fn get_train_label_images_path(&self) -> String {
-        format!("{}/train/labels", self.root).replace("//", "/")
+        PathBuf::from(&self.root)
+            .join("train")
+            .join("labels")
+            .to_string_lossy()
+            .into_owned()
     }
 
     /// Path to the validation images directory.
     pub fn get_validation_images_path(&self) -> String {
-        format!("{}/validation/images", self.root).replace("//", "/")
+        PathBuf::from(&self.root)
+            .join("validation")
+            .join("images")
+            .to_string_lossy()
+            .into_owned()
     }
 
     /// Path to the validation labels directory.
     pub fn get_validation_label_images_path(&self) -> String {
-        format!("{}/validation/labels", self.root).replace("//", "/")
+        PathBuf::from(&self.root)
+            .join("validation")
+            .join("labels")
+            .to_string_lossy()
+            .into_owned()
     }
 
     /// Path to the test images directory.
     pub fn get_test_images_path(&self) -> String {
-        format!("{}/test/images", self.root).replace("//", "/")
+        PathBuf::from(&self.root)
+            .join("test")
+            .join("images")
+            .to_string_lossy()
+            .into_owned()
     }
 
     /// Path to the test labels directory.
     pub fn get_test_label_images_path(&self) -> String {
-        format!("{}/test/labels", self.root).replace("//", "/")
+        PathBuf::from(&self.root)
+            .join("test")
+            .join("labels")
+            .to_string_lossy()
+            .into_owned()
     }
 
     /// Directory stem used for training data.
@@ -177,12 +201,8 @@ pub struct FileMetadata {
 pub struct YoloProjectConfig {
     /// Location of images and labels to scan.
     pub source_paths: SourcePaths,
-<<<<<<< HEAD
     /// Identifies the project format. Currently only "yolo" is supported but
     /// this field is reserved for future project types.
-=======
-    /// Type of project, currently always "yolo".
->>>>>>> a70e8c027a2b221f4edca79f180332770abbb8a1
     pub r#type: String,
     /// Name of the project.
     pub project_name: String,
