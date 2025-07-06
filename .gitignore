@@ -31,3 +31,5 @@ input/
 tests/sandbox/
 validation.json
 report.json
+
+.env
