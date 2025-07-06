@@ -13,32 +13,23 @@ pub fn pair(
     label_filenames: Vec<PathWithKey>,
     image_filenames: Vec<PathWithKey>,
 ) -> Vec<PairingResult> {
-    let mut pairs: Vec<PairingResult> = Vec::new();
+    let mut pairs = Vec::new();
 
     for stem in stems {
         let mut image_paths_for_stem = image_filenames
-<<<<< HEAD
             .iter()
-======
-            .clone()
-            .into_iter()
->>>>> 5664eeae26253c3b7baffffbabeffeaeec214498
             .filter(|image| image.key == *stem)
             .map(|image| image.path.clone())
             .collect::<Vec<PathBuf>>();
-        image_paths_for_stem.sort();
-        let image_paths_for_stem = image_paths_for_stem
+        image_paths_for_stem.sort_by(|a, b| a.to_string_lossy().cmp(&b.to_string_lossy()));
+
+        let mut image_paths_for_stem = image_paths_for_stem
             .iter()
             .map(|image| match image.to_str() {
-                Some(path) => Ok(path.to_string()),
+                Some(p) => Ok(p.to_string()),
                 None => Err(()),
             })
             .collect::<Vec<Result<String, ()>>>();
-
-<<<<< HEAD
-        let mut label_paths_for_stem = label_filenames
-            .iter()
-======
         image_paths_for_stem.sort_by(|a, b| {
             let a_str = a.as_ref().map(|s| s.as_str()).unwrap_or("");
             let b_str = b.as_ref().map(|s| s.as_str()).unwrap_or("");
@@ -46,33 +37,27 @@ pub fn pair(
         });
 
         let mut label_paths_for_stem = label_filenames
-            .clone()
-            .into_iter()
->>>>>> 5664eeae26253c3b7baffffbabeffeaeec214498
+            .iter()
             .filter(|label| label.key == *stem)
             .map(|label| label.path.clone())
             .collect::<Vec<PathBuf>>();
-        label_paths_for_stem.sort();
-        let label_paths_for_stem = label_paths_for_stem
+        label_paths_for_stem.sort_by(|a, b| a.to_string_lossy().cmp(&b.to_string_lossy()));
+
+        let mut label_paths_for_stem = label_paths_for_stem
             .iter()
             .map(|label| match label.to_str() {
-                Some(path) => Ok(path.to_string()),
+                Some(p) => Ok(p.to_string()),
                 None => Err(()),
             })
             .collect::<Vec<Result<String, ()>>>();
-
-<<<<<< agentic
         label_paths_for_stem.sort_by(|a, b| {
             let a_str = a.as_ref().map(|s| s.as_str()).unwrap_or("");
             let b_str = b.as_ref().map(|s| s.as_str()).unwrap_or("");
             a_str.cmp(b_str)
         });
 
-        let invalid_pairs = process_label_path(&file_metadata, label_paths_for_stem.clone());
-=======
         let (invalid_pairs, valid_label_paths) =
             process_label_path(&file_metadata, label_paths_for_stem);
->>>>>> main
 
         let label_paths_for_stem = valid_label_paths
             .into_iter()
@@ -122,8 +107,6 @@ pub fn pair(
 
     pairs
 }
-
-/// Validate all label files for a single stem.
 pub fn process_label_path(
     file_metadata: &FileMetadata,
     label_paths_for_stem: Vec<Result<String, ()>>,
