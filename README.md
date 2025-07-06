@@ -13,7 +13,7 @@ This crate is very much a work-in-progress.  Features outlined may not be comple
    2. Check for corrupted format
    3. Check if duplicates exist in the same file.
    4. Check if invalid class ids exist
-   5. Mismatched duplicate labels are flagged as `DuplicateLabelMismatch`.
+   5. If duplicate label files differ, the conflict triggers a `DuplicateLabelMismatch` error.
 4. Export YOLO project
    1. Unlike RectLabel, let's make it so there isn't other types of imports.  We import a YOLO project, we export a YOLO project.  Don't create a separate folder for annotations.
 5. Data quality validation report
