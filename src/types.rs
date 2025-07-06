@@ -189,6 +189,12 @@ pub struct DuplicateImageLabelPair {
     pub duplicate: ImageLabelPair,
 }
 
+impl std::fmt::Display for DuplicateImageLabelPair {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Duplicate image and label files for '{}'", self.name)
+    }
+}
+
 #[derive(Error, Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub enum PairingError {
     LabelFileError(YoloFileParseError),
@@ -219,8 +225,8 @@ impl std::fmt::Display for PairingError {
             PairingError::ImageFileMissingUnableToUnwrapLabelPath => {
                 write!(f, "Image file missing; unable to unwrap label path")
             }
-            PairingError::Duplicate(_) => {
-                write!(f, "Duplicate image and label files")
+            PairingError::Duplicate(duplicate) => {
+                write!(f, "{}", duplicate)
             }
         }
     }
