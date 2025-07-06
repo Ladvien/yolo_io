@@ -204,6 +204,7 @@ pub enum PairingError {
     ImageFileMissing(String),
     ImageFileMissingUnableToUnwrapLabelPath,
     Duplicate(DuplicateImageLabelPair),
+    DuplicateLabelMismatch(DuplicateImageLabelPair),
 }
 
 impl std::fmt::Display for PairingError {
@@ -227,6 +228,9 @@ impl std::fmt::Display for PairingError {
             }
             PairingError::Duplicate(duplicate) => {
                 write!(f, "{}", duplicate)
+            }
+            PairingError::DuplicateLabelMismatch(_) => {
+                write!(f, "Duplicate image with differing label files")
             }
         }
     }

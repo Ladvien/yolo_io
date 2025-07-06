@@ -16,7 +16,12 @@ pub fn pair(
 
     for stem in stems {
         let mut image_paths_for_stem = image_filenames
+<<<<<<< HEAD
             .iter()
+=======
+            .clone()
+            .into_iter()
+>>>>>>> 5664eeae26253c3b7baffffbabeffeaeec214498
             .filter(|image| image.key == *stem)
             .map(|image| image.path.clone())
             .collect::<Vec<PathBuf>>();
@@ -29,8 +34,20 @@ pub fn pair(
             })
             .collect::<Vec<Result<String, ()>>>();
 
+<<<<<<< HEAD
         let mut label_paths_for_stem = label_filenames
             .iter()
+=======
+        image_paths_for_stem.sort_by(|a, b| {
+            let a_str = a.as_ref().map(|s| s.as_str()).unwrap_or("");
+            let b_str = b.as_ref().map(|s| s.as_str()).unwrap_or("");
+            a_str.cmp(b_str)
+        });
+
+        let mut label_paths_for_stem = label_filenames
+            .clone()
+            .into_iter()
+>>>>>>> 5664eeae26253c3b7baffffbabeffeaeec214498
             .filter(|label| label.key == *stem)
             .map(|label| label.path.clone())
             .collect::<Vec<PathBuf>>();
@@ -42,6 +59,12 @@ pub fn pair(
                 None => Err(()),
             })
             .collect::<Vec<Result<String, ()>>>();
+
+        label_paths_for_stem.sort_by(|a, b| {
+            let a_str = a.as_ref().map(|s| s.as_str()).unwrap_or("");
+            let b_str = b.as_ref().map(|s| s.as_str()).unwrap_or("");
+            a_str.cmp(b_str)
+        });
 
         let invalid_pairs = process_label_path(&file_metadata, label_paths_for_stem.clone());
 
@@ -62,14 +85,21 @@ pub fn pair(
 
             match result {
                 PairingResult::Valid(pair) => match primary_pair {
-                    Some(ref primary_pair) => {
-                        pairs.push(PairingResult::Invalid(PairingError::Duplicate(
-                            DuplicateImageLabelPair {
+                    Some(ref primary) => {
+                        let error = if primary.label_file != pair.label_file {
+                            PairingError::DuplicateLabelMismatch(DuplicateImageLabelPair {
                                 name: stem.clone(),
-                                primary: primary_pair.clone(),
+                                primary: primary.clone(),
                                 duplicate: pair.clone(),
-                            },
-                        )));
+                            })
+                        } else {
+                            PairingError::Duplicate(DuplicateImageLabelPair {
+                                name: stem.clone(),
+                                primary: primary.clone(),
+                                duplicate: pair.clone(),
+                            })
+                        };
+                        pairs.push(PairingResult::Invalid(error));
                     }
                     None => {
                         primary_pair = Some(pair.clone());
