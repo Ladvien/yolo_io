@@ -21,6 +21,8 @@ pub enum ExportError {
     FailedToUnwrapLabelPath,
     #[error("Failed to copy file '{0}' to '{1}'.")]
     FailedToCopyFile(String, String),
+    #[error("Failed to read config file: {0}")]
+    ReadConfig(String),
 }
 
 /// Handles writing a [`YoloProject`] to disk.
@@ -115,8 +117,20 @@ impl YoloProjectExporter {
             let image_stem = pair.name.clone();
             let label_stem = pair.name;
 
-            let new_image_path = format!("{}/{}", export_images_path, image_stem);
-            let new_label_path = format!("{}/{}", export_labels_path, label_stem);
+            let image_extension = std::path::Path::new(image_path)
+                .extension()
+                .and_then(|e| e.to_str())
+                .unwrap_or("");
+
+            let label_extension = std::path::Path::new(&label_path)
+                .extension()
+                .and_then(|e| e.to_str())
+                .unwrap_or("");
+
+            let new_image_path =
+                format!("{}/{}.{}", export_images_path, image_stem, image_extension);
+            let new_label_path =
+                format!("{}/{}.{}", export_labels_path, label_stem, label_extension);
 
             fs::copy(image_path, new_image_path.clone()).map_err(|_| {
                 ExportError::FailedToCopyFile(image_path.to_string(), new_image_path)

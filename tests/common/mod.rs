@@ -5,6 +5,7 @@ use image::{ImageBuffer, Rgb};
 use rstest::fixture;
 use yolo_io::{Export, Paths, SourcePaths, Split, YoloProjectConfig};
 
+#[allow(dead_code)]
 pub const TEST_SANDBOX_DIR: &str = "tests/sandbox";
 
 #[fixture]
