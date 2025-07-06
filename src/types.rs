@@ -213,6 +213,7 @@ pub struct YoloProjectConfig {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     /// Identifies the project format. Currently only "yolo" is supported but
     /// this field is reserved for future project types.
 <<<<<<< HEAD
@@ -232,6 +233,10 @@ pub struct YoloProjectConfig {
     /// Identifies the project format. Currently only "yolo" is supported but
     /// this field is reserved for future project types.
 >>>>>>> 0b309e9da26ac872d7ffa5dc0125e56dd2d7e65d
+=======
+    /// Identifies the project format. Currently only "yolo" is supported but
+    /// this field is reserved for future project types.
+>>>>>>> d5f8f38db09703cc0d2b505bc98688e51c43f07b
     pub r#type: String,
     /// Name of the project.
     pub project_name: String,

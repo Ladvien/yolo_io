@@ -21,6 +21,7 @@ pub fn pair(
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> c3b6efd01ea4f59079e5734f0465ca98e4559444
         let image_paths_for_stem = image_filenames
@@ -65,12 +66,20 @@ pub fn pair(
 >>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b
 =======
 >>>>>>> c3b6efd01ea4f59079e5734f0465ca98e4559444
+=======
+        let image_paths_for_stem = image_filenames
+            .clone()
+            .into_iter()
+            .filter(|image| image.key == *stem)
+            .map(|image| match image.clone().path.to_str() {
+>>>>>>> d5f8f38db09703cc0d2b505bc98688e51c43f07b
                 Some(path) => Ok(path.to_string()),
                 None => Err(()),
             })
             .collect::<Vec<Result<String, ()>>>();
 <<<<<<< HEAD
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -140,12 +149,20 @@ pub fn pair(
             .filter(|label| label.key == *stem)
             .map(|label| match label.clone().path.to_str() {
 >>>>>>> c3b6efd01ea4f59079e5734f0465ca98e4559444
+=======
+        let label_paths_for_stem = label_filenames
+            .clone()
+            .into_iter()
+            .filter(|label| label.key == *stem)
+            .map(|label| match label.clone().path.to_str() {
+>>>>>>> d5f8f38db09703cc0d2b505bc98688e51c43f07b
                 Some(path) => Ok(path.to_string()),
                 None => Err(()),
             })
             .collect::<Vec<Result<String, ()>>>();
 <<<<<<< HEAD
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -186,6 +203,10 @@ pub fn pair(
 >>>>>>> c3b6efd01ea4f59079e5734f0465ca98e4559444
 =======
 =======
+=======
+        let (invalid_pairs, valid_label_paths) =
+            process_label_path(&file_metadata, label_paths_for_stem);
+>>>>>>> d5f8f38db09703cc0d2b505bc98688e51c43f07b
 
         let (invalid_pairs, valid_label_paths) =
             process_label_path(&file_metadata, label_paths_for_stem);
@@ -242,8 +263,11 @@ pub fn pair(
 }
 <<<<<<< HEAD
 
+<<<<<<< HEAD
 =======
 >>>>>>> 0b309e9da26ac872d7ffa5dc0125e56dd2d7e65d
+=======
+>>>>>>> d5f8f38db09703cc0d2b505bc98688e51c43f07b
 pub fn process_label_path(
     file_metadata: &FileMetadata,
     label_paths_for_stem: Vec<Result<String, ()>>,
