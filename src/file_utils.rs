@@ -53,6 +53,7 @@ pub fn get_filepaths_for_extension(
     let file_paths = std::fs::read_dir(path).map_err(|err| FileError::ReadFile(err.to_string()))?;
 
     let mut paths = Vec::<PathWithKey>::new();
+    let extensions_lower: Vec<String> = extensions.iter().map(|ext| ext.to_lowercase()).collect();
 
     for file_path in file_paths {
         let file_path = file_path
@@ -69,7 +70,7 @@ pub fn get_filepaths_for_extension(
         }
 
         let extension = match get_file_extension(&file_path) {
-            Ok(extension) => extension,
+            Ok(extension) => extension.to_lowercase(),
             Err(_) => continue,
         };
 
@@ -78,7 +79,7 @@ pub fn get_filepaths_for_extension(
             Err(_) => continue,
         };
 
-        if extensions.contains(&extension) {
+        if extensions_lower.contains(&extension) {
             paths.push(PathWithKey {
                 path: file_path.clone(),
                 key: String::from(stem),
@@ -86,6 +87,7 @@ pub fn get_filepaths_for_extension(
         }
     }
 
+    // Ensure deterministic order of returned paths
     paths.sort_by(|a, b| a.path.cmp(&b.path));
 
     Ok(paths)
