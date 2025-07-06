@@ -18,9 +18,6 @@ pub struct Split {
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 /// Settings controlling dataset export.
-///
-/// These options determine where the processed dataset will be
-/// written and how duplicates and splits are handled.
 pub struct Export {
     /// Directory layout for the exported dataset.
     pub paths: Paths,
@@ -34,9 +31,6 @@ pub struct Export {
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 /// Collection of paths used during export.
-///
-/// The values are joined with the project root to form the final
-/// directory layout written by [`crate::YoloProjectExporter`].
 pub struct Paths {
     /// Root directory for exported data.
     pub root: String,
@@ -66,56 +60,32 @@ impl Paths {
 
     /// Path to the training images directory.
     pub fn get_train_images_path(&self) -> String {
-        PathBuf::from(&self.root)
-            .join("train")
-            .join("images")
-            .to_string_lossy()
-            .into_owned()
+        format!("{}/train/images", self.root).replace("//", "/")
     }
 
     /// Path to the training labels directory.
     pub fn get_train_label_images_path(&self) -> String {
-        PathBuf::from(&self.root)
-            .join("train")
-            .join("labels")
-            .to_string_lossy()
-            .into_owned()
+        format!("{}/train/labels", self.root).replace("//", "/")
     }
 
     /// Path to the validation images directory.
     pub fn get_validation_images_path(&self) -> String {
-        PathBuf::from(&self.root)
-            .join("validation")
-            .join("images")
-            .to_string_lossy()
-            .into_owned()
+        format!("{}/validation/images", self.root).replace("//", "/")
     }
 
     /// Path to the validation labels directory.
     pub fn get_validation_label_images_path(&self) -> String {
-        PathBuf::from(&self.root)
-            .join("validation")
-            .join("labels")
-            .to_string_lossy()
-            .into_owned()
+        format!("{}/validation/labels", self.root).replace("//", "/")
     }
 
     /// Path to the test images directory.
     pub fn get_test_images_path(&self) -> String {
-        PathBuf::from(&self.root)
-            .join("test")
-            .join("images")
-            .to_string_lossy()
-            .into_owned()
+        format!("{}/test/images", self.root).replace("//", "/")
     }
 
     /// Path to the test labels directory.
     pub fn get_test_label_images_path(&self) -> String {
-        PathBuf::from(&self.root)
-            .join("test")
-            .join("labels")
-            .to_string_lossy()
-            .into_owned()
+        format!("{}/test/labels", self.root).replace("//", "/")
     }
 
     /// Directory stem used for training data.
@@ -203,35 +173,12 @@ pub struct FileMetadata {
 
 /// Configuration for a YOLO project.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-/// Top level configuration for a [`crate::YoloProject`].
-///
-/// This structure mirrors the fields of the `config.yaml` file and is
-/// typically loaded using [`YoloProjectConfig::new`].
+/// Top level configuration for a [`YoloProject`].
 pub struct YoloProjectConfig {
     /// Location of images and labels to scan.
     pub source_paths: SourcePaths,
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
     /// Identifies the project format. Currently only "yolo" is supported but
     /// this field is reserved for future project types.
-<<<<<<< HEAD
-=======
-    /// Type of project, currently always "yolo".
->>>>>>> c9cf85d60740a6510ca489f36753e559018a9dbe
-=======
->>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b
-=======
-    /// Type of project, currently always "yolo".
->>>>>>> c3b6efd01ea4f59079e5734f0465ca98e4559444
-=======
-    /// Identifies the project format. Currently only "yolo" is supported,
-    /// but this field is reserved for future project types.
->>>>>>> f81ccc4939ee178da75b073df90b7d5c05d68f4f
-=======
-    /// Identifies the project format. Currently only "yolo" is supported but
-    /// this field is reserved for future project types.
->>>>>>> 0b309e9da26ac872d7ffa5dc0125e56dd2d7e65d
     pub r#type: String,
     /// Name of the project.
     pub project_name: String,
@@ -262,10 +209,8 @@ impl Default for YoloProjectConfig {
 impl YoloProjectConfig {
     /// Read a YAML configuration from disk.
     pub fn new(path: &str) -> Result<Self, ExportError> {
-        let data =
-            fs::read_to_string(path).map_err(|e| ExportError::ReadConfig(e.to_string()))?;
-        let config = serde_yml::from_str(&data)
-            .map_err(|e| ExportError::ParseConfig(e.to_string()))?;
+        let data = fs::read_to_string(path).expect("Unable to read file");
+        let config: YoloProjectConfig = serde_yml::from_str(&data).expect("Unable to parse YAML");
         Ok(config)
     }
 }
@@ -300,9 +245,6 @@ impl std::fmt::Display for DuplicateImageLabelPair {
 
 #[derive(Error, Clone, PartialEq, Debug, Serialize, Deserialize)]
 /// Reasons why a stem could not be paired.
-///
-/// These errors are produced during project loading when an image and
-/// label file cannot be matched or validated.
 pub enum PairingError {
     LabelFileError(YoloFileParseError),
     BothFilesMissing,
