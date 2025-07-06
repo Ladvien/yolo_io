@@ -256,7 +256,7 @@ impl YoloFile {
                 label_coordinates.push((x1, x2, y1, y2))
             }
 
-            let tolerance = 0.01;
+            let tolerance = metadata.duplicate_tolerance;
             if let Some(indices) = Self::get_duplicate_index(&label_coordinates, tolerance) {
                 return Err(YoloFileParseError::DuplicateEntries(
                     YoloFileParseErrorDetails {
