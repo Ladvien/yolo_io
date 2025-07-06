@@ -69,6 +69,7 @@ impl YoloDataQualityReport {
                 String::from("ImageFileMissingUnableToUnwrapLabelPath")
             }
             PairingError::Duplicate(_) => String::from("DuplicateImageLabelPair"),
+            PairingError::DuplicateLabelMismatch(_) => String::from("DuplicateImageLabelMismatch"),
         }
     }
 }
