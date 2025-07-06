@@ -1,4 +1,5 @@
 use hashbrown::HashMap;
+use log::debug;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use std::fs;
@@ -89,7 +90,7 @@ impl YoloProjectExporter {
         pairs: Vec<ImageLabelPair>,
     ) -> Result<(), ExportError> {
         for pair in pairs {
-            println!("pair: {:?}", pair);
+            debug!("pair: {:?}", pair);
 
             let image_path = pair
                 .image_path

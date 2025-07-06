@@ -96,8 +96,6 @@ mod tests {
 
         let yolo_yaml_path = format!("{}/test_project.yaml", exported_config.export.paths.root);
 
-        println!("Yolo YAML Path: {}", yolo_yaml_path);
-
         let expected_yaml = r#"# Generate by yolo_io - https://github.com/Ladvien/yolo_io
 path: tests/sandbox/export_test_yolo_yaml_created
 train: train/
