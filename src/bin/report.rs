@@ -2,6 +2,7 @@ use clap::{Parser, ValueEnum};
 use std::path::PathBuf;
 use yolo_io::{YoloDataQualityReport, YoloProject, YoloProjectConfig};
 
+/// Command line interface for the `yolo_io` report generator.
 #[derive(Parser, Debug)]
 #[command(author, version, about = "Generate a data quality report")]
 pub struct Cli {
@@ -18,9 +19,12 @@ pub struct Cli {
     format: Format,
 }
 
+/// Available output formats for the report.
 #[derive(ValueEnum, Clone, Debug, PartialEq)]
 pub enum Format {
+    /// Generate the report as JSON.
     Json,
+    /// Generate the report as YAML.
     Yaml,
 }
 
