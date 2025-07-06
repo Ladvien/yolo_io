@@ -4,7 +4,7 @@ mod config_tests {
 
     #[test]
     fn test_invalid_config_path_returns_error() {
-        let result = YoloProjectConfig::new("tests/does_not_exist.yaml");
+        let result = YoloProjectConfig::new(std::path::Path::new("tests/does_not_exist.yaml"));
         assert!(matches!(result, Err(ExportError::ReadConfig(_))));
     }
 }

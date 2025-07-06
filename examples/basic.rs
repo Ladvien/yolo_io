@@ -3,7 +3,8 @@ use yolo_io::*;
 
 fn main() {
     // Load the project configuration from disk
-    let config = YoloProjectConfig::new("examples/config.yaml").expect("Failed to load config");
+    let config = YoloProjectConfig::new(std::path::Path::new("examples/config.yaml"))
+        .expect("Failed to load config");
 
     // Build a project using the configuration
     let project = YoloProject::new(&config).expect("Failed to create project");

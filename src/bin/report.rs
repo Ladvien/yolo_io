@@ -31,7 +31,7 @@ pub enum Format {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
 
-    let config = YoloProjectConfig::new(&cli.config)?;
+    let config = YoloProjectConfig::new(cli.config.as_path())?;
     let project = YoloProject::new(&config)?;
 
     match cli.format {
