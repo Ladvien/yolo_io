@@ -16,7 +16,7 @@ pub enum ExportError {
     UnableToCreateDirectory(String),
     #[error("Failed to unwrap label path.")]
     FailedToUnwrapLabelPath,
-    #[error("Failed to copy file '{0}' to '{0}'.")]
+    #[error("Failed to copy file '{0}' to '{1}'.")]
     FailedToCopyFile(String, String),
 }
 
