@@ -66,56 +66,32 @@ impl Paths {
 
     /// Path to the training images directory.
     pub fn get_train_images_path(&self) -> String {
-        PathBuf::from(&self.root)
-            .join("train")
-            .join("images")
-            .to_string_lossy()
-            .into_owned()
+        format!("{}/train/images", self.root).replace("//", "/")
     }
 
     /// Path to the training labels directory.
     pub fn get_train_label_images_path(&self) -> String {
-        PathBuf::from(&self.root)
-            .join("train")
-            .join("labels")
-            .to_string_lossy()
-            .into_owned()
+        format!("{}/train/labels", self.root).replace("//", "/")
     }
 
     /// Path to the validation images directory.
     pub fn get_validation_images_path(&self) -> String {
-        PathBuf::from(&self.root)
-            .join("validation")
-            .join("images")
-            .to_string_lossy()
-            .into_owned()
+        format!("{}/validation/images", self.root).replace("//", "/")
     }
 
     /// Path to the validation labels directory.
     pub fn get_validation_label_images_path(&self) -> String {
-        PathBuf::from(&self.root)
-            .join("validation")
-            .join("labels")
-            .to_string_lossy()
-            .into_owned()
+        format!("{}/validation/labels", self.root).replace("//", "/")
     }
 
     /// Path to the test images directory.
     pub fn get_test_images_path(&self) -> String {
-        PathBuf::from(&self.root)
-            .join("test")
-            .join("images")
-            .to_string_lossy()
-            .into_owned()
+        format!("{}/test/images", self.root).replace("//", "/")
     }
 
     /// Path to the test labels directory.
     pub fn get_test_label_images_path(&self) -> String {
-        PathBuf::from(&self.root)
-            .join("test")
-            .join("labels")
-            .to_string_lossy()
-            .into_owned()
+        format!("{}/test/labels", self.root).replace("//", "/")
     }
 
     /// Directory stem used for training data.
@@ -214,6 +190,7 @@ pub struct YoloProjectConfig {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     /// Identifies the project format. Currently only "yolo" is supported but
     /// this field is reserved for future project types.
 <<<<<<< HEAD
@@ -237,6 +214,9 @@ pub struct YoloProjectConfig {
     /// Identifies the project format. Currently only "yolo" is supported but
     /// this field is reserved for future project types.
 >>>>>>> d5f8f38db09703cc0d2b505bc98688e51c43f07b
+=======
+    /// Type of project, currently always "yolo".
+>>>>>>> 4f3b3d75592e0b37becbaae01f804963cc209459
     pub r#type: String,
     /// Name of the project.
     pub project_name: String,

@@ -3,6 +3,7 @@
 //! The crate scans directories for image and label files, pairs them,
 //! validates the labels and can export the result into the YOLO directory
 //! structure.  See [`YoloProject`] for the main entry point.
+<<<<<<< HEAD
 //!
 //! # Example
 //! ```no_run
@@ -17,6 +18,8 @@
 //! YoloProjectExporter::export(project).unwrap();
 //! ```
 #[macro_use]
+=======
+>>>>>>> 4f3b3d75592e0b37becbaae01f804963cc209459
 mod report;
 mod export;
 mod file_utils;

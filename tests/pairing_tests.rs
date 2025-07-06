@@ -191,10 +191,13 @@ mod pairing_tests {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> c3b6efd01ea4f59079e5734f0465ca98e4559444
 =======
 >>>>>>> 0b309e9da26ac872d7ffa5dc0125e56dd2d7e65d
+=======
+>>>>>>> 4f3b3d75592e0b37becbaae01f804963cc209459
     fn test_pairing_with_mixed_case_extensions(
         image_data: ImageBuffer<Rgb<u8>, Vec<u8>>,
         mut create_yolo_project_config: YoloProjectConfig,
@@ -206,6 +209,7 @@ mod pairing_tests {
         create_image_file(&image_file, &image_data);
 
         let label_file = PathBuf::from(format!("{}/testMiXeD.TxT", this_test_directory));
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -237,6 +241,8 @@ mod pairing_tests {
 >>>>>>> 0b309e9da26ac872d7ffa5dc0125e56dd2d7e65d
 =======
 >>>>>>> d5f8f38db09703cc0d2b505bc98688e51c43f07b
+=======
+>>>>>>> 4f3b3d75592e0b37becbaae01f804963cc209459
         create_dir_and_write_file(&label_file, "0 0.5 0.5 0.5 0.5");
 
         create_yolo_project_config.source_paths.images = this_test_directory.clone();
@@ -250,6 +256,7 @@ mod pairing_tests {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         let valid_pair = valid_pairs
             .into_iter()
             .find(|pair| pair.name == "testMiXeD");
@@ -258,10 +265,13 @@ mod pairing_tests {
         let valid_pair = valid_pairs.into_iter().find(|pair| pair.name == "test1");
 >>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b
 =======
+=======
+>>>>>>> 4f3b3d75592e0b37becbaae01f804963cc209459
 
         let valid_pair = valid_pairs
             .into_iter()
             .find(|pair| pair.name == "testMiXeD");
+<<<<<<< HEAD
 >>>>>>> c3b6efd01ea4f59079e5734f0465ca98e4559444
 =======
         let valid_pair = valid_pairs
@@ -272,6 +282,8 @@ mod pairing_tests {
 
         let valid_pair = valid_pairs.into_iter().find(|pair| pair.name == "test1");
 >>>>>>> d5f8f38db09703cc0d2b505bc98688e51c43f07b
+=======
+>>>>>>> 4f3b3d75592e0b37becbaae01f804963cc209459
 
         assert!(valid_pair.is_some());
     }

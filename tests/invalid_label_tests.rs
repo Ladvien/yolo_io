@@ -3,9 +3,12 @@ mod common;
 #[cfg(test)]
 mod invalid_label_tests {
     use rstest::rstest;
+    use std::path::PathBuf;
 
     use crate::common::TEST_SANDBOX_DIR;
-    use yolo_io::{FileMetadata, YoloClass, YoloFile, YoloFileParseError};
+    use yolo_io::{
+        FileMetadata, YoloClass, YoloFile, YoloFileParseError, YoloFileParseErrorDetails,
+    };
 
     fn create_yolo_classes(classes: Vec<(isize, &str)>) -> Vec<YoloClass> {
         classes
@@ -333,6 +336,7 @@ mod invalid_label_tests {
         }
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -450,4 +454,6 @@ mod invalid_label_tests {
     }
 =======
 >>>>>>> c3b6efd01ea4f59079e5734f0465ca98e4559444
+=======
+>>>>>>> 4f3b3d75592e0b37becbaae01f804963cc209459
 }
