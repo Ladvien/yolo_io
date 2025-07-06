@@ -335,4 +335,44 @@ mod invalid_label_tests {
             panic!("Expected error");
         }
     }
+
+    fn create_yolo_label_file_with_tolerance(
+        filename: &str,
+        classes: Vec<YoloClass>,
+        content: &str,
+        tolerance: f32,
+    ) -> (FileMetadata, String) {
+        let dir = format!("{}/data", TEST_SANDBOX_DIR);
+        let path = format!("{}/{}", dir, filename);
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(&path, content).unwrap();
+
+        (
+            FileMetadata {
+                classes,
+                duplicate_tolerance: tolerance,
+            },
+            path,
+        )
+    }
+
+    #[test]
+    fn test_duplicate_tolerance_from_config() {
+        let filename = "tolerance.txt";
+        let classes_raw = vec![(0, "person")];
+        let classes = create_yolo_classes(classes_raw.clone());
+        let (metadata, path) = create_yolo_label_file_with_tolerance(
+            filename,
+            classes,
+            "0 0.5 0.5 0.2 0.2\n0 0.515 0.5 0.2 0.2",
+            0.02,
+        );
+
+        let yolo_file = YoloFile::new(&metadata, &path);
+
+        assert!(matches!(
+            yolo_file,
+            Err(YoloFileParseError::DuplicateEntries(_))
+        ));
+    }
 }

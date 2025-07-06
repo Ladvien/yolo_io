@@ -185,4 +185,34 @@ mod pairing_tests {
         assert!(valid_pair.is_none());
         assert!(invalid_pair.is_none());
     }
+
+    #[rstest]
+    fn test_pairing_with_mixed_case_extensions(
+        image_data: ImageBuffer<Rgb<u8>, Vec<u8>>,
+        mut create_yolo_project_config: YoloProjectConfig,
+    ) {
+        let filename = "mixed_ext";
+        let this_test_directory = format!("{}/{}/", TEST_SANDBOX_DIR, filename);
+
+        let image_file =
+            PathBuf::from(format!("{}/testMiXeD.JpG", this_test_directory));
+        create_image_file(&image_file, &image_data);
+
+        let label_file =
+            PathBuf::from(format!("{}/testMiXeD.TxT", this_test_directory));
+        create_dir_and_write_file(&label_file, "0 0.5 0.5 0.5 0.5");
+
+        create_yolo_project_config.source_paths.images = this_test_directory.clone();
+        create_yolo_project_config.source_paths.labels = this_test_directory.clone();
+
+        let project =
+            YoloProject::new(&create_yolo_project_config).expect("Unable to create project");
+
+        let valid_pairs = project.get_valid_pairs();
+        let valid_pair = valid_pairs
+            .into_iter()
+            .find(|pair| pair.name == "testMiXeD");
+
+        assert!(valid_pair.is_some());
+    }
 }
