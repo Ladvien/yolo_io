@@ -18,11 +18,15 @@ pub fn pair(
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> c3b6efd01ea4f59079e5734f0465ca98e4559444
         let image_paths_for_stem = image_filenames
             .clone()
             .into_iter()
             .filter(|image| image.key == *stem)
             .map(|image| match image.clone().path.to_str() {
+<<<<<<< HEAD
 =======
 =======
 >>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b
@@ -48,11 +52,14 @@ pub fn pair(
 =======
             .map(|image| match image.clone().path.to_str() {
 >>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b
+=======
+>>>>>>> c3b6efd01ea4f59079e5734f0465ca98e4559444
                 Some(path) => Ok(path.to_string()),
                 None => Err(()),
             })
             .collect::<Vec<Result<String, ()>>>();
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -92,11 +99,19 @@ pub fn pair(
 =======
             .map(|label| match label.clone().path.to_str() {
 >>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b
+=======
+        let label_paths_for_stem = label_filenames
+            .clone()
+            .into_iter()
+            .filter(|label| label.key == *stem)
+            .map(|label| match label.clone().path.to_str() {
+>>>>>>> c3b6efd01ea4f59079e5734f0465ca98e4559444
                 Some(path) => Ok(path.to_string()),
                 None => Err(()),
             })
             .collect::<Vec<Result<String, ()>>>();
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -115,6 +130,10 @@ pub fn pair(
         let (invalid_pairs, valid_label_paths) =
             process_label_path(&file_metadata, label_paths_for_stem);
 =======
+=======
+        let (invalid_pairs, valid_label_paths) =
+            process_label_path(&file_metadata, label_paths_for_stem);
+>>>>>>> c3b6efd01ea4f59079e5734f0465ca98e4559444
 
         let invalid_pairs = process_label_path(&file_metadata, label_paths_for_stem.clone());
 >>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b

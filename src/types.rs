@@ -201,6 +201,7 @@ pub struct FileMetadata {
 pub struct YoloProjectConfig {
     /// Location of images and labels to scan.
     pub source_paths: SourcePaths,
+<<<<<<< HEAD
     /// Identifies the project format. Currently only "yolo" is supported but
     /// this field is reserved for future project types.
 <<<<<<< HEAD
@@ -209,6 +210,9 @@ pub struct YoloProjectConfig {
 >>>>>>> c9cf85d60740a6510ca489f36753e559018a9dbe
 =======
 >>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b
+=======
+    /// Type of project, currently always "yolo".
+>>>>>>> c3b6efd01ea4f59079e5734f0465ca98e4559444
     pub r#type: String,
     /// Name of the project.
     pub project_name: String,
@@ -239,8 +243,10 @@ impl Default for YoloProjectConfig {
 impl YoloProjectConfig {
     /// Read a YAML configuration from disk.
     pub fn new(path: &str) -> Result<Self, ExportError> {
-        let data = fs::read_to_string(path).expect("Unable to read file");
-        let config: YoloProjectConfig = serde_yml::from_str(&data).expect("Unable to parse YAML");
+        let data =
+            fs::read_to_string(path).map_err(|e| ExportError::ReadConfig(e.to_string()))?;
+        let config = serde_yml::from_str(&data)
+            .map_err(|e| ExportError::ParseConfig(e.to_string()))?;
         Ok(config)
     }
 }

@@ -332,6 +332,7 @@ mod invalid_label_tests {
             panic!("Expected error");
         }
     }
+<<<<<<< HEAD
 
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -424,4 +425,6 @@ mod invalid_label_tests {
 =======
 >>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b
     }
+=======
+>>>>>>> c3b6efd01ea4f59079e5734f0465ca98e4559444
 }
