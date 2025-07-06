@@ -16,53 +16,11 @@ pub fn pair(
     let mut pairs = Vec::new();
 
     for stem in stems {
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-        let image_paths_for_stem = image_filenames
-            .clone()
-            .into_iter()
-            .filter(|image| image.key == *stem)
-            .map(|image| match image.clone().path.to_str() {
-=======
-        let mut image_paths_for_stem = image_filenames
-            .iter()
-            .filter(|image| image.key == stem)
-            .map(|image| image.path.clone())
-            .collect::<Vec<PathBuf>>();
-        image_paths_for_stem.sort();
-        let image_paths_for_stem = image_paths_for_stem
-            .iter()
-            .map(|image| match image.to_str() {
->>>>>>> 88c6208b5242bb685205ed0cd2acd75901f72741
-                Some(path) => Ok(path.to_string()),
-                None => Err(()),
-            })
-            .collect::<Vec<Result<String, ()>>>();
-
-<<<<<<< HEAD
-        let label_paths_for_stem = label_filenames
-            .clone()
-            .into_iter()
-            .filter(|label| label.key == *stem)
-            .map(|label| match label.clone().path.to_str() {
-                Some(path) => Ok(path.to_string()),
-                None => Err(()),
-            })
-            .collect::<Vec<Result<String, ()>>>();
-=======
         let mut image_paths_for_stem = image_filenames
             .iter()
             .filter(|image| image.key == *stem)
             .map(|image| image.path.clone())
             .collect::<Vec<PathBuf>>();
-=======
-        let mut image_paths_for_stem = image_filenames
-            .iter()
-            .filter(|image| image.key == *stem)
-            .map(|image| image.path.clone())
-            .collect::<Vec<PathBuf>>();
->>>>>>> ef8cf112772ee387eb40674c9a50d3eac3745eee
         image_paths_for_stem.sort_by(|a, b| a.to_string_lossy().cmp(&b.to_string_lossy()));
 
         let mut image_paths_for_stem = image_paths_for_stem
@@ -81,14 +39,6 @@ pub fn pair(
         let mut label_paths_for_stem = label_filenames
             .iter()
             .filter(|label| label.key == *stem)
-<<<<<<< HEAD
-=======
-        let mut label_paths_for_stem = label_filenames
-            .iter()
-            .filter(|label| label.key == stem)
->>>>>>> 88c6208b5242bb685205ed0cd2acd75901f72741
-=======
->>>>>>> ef8cf112772ee387eb40674c9a50d3eac3745eee
             .map(|label| label.path.clone())
             .collect::<Vec<PathBuf>>();
         label_paths_for_stem.sort_by(|a, b| a.to_string_lossy().cmp(&b.to_string_lossy()));
@@ -100,21 +50,11 @@ pub fn pair(
                 None => Err(()),
             })
             .collect::<Vec<Result<String, ()>>>();
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> ef8cf112772ee387eb40674c9a50d3eac3745eee
         label_paths_for_stem.sort_by(|a, b| {
             let a_str = a.as_ref().map(|s| s.as_str()).unwrap_or("");
             let b_str = b.as_ref().map(|s| s.as_str()).unwrap_or("");
             a_str.cmp(b_str)
         });
-<<<<<<< HEAD
->>>>>>> 296ef2ce047247f51f7750eb57a5ee55d9f55b59
-=======
->>>>>>> 88c6208b5242bb685205ed0cd2acd75901f72741
-=======
->>>>>>> ef8cf112772ee387eb40674c9a50d3eac3745eee
 
         let (invalid_pairs, valid_label_paths) =
             process_label_path(&file_metadata, label_paths_for_stem);
@@ -167,13 +107,6 @@ pub fn pair(
 
     pairs
 }
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
->>>>>>> 296ef2ce047247f51f7750eb57a5ee55d9f55b59
-=======
->>>>>>> ef8cf112772ee387eb40674c9a50d3eac3745eee
 pub fn process_label_path(
     file_metadata: &FileMetadata,
     label_paths_for_stem: Vec<Result<String, ()>>,

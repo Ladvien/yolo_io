@@ -119,7 +119,6 @@ names:
     }
 
     #[rstest]
-<<<<<<< HEAD
     fn test_export_preserves_extensions(create_yolo_project_config: YoloProjectConfig) {
         let exported_config = run_export(
             create_yolo_project_config,
@@ -154,23 +153,5 @@ names:
                 assert_eq!(path.extension().unwrap().to_str().unwrap(), "data");
             }
         }
-=======
-    fn test_export_preserves_extension(create_yolo_project_config: YoloProjectConfig) {
-        let exported_config = run_export(
-            create_yolo_project_config,
-            "preserve_extension".to_string(),
-            image_data(),
-        );
-
-        let train_image_dir = format!("{}/train/images", exported_config.export.paths.root);
-        let mut entries = fs::read_dir(train_image_dir).expect("Unable to read directory");
-        let first_entry = entries
-            .next()
-            .expect("No files found")
-            .expect("Unable to read entry");
-        let path = first_entry.path();
-        let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("");
-        assert_eq!(ext, "jpg");
->>>>>>> 88c6208b5242bb685205ed0cd2acd75901f72741
     }
 }

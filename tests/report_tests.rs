@@ -1,6 +1,5 @@
 mod common;
 #[cfg(test)]
-<<<<<<< HEAD
 mod report_tests {
     use std::path::PathBuf;
 
@@ -130,6 +129,3 @@ mod report_tests {
         assert_eq!(report, expected);
     }
 }
-=======
-mod report_tests {}
->>>>>>> 88c6208b5242bb685205ed0cd2acd75901f72741
