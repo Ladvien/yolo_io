@@ -336,7 +336,6 @@ mod invalid_label_tests {
         }
     }
 
-<<<<<<< HEAD
     #[test]
     fn test_yolo_file_new_allows_duplicates_when_tolerance_zero() {
         let filename = "tolerance_zero.txt";
@@ -353,7 +352,8 @@ mod invalid_label_tests {
         let yolo_file = YoloFile::new(&metadata, &path);
 
         assert!(yolo_file.is_ok());
-=======
+    }
+
     fn create_yolo_label_file_with_tolerance(
         filename: &str,
         classes: Vec<YoloClass>,
@@ -388,10 +388,6 @@ mod invalid_label_tests {
 
         let yolo_file = YoloFile::new(&metadata, &path);
 
-        assert!(matches!(
-            yolo_file,
-            Err(YoloFileParseError::DuplicateEntries(_))
-        ));
->>>>>>> cff4fcbe87749809e691fd884dbed988fac6624a
+        assert!(yolo_file.is_ok());
     }
 }
