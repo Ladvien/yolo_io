@@ -10,6 +10,8 @@ use crate::{
     YoloProject,
 };
 
+/// Errors that may occur while exporting a project.
+
 #[derive(Error, Debug)]
 pub enum ExportError {
     #[error("Unable to create '{0}' directory")]
@@ -20,11 +22,14 @@ pub enum ExportError {
     FailedToCopyFile(String, String),
 }
 
+/// Handles writing a [`YoloProject`] to disk.
 pub struct YoloProjectExporter {
+    /// Project to be exported.
     pub project: YoloProject,
 }
 
 impl YoloProjectExporter {
+    /// Write the given [`YoloProject`] to disk according to its configuration.
     pub fn export(project: YoloProject) -> Result<(), ExportError> {
         let paths = &project.config.export.paths;
 

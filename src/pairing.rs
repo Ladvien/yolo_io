@@ -6,6 +6,7 @@ use crate::types::{
 };
 use crate::YoloFile;
 
+/// Pair images and labels based on matching file stems.
 pub fn pair(
     file_metadata: FileMetadata,
     stems: Vec<String>,
@@ -80,6 +81,7 @@ pub fn pair(
     pairs
 }
 
+/// Validate all label files for a single stem.
 pub fn process_label_path(
     file_metadata: &FileMetadata,
     label_paths_for_stem: Vec<Result<String, ()>>,
@@ -112,6 +114,7 @@ pub fn process_label_path(
     invalid_pairs
 }
 
+/// Build a [`PairingResult`] from a potential image/label pair.
 pub fn evaluate_pair(
     stem: String,
     pair: EitherOrBoth<Result<String, ()>>,

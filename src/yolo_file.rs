@@ -19,7 +19,10 @@ use thiserror::Error;
 
 use crate::{file_utils::get_file_stem, types::FileMetadata};
 
+/// Errors that can occur when parsing a YOLO label file.
+
 #[derive(Error, Clone, PartialEq, Debug, Serialize, Deserialize)]
+/// Detailed reasons a label file failed to parse.
 pub enum YoloFileParseError {
     #[error("Invalid format for file '{}'", .0.path)]
     InvalidFormat(YoloFileParseErrorDetails),
@@ -40,38 +43,59 @@ pub enum YoloFileParseError {
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
+/// Additional information associated with a [`YoloFileParseError`].
 pub struct YoloFileParseErrorDetails {
+    /// Path of the file that failed.
     pub path: String,
+    /// Class value being parsed when the error occurred.
     pub class: Option<String>,
+    /// Line number of the offending entry.
     pub row: Option<usize>,
+    /// Line number of a duplicate entry if relevant.
     pub other_row: Option<usize>,
+    /// Column name associated with the error.
     pub column: Option<String>,
+    /// The offending numeric value if available.
     pub value: Option<f32>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+/// Class definition used when validating label files.
 pub struct YoloClass {
+    /// Numeric class identifier.
     pub id: isize,
+    /// Human readable class name.
     pub name: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+/// A single label entry in a YOLO file.
 pub struct YoloEntry {
+    /// Class identifier.
     pub class: isize,
+    /// Normalized x coordinate of the bounding box centre.
     pub x_center: f32,
+    /// Normalized y coordinate of the bounding box centre.
     pub y_center: f32,
+    /// Normalized bounding box width.
     pub width: f32,
+    /// Normalized bounding box height.
     pub height: f32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+/// Representation of a `.txt` label file in YOLO format.
 pub struct YoloFile {
+    /// File stem without extension.
     pub stem: String,
+    /// Full path to the label file on disk.
     pub path: String,
+    /// Parsed label entries.
     pub entries: Vec<YoloEntry>,
 }
 
 impl YoloFile {
+    /// Read and validate a label file.
     pub fn new(metadata: &FileMetadata, path: &String) -> Result<YoloFile, YoloFileParseError> {
         let potential_file = read_to_string(path);
 
