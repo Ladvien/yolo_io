@@ -107,6 +107,13 @@ pub fn pair(
 
     pairs
 }
+
+/// Validate the label paths associated with a single file stem.
+///
+/// Each path is parsed to ensure the label file contents are valid
+/// according to the provided [`FileMetadata`]. Any parsing failures
+/// are returned as [`PairingResult::Invalid`] while successful paths
+/// are collected for pairing with images.
 pub fn process_label_path(
     file_metadata: &FileMetadata,
     label_paths_for_stem: Vec<Result<String, ()>>,

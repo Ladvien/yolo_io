@@ -26,7 +26,7 @@ mod report_tests {
 
     #[rstest]
     fn test_generate_report_with_label_file_error(
-        mut create_yolo_project_config: yolo_io::YoloProjectConfig,
+        _create_yolo_project_config: yolo_io::YoloProjectConfig,
     ) {
         let details = YoloFileParseErrorDetails {
             path: "label.txt".to_string(),
@@ -131,7 +131,7 @@ mod report_tests {
 
     #[rstest]
     fn test_generate_yaml_report_with_label_file_missing(
-        mut create_yolo_project_config: yolo_io::YoloProjectConfig,
+        _create_yolo_project_config: yolo_io::YoloProjectConfig,
     ) {
         let pairing_error = PairingError::LabelFileMissing("label.txt".to_string());
         let project = create_test_project(vec![PairingResult::Invalid(pairing_error.clone())]);
