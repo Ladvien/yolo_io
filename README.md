@@ -29,3 +29,32 @@ This crate is very much a work-in-progress.  Features outlined may not be comple
 `type` field inside this file denotes the project format. Today only the
 `"yolo"` type is recognized, but this key remains so other formats can be
 supported later.
+
+## Data Quality Reports
+
+`YoloDataQualityReport::generate` inspects a project and returns a JSON string
+describing all issues. The [`examples/basic.rs`](examples/basic.rs) example writes
+the report to `report.json`:
+
+```rust
+// from examples/basic.rs
+if let Some(report) = YoloDataQualityReport::generate(project.clone()) {
+    fs::write("report.json", report).expect("Unable to write report");
+}
+```
+
+To create a YAML version, deserialize the JSON into `DataQualityItem` values and
+re-serialize with `serde_yml`:
+
+```rust
+use serde_yml;
+use yolo_io::*;
+
+if let Some(json) = YoloDataQualityReport::generate(project.clone()) {
+    let items: Vec<DataQualityItem> = serde_json::from_str(&json).unwrap();
+    let yaml = serde_yml::to_string(&items).unwrap();
+    fs::write("report.yaml", yaml).expect("Unable to write YAML report");
+}
+```
+
+This produces `report.yaml` alongside `report.json`.
