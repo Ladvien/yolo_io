@@ -30,7 +30,11 @@ impl YoloDataQualityReport {
             }
         }
 
-        serde_json::to_string(&errors).ok()
+        if errors.is_empty() {
+            None
+        } else {
+            serde_json::to_string(&errors).ok()
+        }
     }
 
     fn get_source_name(pairing_error: &PairingError) -> String {

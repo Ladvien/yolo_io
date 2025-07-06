@@ -256,7 +256,7 @@ impl YoloFile {
                 label_coordinates.push((x1, x2, y1, y2))
             }
 
-            let tolerance = 0.01;
+            let tolerance = metadata.duplicate_tolerance;
             if let Some(indices) = Self::get_duplicate_index(&label_coordinates, tolerance) {
                 return Err(YoloFileParseError::DuplicateEntries(
                     YoloFileParseErrorDetails {
@@ -295,23 +295,30 @@ impl YoloFile {
         duplicated_labels: &[(f32, f32, f32, f32)],
         tolerance: f32,
     ) -> Option<(usize, usize)> {
-        for (index, coordinates) in duplicated_labels.iter().enumerate() {
-            let (x1, x2, y1, y2) = coordinates;
+        use hashbrown::HashMap;
 
-            for (duplicate_index, other_coordinates) in duplicated_labels.iter().enumerate() {
-                if duplicate_index != index {
-                    let (ox1, ox2, oy1, oy2) = other_coordinates;
-
-                    if (x1 - ox1).abs() < tolerance
-                        && (x2 - ox2).abs() < tolerance
-                        && (y1 - oy1).abs() < tolerance
-                        && (y2 - oy2).abs() < tolerance
-                    {
-                        return Some((index, duplicate_index));
-                    }
-                }
-            }
+        if tolerance <= 0.0 {
+            return None;
         }
+
+        let scale = 1.0 / tolerance;
+        let mut seen: HashMap<(i32, i32, i32, i32), usize> = HashMap::new();
+
+        for (index, (x1, x2, y1, y2)) in duplicated_labels.iter().cloned().enumerate() {
+            let key = (
+                (x1 * scale).round() as i32,
+                (x2 * scale).round() as i32,
+                (y1 * scale).round() as i32,
+                (y2 * scale).round() as i32,
+            );
+
+            if let Some(prev_index) = seen.get(&key) {
+                return Some((*prev_index, index));
+            }
+
+            seen.insert(key, index);
+        }
+
         None
     }
 }
