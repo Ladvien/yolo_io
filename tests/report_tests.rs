@@ -128,4 +128,38 @@ mod report_tests {
 
         assert_eq!(report, expected);
     }
+
+    #[rstest]
+    fn test_generate_yaml_report_with_label_file_missing(
+        mut create_yolo_project_config: yolo_io::YoloProjectConfig,
+    ) {
+        let pairing_error = PairingError::LabelFileMissing("label.txt".to_string());
+        let project = create_test_project(vec![PairingResult::Invalid(pairing_error.clone())]);
+
+        let report = YoloDataQualityReport::generate_yaml(project).unwrap();
+        let expected = serde_yml::to_string(&vec![DataQualityItem {
+            source: "LabelFileMissing".to_string(),
+            message: pairing_error.to_string(),
+            data: pairing_error.clone(),
+        }])
+        .unwrap();
+
+        assert_eq!(report, expected);
+    }
+
+    #[test]
+    fn test_generate_yaml_report_with_both_files_missing() {
+        let pairing_error = PairingError::BothFilesMissing;
+        let project = create_test_project(vec![PairingResult::Invalid(pairing_error.clone())]);
+
+        let report = YoloDataQualityReport::generate_yaml(project).unwrap();
+        let expected = serde_yml::to_string(&vec![DataQualityItem {
+            source: "BothFilesMissing".to_string(),
+            message: pairing_error.to_string(),
+            data: pairing_error.clone(),
+        }])
+        .unwrap();
+
+        assert_eq!(report, expected);
+    }
 }
