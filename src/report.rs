@@ -21,6 +21,10 @@ pub struct YoloDataQualityReport;
 
 impl YoloDataQualityReport {
     /// Create a JSON report from a [`YoloProject`].
+    ///
+    /// All invalid pairs are converted into a list of [`DataQualityItem`]
+    /// structures and serialized to JSON. If the project contains no
+    /// errors `None` is returned.
     pub fn generate(project: YoloProject) -> Option<String> {
         let mut errors = Vec::<DataQualityItem>::new();
 

@@ -18,6 +18,9 @@ pub struct Split {
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 /// Settings controlling dataset export.
+///
+/// These options determine where the processed dataset will be
+/// written and how duplicates and splits are handled.
 pub struct Export {
     /// Directory layout for the exported dataset.
     pub paths: Paths,
@@ -31,6 +34,9 @@ pub struct Export {
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 /// Collection of paths used during export.
+///
+/// The values are joined with the project root to form the final
+/// directory layout written by [`crate::YoloProjectExporter`].
 pub struct Paths {
     /// Root directory for exported data.
     pub root: String,
@@ -197,10 +203,14 @@ pub struct FileMetadata {
 
 /// Configuration for a YOLO project.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-/// Top level configuration for a [`YoloProject`].
+/// Top level configuration for a [`crate::YoloProject`].
+///
+/// This structure mirrors the fields of the `config.yaml` file and is
+/// typically loaded using [`YoloProjectConfig::new`].
 pub struct YoloProjectConfig {
     /// Location of images and labels to scan.
     pub source_paths: SourcePaths,
+<<<<<<< HEAD
 <<<<<<< HEAD
     /// Identifies the project format. Currently only "yolo" is supported but
     /// this field is reserved for future project types.
@@ -213,6 +223,10 @@ pub struct YoloProjectConfig {
 =======
     /// Type of project, currently always "yolo".
 >>>>>>> c3b6efd01ea4f59079e5734f0465ca98e4559444
+=======
+    /// Identifies the project format. Currently only "yolo" is supported,
+    /// but this field is reserved for future project types.
+>>>>>>> f81ccc4939ee178da75b073df90b7d5c05d68f4f
     pub r#type: String,
     /// Name of the project.
     pub project_name: String,
@@ -281,6 +295,9 @@ impl std::fmt::Display for DuplicateImageLabelPair {
 
 #[derive(Error, Clone, PartialEq, Debug, Serialize, Deserialize)]
 /// Reasons why a stem could not be paired.
+///
+/// These errors are produced during project loading when an image and
+/// label file cannot be matched or validated.
 pub enum PairingError {
     LabelFileError(YoloFileParseError),
     BothFilesMissing,

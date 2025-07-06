@@ -19,11 +19,16 @@ pub fn pair(
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> c3b6efd01ea4f59079e5734f0465ca98e4559444
         let image_paths_for_stem = image_filenames
             .clone()
             .into_iter()
+=======
+        let mut image_paths_for_stem = image_filenames
+            .iter()
+>>>>>>> f81ccc4939ee178da75b073df90b7d5c05d68f4f
             .filter(|image| image.key == *stem)
             .map(|image| match image.clone().path.to_str() {
 <<<<<<< HEAD
@@ -58,6 +63,7 @@ pub fn pair(
                 None => Err(()),
             })
             .collect::<Vec<Result<String, ()>>>();
+<<<<<<< HEAD
 
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -71,6 +77,8 @@ pub fn pair(
 =======
 =======
 >>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b
+=======
+>>>>>>> f81ccc4939ee178da75b073df90b7d5c05d68f4f
         image_paths_for_stem.sort_by(|a, b| {
             let a_str = a.as_ref().map(|s| s.as_str()).unwrap_or("");
             let b_str = b.as_ref().map(|s| s.as_str()).unwrap_or("");
@@ -78,8 +86,12 @@ pub fn pair(
         });
 
         let mut label_paths_for_stem = label_filenames
+<<<<<<< HEAD
             .clone()
             .into_iter()
+=======
+            .iter()
+>>>>>>> f81ccc4939ee178da75b073df90b7d5c05d68f4f
             .filter(|label| label.key == *stem)
 <<<<<<< HEAD
             .map(|label| label.path.clone())
@@ -110,6 +122,7 @@ pub fn pair(
                 None => Err(()),
             })
             .collect::<Vec<Result<String, ()>>>();
+<<<<<<< HEAD
 
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -118,11 +131,14 @@ pub fn pair(
 =======
 =======
 >>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b
+=======
+>>>>>>> f81ccc4939ee178da75b073df90b7d5c05d68f4f
         label_paths_for_stem.sort_by(|a, b| {
             let a_str = a.as_ref().map(|s| s.as_str()).unwrap_or("");
             let b_str = b.as_ref().map(|s| s.as_str()).unwrap_or("");
             a_str.cmp(b_str)
         });
+<<<<<<< HEAD
 <<<<<<< HEAD
 >>>>>>> 41a5c29104dc33c0f0f2a3a1576287e6710baaeb
 =======
@@ -134,6 +150,11 @@ pub fn pair(
         let (invalid_pairs, valid_label_paths) =
             process_label_path(&file_metadata, label_paths_for_stem);
 >>>>>>> c3b6efd01ea4f59079e5734f0465ca98e4559444
+=======
+
+        let (invalid_pairs, valid_label_paths) =
+            process_label_path(&file_metadata, label_paths_for_stem);
+>>>>>>> f81ccc4939ee178da75b073df90b7d5c05d68f4f
 
         let invalid_pairs = process_label_path(&file_metadata, label_paths_for_stem.clone());
 >>>>>>> 4f08b15df24ace696343f6d3fd4485ad08bb764b
