@@ -25,10 +25,13 @@ pub use yolo_file::{YoloEntry, YoloFile, YoloFileParseError, YoloFileParseErrorD
 
 use serde::{Deserialize, Serialize};
 
-/// Data collected during project loading.
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
-/// Results of scanning the source directories.
+/// Results of scanning the source directories when a project is loaded.
+///
+/// This structure stores every file stem discovered along with the
+/// outcome of pairing the corresponding image and label files. It also
+/// records how many unique classes were found in the project
+/// configuration.
 pub struct YoloProjectData {
     /// File stems found in the source directories.
     pub stems: Vec<String>,
@@ -41,9 +44,10 @@ pub struct YoloProjectData {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 /// High level representation of a YOLO dataset project.
 ///
-/// The project is constructed from a [`YoloProjectConfig`] and holds
-/// both the configuration and the results from file pairing and
-/// validation stored in [`YoloProjectData`].
+/// A `YoloProject` combines the user supplied configuration with the
+/// data discovered during scanning. It exposes helper methods to query
+/// valid pairs or inspect any errors detected while validating the
+/// dataset.
 pub struct YoloProject {
     /// Data produced when loading the project.
     pub data: YoloProjectData,
@@ -67,8 +71,10 @@ impl Default for YoloProject {
 impl YoloProject {
     /// Load a project using a [`YoloProjectConfig`].
     ///
-    /// This scans the configured image and label directories,
-    /// pairs files with the same stem and validates each pair.
+    /// The method scans the configured image and label directories,
+    /// pairs files with the same stem and validates each pair. The
+    /// results of this process are stored within the returned
+    /// [`YoloProject`] for further inspection or export.
     pub fn new(config: &YoloProjectConfig) -> Result<Self, FileError> {
         let image_paths = get_filepaths_for_extension(
             &config.source_paths.images,
