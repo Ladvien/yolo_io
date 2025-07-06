@@ -15,21 +15,29 @@ pub fn pair(
     let mut pairs: Vec<PairingResult> = Vec::new();
 
     for stem in stems {
-        let image_paths_for_stem = image_filenames
-            .clone()
-            .into_iter()
+        let mut image_paths_for_stem = image_filenames
+            .iter()
             .filter(|image| image.key == *stem)
-            .map(|image| match image.clone().path.to_str() {
+            .map(|image| image.path.clone())
+            .collect::<Vec<PathBuf>>();
+        image_paths_for_stem.sort();
+        let image_paths_for_stem = image_paths_for_stem
+            .iter()
+            .map(|image| match image.to_str() {
                 Some(path) => Ok(path.to_string()),
                 None => Err(()),
             })
             .collect::<Vec<Result<String, ()>>>();
 
-        let label_paths_for_stem = label_filenames
-            .clone()
-            .into_iter()
+        let mut label_paths_for_stem = label_filenames
+            .iter()
             .filter(|label| label.key == *stem)
-            .map(|label| match label.clone().path.to_str() {
+            .map(|label| label.path.clone())
+            .collect::<Vec<PathBuf>>();
+        label_paths_for_stem.sort();
+        let label_paths_for_stem = label_paths_for_stem
+            .iter()
+            .map(|label| match label.to_str() {
                 Some(path) => Ok(path.to_string()),
                 None => Err(()),
             })

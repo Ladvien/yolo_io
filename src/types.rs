@@ -136,9 +136,12 @@ pub struct FileMetadata {
     pub duplicate_tolerance: f32,
 }
 
+/// Configuration for a YOLO project.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct YoloProjectConfig {
     pub source_paths: SourcePaths,
+    /// Identifies the project format. Currently only "yolo" is supported but
+    /// this field is reserved for future project types.
     pub r#type: String,
     pub project_name: String,
     pub export: Export,

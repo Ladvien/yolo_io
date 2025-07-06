@@ -22,3 +22,10 @@ This crate is very much a work-in-progress.  Features outlined may not be comple
 
 ## Reads
 - [YOLO Format](https://docs.ultralytics.com/yolov5/tutorials/train_custom_data/#21-create-datasetyaml)
+
+## Configuration
+
+`yolo_io` expects a YAML configuration file when building a project. The
+`type` field inside this file denotes the project format. Today only the
+`"yolo"` type is recognized, but this key remains so other formats can be
+supported later.
