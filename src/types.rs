@@ -251,7 +251,6 @@ impl std::fmt::Display for DuplicateImageLabelPair {
 /// Reasons why a stem could not be paired.
 pub enum PairingError {
     LabelFileError(YoloFileParseError),
-    BothFilesMissing,
     LabelFileMissing(String),
     LabelFileMissingUnableToUnwrapImagePath,
     ImageFileMissing(String),
@@ -266,7 +265,6 @@ impl std::fmt::Display for PairingError {
             PairingError::LabelFileError(error) => {
                 write!(f, "Label file error: {}", error)
             }
-            PairingError::BothFilesMissing => write!(f, "Both files missing"),
             PairingError::LabelFileMissing(path) => {
                 write!(f, "Label file missing: {}", path)
             }

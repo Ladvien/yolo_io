@@ -181,7 +181,7 @@ pub fn evaluate_pair(
             (Err(_), Ok(label_path)) => {
                 PairingResult::Invalid(PairingError::ImageFileMissing(label_path))
             }
-            (Err(_), Err(_)) => PairingResult::Invalid(PairingError::BothFilesMissing),
+            (Err(_), Err(_)) => unreachable!("both image and label paths missing after validation"),
         },
         EitherOrBoth::Left(image_path) => match image_path {
             Ok(image_path) => PairingResult::Invalid(PairingError::LabelFileMissing(image_path)),

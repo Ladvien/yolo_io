@@ -158,35 +158,6 @@ mod pairing_tests {
     }
 
     #[rstest]
-    fn test_project_validation_produces_one_invalid_pair_for_no_image_no_label(
-        mut create_yolo_project_config: YoloProjectConfig,
-    ) {
-        // THIS ERROR IS IMPOSSIBLE TO TRIGGER
-        let filename = "five";
-        let this_test_directory = format!("{}/{}/", TEST_SANDBOX_DIR, filename);
-
-        fs::create_dir_all(&this_test_directory).expect("Unable to create directory");
-
-        create_yolo_project_config.source_paths.images = this_test_directory.clone();
-        create_yolo_project_config.source_paths.labels = this_test_directory.clone();
-
-        let project =
-            YoloProject::new(&create_yolo_project_config).expect("Unable to create project");
-
-        let valid_pairs = project.get_valid_pairs();
-        let valid_pair = valid_pairs.into_iter().find(|pair| pair.name == "test5");
-
-        let invalid_pairs = project.get_invalid_pairs();
-
-        let invalid_pair = invalid_pairs
-            .into_iter()
-            .find(|pair| matches!(pair, yolo_io::PairingError::BothFilesMissing));
-
-        assert!(valid_pair.is_none());
-        assert!(invalid_pair.is_none());
-    }
-
-    #[rstest]
 <<<<<<< HEAD
     fn test_project_validation_handles_mixed_case_extensions(
         image_data: ImageBuffer<Rgb<u8>, Vec<u8>>,
