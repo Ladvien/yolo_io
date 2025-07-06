@@ -2,11 +2,7 @@ use hashbrown::HashMap;
 use log::debug;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
-<<<<<<< HEAD
 use std::{fs, path::PathBuf};
-=======
-use std::fs;
->>>>>>> ef8cf112772ee387eb40674c9a50d3eac3745eee
 
 use thiserror::Error;
 
@@ -25,18 +21,10 @@ pub enum ExportError {
     FailedToUnwrapLabelPath,
     #[error("Failed to copy file '{0}' to '{1}'.")]
     FailedToCopyFile(String, String),
-<<<<<<< HEAD
-<<<<<<< HEAD
     #[error("Failed to read config: {0}")]
     ReadConfig(String),
     #[error("Failed to parse config: {0}")]
     ParseConfig(String),
-=======
-    #[error("Failed to read config file: {0}")]
-    ReadConfig(String),
->>>>>>> 88c6208b5242bb685205ed0cd2acd75901f72741
-=======
->>>>>>> ef8cf112772ee387eb40674c9a50d3eac3745eee
 }
 
 /// Handles writing a [`YoloProject`] to disk.
@@ -117,52 +105,40 @@ impl YoloProjectExporter {
                 .image_path
                 .ok_or(ExportError::FailedToUnwrapLabelPath)?;
 
-            let image_path = image_path
-                .as_os_str()
-                .to_str()
-                .ok_or(ExportError::FailedToUnwrapLabelPath)?;
-
             let label_file = pair
                 .label_file
                 .ok_or(ExportError::FailedToUnwrapLabelPath)?;
 
-            let label_path = label_file.path;
+            let label_path = PathBuf::from(label_file.path);
 
-            let image_stem = pair.name.clone();
-            let label_stem = pair.name;
+            let image_ext = image_path
+                .extension()
+                .and_then(|e| e.to_str())
+                .unwrap_or("");
 
-<<<<<<< HEAD
-<<<<<<< HEAD
             let label_ext = label_path
                 .extension()
                 .and_then(|e| e.to_str())
                 .unwrap_or("");
-=======
-            let image_extension = std::path::Path::new(image_path)
-                .extension()
-                .and_then(|e| e.to_str())
-                .unwrap_or("");
 
-            let label_extension = std::path::Path::new(&label_path)
-                .extension()
-                .and_then(|e| e.to_str())
-                .unwrap_or("");
+            let new_image_path = PathBuf::from(export_images_path)
+                .join(PathBuf::from(&pair.name).with_extension(image_ext));
 
-            let new_image_path =
-                format!("{}/{}.{}", export_images_path, image_stem, image_extension);
-            let new_label_path =
-                format!("{}/{}.{}", export_labels_path, label_stem, label_extension);
->>>>>>> 88c6208b5242bb685205ed0cd2acd75901f72741
-=======
-            let new_image_path = format!("{}/{}", export_images_path, image_stem);
-            let new_label_path = format!("{}/{}", export_labels_path, label_stem);
->>>>>>> ef8cf112772ee387eb40674c9a50d3eac3745eee
+            let new_label_path = PathBuf::from(export_labels_path)
+                .join(PathBuf::from(&pair.name).with_extension(label_ext));
 
-            fs::copy(image_path, new_image_path.clone()).map_err(|_| {
-                ExportError::FailedToCopyFile(image_path.to_string(), new_image_path)
+            fs::copy(&image_path, &new_image_path).map_err(|_| {
+                ExportError::FailedToCopyFile(
+                    image_path.to_string_lossy().to_string(),
+                    new_image_path.to_string_lossy().to_string(),
+                )
             })?;
-            fs::copy(label_path.clone(), new_label_path.clone()).map_err(|_| {
-                ExportError::FailedToCopyFile(label_path.to_string(), new_label_path)
+
+            fs::copy(&label_path, &new_label_path).map_err(|_| {
+                ExportError::FailedToCopyFile(
+                    label_path.to_string_lossy().to_string(),
+                    new_label_path.to_string_lossy().to_string(),
+                )
             })?;
         }
 
@@ -198,7 +174,7 @@ names:
 "
         );
 
-        let yolo_yaml_path = format!("{root_path}/{project_name}.yaml");
+        let yolo_yaml_path = PathBuf::from(&root_path).join(format!("{project_name}.yaml"));
         fs::write(yolo_yaml_path, yolo_yaml).unwrap();
     }
 }

@@ -335,12 +335,6 @@ mod invalid_label_tests {
             panic!("Expected error");
         }
     }
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> ef8cf112772ee387eb40674c9a50d3eac3745eee
 
     #[test]
     fn test_yolo_file_new_allows_duplicates_when_tolerance_zero() {
@@ -359,11 +353,6 @@ mod invalid_label_tests {
 
         assert!(yolo_file.is_ok());
     }
-<<<<<<< HEAD
-=======
->>>>>>> 88c6208b5242bb685205ed0cd2acd75901f72741
-=======
->>>>>>> ef8cf112772ee387eb40674c9a50d3eac3745eee
 
     fn create_yolo_label_file_with_tolerance(
         filename: &str,
@@ -393,13 +382,8 @@ mod invalid_label_tests {
         let (metadata, path) = create_yolo_label_file_with_tolerance(
             filename,
             classes,
-<<<<<<< HEAD
             "0 0.5 0.5 0.2 0.2\n0 0.515 0.5 0.2 0.2",
             0.05,
-=======
-            "0 0.5 0.5 0.2 0.2\n0 0.505 0.5 0.2 0.2",
-            0.02,
->>>>>>> 88c6208b5242bb685205ed0cd2acd75901f72741
         );
 
         let yolo_file = YoloFile::new(&metadata, &path);
@@ -408,31 +392,5 @@ mod invalid_label_tests {
             yolo_file,
             Err(YoloFileParseError::DuplicateEntries(_))
         ));
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
     }
-
-    #[test]
-    fn test_yolo_file_new_allows_duplicates_when_tolerance_zero() {
-        let filename = "tolerance_zero.txt";
-        let classes_raw = vec![(0, "person")];
-        let classes = create_yolo_classes(classes_raw.clone());
-        let (mut metadata, path) = create_yolo_label_file(
-            filename,
-            classes.clone(),
-            "0 0.25 0.5 0.25 0.5\n0 0.25 0.5 0.25 0.5",
-        );
-
-        metadata.duplicate_tolerance = 0.0;
-
-        let yolo_file = YoloFile::new(&metadata, &path);
-
-        assert!(yolo_file.is_ok());
->>>>>>> 88c6208b5242bb685205ed0cd2acd75901f72741
-    }
->>>>>>> 296ef2ce047247f51f7750eb57a5ee55d9f55b59
-=======
-    }
->>>>>>> ef8cf112772ee387eb40674c9a50d3eac3745eee
 }
