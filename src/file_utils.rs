@@ -5,6 +5,8 @@ use thiserror::Error;
 
 use crate::types::PathWithKey;
 
+/// Errors returned when reading from or writing to the file system.
+
 #[derive(Debug, Error, PartialEq, Clone, Serialize, Deserialize)]
 pub enum FileError {
     #[error("Unable to convert {0} to string.")]
@@ -17,6 +19,7 @@ pub enum FileError {
     WriteFile,
 }
 
+/// Return the file stem for a path.
 pub fn get_file_stem(file_path: &Path) -> Result<&str, FileError> {
     file_path
         .file_stem()
@@ -46,6 +49,7 @@ fn get_filepath_as_string(file_path: &Path) -> Result<String, FileError> {
     Ok(file_path.to_string())
 }
 
+/// Recursively gather all files under `path` with the given extensions.
 pub fn get_filepaths_for_extension(
     path: &str,
     extensions: Vec<&str>,

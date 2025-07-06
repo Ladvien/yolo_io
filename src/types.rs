@@ -6,29 +6,44 @@ use thiserror::Error;
 use crate::{ExportError, YoloFile, YoloFileParseError};
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+/// Percentage split used when exporting.
 pub struct Split {
+    /// Portion of data to use for training.
     pub train: f32,
+    /// Portion of data to use for validation.
     pub validation: f32,
+    /// Portion of data to use for testing.
     pub test: f32,
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+/// Settings controlling dataset export.
 pub struct Export {
+    /// Directory layout for the exported dataset.
     pub paths: Paths,
+    /// Mapping of class id to class name.
     pub class_map: HashMap<isize, String>,
+    /// Bounding box overlap tolerance used for duplicate detection.
     pub duplicate_tolerance: f32,
+    /// Train/val/test ratio.
     pub split: Split,
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+/// Collection of paths used during export.
 pub struct Paths {
+    /// Root directory for exported data.
     pub root: String,
+    /// Sub directory used for training data.
     pub train: String,
+    /// Sub directory used for validation data.
     pub validation: String,
+    /// Sub directory used for test data.
     pub test: String,
 }
 
 impl Paths {
+    /// Create a new set of export paths.
     pub fn new(root: &str, train: &str, validation: &str, test: &str) -> Self {
         Paths {
             root: root.to_string(),
@@ -38,46 +53,57 @@ impl Paths {
         }
     }
 
+    /// Root path used for export.
     pub fn get_root(&self) -> String {
         self.root.clone()
     }
 
+    /// Path to the training images directory.
     pub fn get_train_images_path(&self) -> String {
         format!("{}/train/images", self.root).replace("//", "/")
     }
 
+    /// Path to the training labels directory.
     pub fn get_train_label_images_path(&self) -> String {
         format!("{}/train/labels", self.root).replace("//", "/")
     }
 
+    /// Path to the validation images directory.
     pub fn get_validation_images_path(&self) -> String {
         format!("{}/validation/images", self.root).replace("//", "/")
     }
 
+    /// Path to the validation labels directory.
     pub fn get_validation_label_images_path(&self) -> String {
         format!("{}/validation/labels", self.root).replace("//", "/")
     }
 
+    /// Path to the test images directory.
     pub fn get_test_images_path(&self) -> String {
         format!("{}/test/images", self.root).replace("//", "/")
     }
 
+    /// Path to the test labels directory.
     pub fn get_test_label_images_path(&self) -> String {
         format!("{}/test/labels", self.root).replace("//", "/")
     }
 
+    /// Directory stem used for training data.
     pub fn get_train_stem(&self) -> String {
         self.train.clone()
     }
 
+    /// Directory stem used for validation data.
     pub fn get_validation_stem(&self) -> String {
         self.validation.clone()
     }
 
+    /// Directory stem used for test data.
     pub fn get_test_stem(&self) -> String {
         self.test.clone()
     }
 
+    /// Create the directory structure on disk.
     pub fn create_all_directories(&self) -> Result<(), ExportError> {
         let paths_to_create = vec![
             self.get_root(),
@@ -111,8 +137,11 @@ impl Default for Paths {
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+/// Where to locate source images and labels when loading a project.
 pub struct SourcePaths {
+    /// Directory containing image files.
     pub images: String,
+    /// Directory containing label files.
     pub labels: String,
 }
 
@@ -126,24 +155,38 @@ impl Default for SourcePaths {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+/// Class id and name as defined by the project configuration.
 pub struct YoloClass {
+    /// Numeric class identifier.
     pub id: isize,
+    /// Human readable class name.
     pub name: String,
 }
 
+/// Parameters used when validating label files.
 pub struct FileMetadata {
+    /// Allowed classes for labels.
     pub classes: Vec<YoloClass>,
+    /// Tolerance for bounding box duplication.
     pub duplicate_tolerance: f32,
 }
 
 /// Configuration for a YOLO project.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+/// Top level configuration for a [`YoloProject`].
 pub struct YoloProjectConfig {
+    /// Location of images and labels to scan.
     pub source_paths: SourcePaths,
+<<<<<<< HEAD
     /// Identifies the project format. Currently only "yolo" is supported but
     /// this field is reserved for future project types.
+=======
+    /// Type of project, currently always "yolo".
+>>>>>>> a70e8c027a2b221f4edca79f180332770abbb8a1
     pub r#type: String,
+    /// Name of the project.
     pub project_name: String,
+    /// Export related settings.
     pub export: Export,
 }
 
@@ -168,6 +211,7 @@ impl Default for YoloProjectConfig {
 }
 
 impl YoloProjectConfig {
+    /// Read a YAML configuration from disk.
     pub fn new(path: &str) -> Result<Self, ExportError> {
         let data = fs::read_to_string(path).expect("Unable to read file");
         let config: YoloProjectConfig = serde_yml::from_str(&data).expect("Unable to parse YAML");
@@ -176,16 +220,24 @@ impl YoloProjectConfig {
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+/// An image and label pair discovered in the project.
 pub struct ImageLabelPair {
+    /// File stem shared by the image and label.
     pub name: String,
+    /// Path to the image file if it exists.
     pub image_path: Option<PathBuf>,
+    /// Parsed label file if it exists.
     pub label_file: Option<YoloFile>,
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+/// Used when multiple files with the same stem are found.
 pub struct DuplicateImageLabelPair {
+    /// The shared file stem.
     pub name: String,
+    /// First discovered pair for the stem.
     pub primary: ImageLabelPair,
+    /// Additional pair detected as a duplicate.
     pub duplicate: ImageLabelPair,
 }
 
@@ -196,6 +248,7 @@ impl std::fmt::Display for DuplicateImageLabelPair {
 }
 
 #[derive(Error, Clone, PartialEq, Debug, Serialize, Deserialize)]
+/// Reasons why a stem could not be paired.
 pub enum PairingError {
     LabelFileError(YoloFileParseError),
     BothFilesMissing,
@@ -237,13 +290,17 @@ impl std::fmt::Display for PairingError {
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+/// Result of attempting to pair an image and label file.
 pub enum PairingResult {
     Valid(ImageLabelPair),
     Invalid(PairingError),
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+/// Helper used when scanning for files.
 pub struct PathWithKey {
+    /// Full path to the file.
     pub path: PathBuf,
+    /// Stem of the file used for matching.
     pub key: String,
 }

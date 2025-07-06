@@ -1,3 +1,8 @@
+//! IO helpers for working with YOLO style datasets.
+//!
+//! The crate scans directories for image and label files, pairs them,
+//! validates the labels and can export the result into the YOLO directory
+//! structure.  See [`YoloProject`] for the main entry point.
 #[macro_use]
 mod report;
 mod export;
@@ -20,16 +25,29 @@ pub use yolo_file::{YoloEntry, YoloFile, YoloFileParseError, YoloFileParseErrorD
 
 use serde::{Deserialize, Serialize};
 
+/// Data collected during project loading.
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
+/// Results of scanning the source directories.
 pub struct YoloProjectData {
+    /// File stems found in the source directories.
     pub stems: Vec<String>,
+    /// Pairing and validation results for each stem.
     pub pairs: Vec<PairingResult>,
+    /// Number of classes defined in the project configuration.
     pub number_of_classes: usize,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+/// High level representation of a YOLO dataset project.
+///
+/// The project is constructed from a [`YoloProjectConfig`] and holds
+/// both the configuration and the results from file pairing and
+/// validation stored in [`YoloProjectData`].
 pub struct YoloProject {
+    /// Data produced when loading the project.
     pub data: YoloProjectData,
+    /// Configuration used when loading and exporting the project.
     pub config: YoloProjectConfig,
 }
 
@@ -47,6 +65,10 @@ impl Default for YoloProject {
 }
 
 impl YoloProject {
+    /// Load a project using a [`YoloProjectConfig`].
+    ///
+    /// This scans the configured image and label directories,
+    /// pairs files with the same stem and validates each pair.
     pub fn new(config: &YoloProjectConfig) -> Result<Self, FileError> {
         let image_paths = get_filepaths_for_extension(
             &config.source_paths.images,
@@ -93,6 +115,7 @@ impl YoloProject {
         })
     }
 
+    /// Retrieve all successfully paired image/label combinations.
     pub fn get_valid_pairs(&self) -> Vec<ImageLabelPair> {
         self.data
             .pairs
@@ -104,6 +127,7 @@ impl YoloProject {
             .collect::<Vec<ImageLabelPair>>()
     }
 
+    /// Return any errors encountered during pairing or validation.
     pub fn get_invalid_pairs(&self) -> Vec<PairingError> {
         let invalid_pairs = self
             .data
@@ -118,6 +142,7 @@ impl YoloProject {
         invalid_pairs
     }
 
+    /// Lookup a pair by the file stem.
     pub fn get_pair(&self, stem: &str) -> Option<ImageLabelPair> {
         self.get_valid_pairs()
             .iter()
@@ -125,6 +150,7 @@ impl YoloProject {
             .cloned()
     }
 
+    /// Access a valid pair by index.
     pub fn pair_at_index(&self, index: isize) -> Option<ImageLabelPair> {
         self.get_valid_pairs().get(index as usize).cloned()
     }
