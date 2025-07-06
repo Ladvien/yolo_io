@@ -3,6 +3,7 @@ use log::debug;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 use std::fs;
+use std::path::{Path, PathBuf};
 
 use thiserror::Error;
 
@@ -101,28 +102,40 @@ impl YoloProjectExporter {
                 .image_path
                 .ok_or(ExportError::FailedToUnwrapLabelPath)?;
 
-            let image_path = image_path
-                .as_os_str()
-                .to_str()
-                .ok_or(ExportError::FailedToUnwrapLabelPath)?;
-
             let label_file = pair
                 .label_file
                 .ok_or(ExportError::FailedToUnwrapLabelPath)?;
 
-            let label_path = label_file.path;
+            let label_path = PathBuf::from(label_file.path);
 
-            let image_stem = pair.name.clone();
-            let label_stem = pair.name;
+            let image_ext = image_path
+                .extension()
+                .and_then(|e| e.to_str())
+                .unwrap_or("");
 
-            let new_image_path = format!("{}/{}", export_images_path, image_stem);
-            let new_label_path = format!("{}/{}", export_labels_path, label_stem);
+            let label_ext = label_path
+                .extension()
+                .and_then(|e| e.to_str())
+                .unwrap_or("");
 
-            fs::copy(image_path, new_image_path.clone()).map_err(|_| {
-                ExportError::FailedToCopyFile(image_path.to_string(), new_image_path)
+            let new_image_path = PathBuf::from(export_images_path)
+                .join(PathBuf::from(&pair.name).with_extension(image_ext));
+
+            let new_label_path = PathBuf::from(export_labels_path)
+                .join(PathBuf::from(&pair.name).with_extension(label_ext));
+
+            fs::copy(&image_path, &new_image_path).map_err(|_| {
+                ExportError::FailedToCopyFile(
+                    image_path.to_string_lossy().to_string(),
+                    new_image_path.to_string_lossy().to_string(),
+                )
             })?;
-            fs::copy(label_path.clone(), new_label_path.clone()).map_err(|_| {
-                ExportError::FailedToCopyFile(label_path.to_string(), new_label_path)
+
+            fs::copy(&label_path, &new_label_path).map_err(|_| {
+                ExportError::FailedToCopyFile(
+                    label_path.to_string_lossy().to_string(),
+                    new_label_path.to_string_lossy().to_string(),
+                )
             })?;
         }
 
