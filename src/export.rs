@@ -25,6 +25,8 @@ pub enum ExportError {
     ReadConfig(String),
     #[error("Failed to parse config: {0}")]
     ParseConfig(String),
+    #[error("Failed to write file '{0}'")]
+    WriteFile(String),
 }
 
 /// Handles writing a [`YoloProject`] to disk.
@@ -43,7 +45,7 @@ impl YoloProjectExporter {
         let project_name = &project.config.project_name;
         let classes = &project.config.export.class_map;
 
-        Self::create_yolo_yaml(project_name, paths, classes);
+        Self::create_yolo_yaml(project_name, paths, classes)?;
 
         let (train_pairs, validation_pairs, test_pairs) =
             Self::split_pairs(project.get_valid_pairs(), project.config.export.split);
@@ -145,7 +147,11 @@ impl YoloProjectExporter {
         Ok(())
     }
 
-    fn create_yolo_yaml(project_name: &str, paths: &Paths, classes: &HashMap<isize, String>) {
+    fn create_yolo_yaml(
+        project_name: &str,
+        paths: &Paths,
+        classes: &HashMap<isize, String>,
+    ) -> Result<(), ExportError> {
         let mut classes_vec: Vec<(isize, String)> =
             classes.iter().map(|(&k, v)| (k, v.clone())).collect();
 
@@ -175,6 +181,9 @@ names:
         );
 
         let yolo_yaml_path = PathBuf::from(&root_path).join(format!("{project_name}.yaml"));
-        fs::write(yolo_yaml_path, yolo_yaml).unwrap();
+        fs::write(&yolo_yaml_path, yolo_yaml)
+            .map_err(|_| ExportError::WriteFile(yolo_yaml_path.to_string_lossy().into()))?;
+
+        Ok(())
     }
 }
