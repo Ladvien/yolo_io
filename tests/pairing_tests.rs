@@ -187,19 +187,6 @@ mod pairing_tests {
     }
 
     #[rstest]
-<<<<<<< HEAD
-    fn test_project_validation_handles_mixed_case_extensions(
-        image_data: ImageBuffer<Rgb<u8>, Vec<u8>>,
-        mut create_yolo_project_config: YoloProjectConfig,
-    ) {
-        let filename = "mixed_case";
-        let this_test_directory = format!("{}/{}/", TEST_SANDBOX_DIR, filename);
-
-        let image_file = PathBuf::from(format!("{}/test1.JpG", this_test_directory));
-        create_image_file(&image_file, &image_data);
-
-        let label_file = PathBuf::from(format!("{}/test1.TxT", this_test_directory));
-=======
     fn test_pairing_with_mixed_case_extensions(
         image_data: ImageBuffer<Rgb<u8>, Vec<u8>>,
         mut create_yolo_project_config: YoloProjectConfig,
@@ -207,13 +194,10 @@ mod pairing_tests {
         let filename = "mixed_ext";
         let this_test_directory = format!("{}/{}/", TEST_SANDBOX_DIR, filename);
 
-        let image_file =
-            PathBuf::from(format!("{}/testMiXeD.JpG", this_test_directory));
+        let image_file = PathBuf::from(format!("{}/testMiXeD.JpG", this_test_directory));
         create_image_file(&image_file, &image_data);
 
-        let label_file =
-            PathBuf::from(format!("{}/testMiXeD.TxT", this_test_directory));
->>>>>>> cff4fcbe87749809e691fd884dbed988fac6624a
+        let label_file = PathBuf::from(format!("{}/testMiXeD.TxT", this_test_directory));
         create_dir_and_write_file(&label_file, "0 0.5 0.5 0.5 0.5");
 
         create_yolo_project_config.source_paths.images = this_test_directory.clone();
@@ -223,14 +207,10 @@ mod pairing_tests {
             YoloProject::new(&create_yolo_project_config).expect("Unable to create project");
 
         let valid_pairs = project.get_valid_pairs();
-<<<<<<< HEAD
 
-        let valid_pair = valid_pairs.into_iter().find(|pair| pair.name == "test1");
-=======
         let valid_pair = valid_pairs
             .into_iter()
             .find(|pair| pair.name == "testMiXeD");
->>>>>>> cff4fcbe87749809e691fd884dbed988fac6624a
 
         assert!(valid_pair.is_some());
     }

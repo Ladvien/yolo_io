@@ -21,6 +21,10 @@ pub enum ExportError {
     FailedToUnwrapLabelPath,
     #[error("Failed to copy file '{0}' to '{1}'.")]
     FailedToCopyFile(String, String),
+    #[error("Failed to read config: {0}")]
+    ReadConfig(String),
+    #[error("Failed to parse config: {0}")]
+    ParseConfig(String),
 }
 
 /// Handles writing a [`YoloProject`] to disk.
