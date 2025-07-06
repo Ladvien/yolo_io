@@ -207,7 +207,10 @@ mod pairing_tests {
             YoloProject::new(&create_yolo_project_config).expect("Unable to create project");
 
         let valid_pairs = project.get_valid_pairs();
+<<<<<<< HEAD
 
+=======
+>>>>>>> 296ef2ce047247f51f7750eb57a5ee55d9f55b59
         let valid_pair = valid_pairs
             .into_iter()
             .find(|pair| pair.name == "testMiXeD");

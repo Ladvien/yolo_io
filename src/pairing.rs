@@ -6,6 +6,7 @@ use crate::types::{
 };
 use crate::YoloFile;
 
+/// Pair images and labels based on matching file stems.
 pub fn pair(
     file_metadata: FileMetadata,
     stems: Vec<String>,
@@ -15,6 +16,7 @@ pub fn pair(
     let mut pairs: Vec<PairingResult> = Vec::new();
 
     for stem in stems {
+<<<<<<< HEAD
         let image_paths_for_stem = image_filenames
             .clone()
             .into_iter()
@@ -34,6 +36,47 @@ pub fn pair(
                 None => Err(()),
             })
             .collect::<Vec<Result<String, ()>>>();
+=======
+        let mut image_paths_for_stem = image_filenames
+            .iter()
+            .filter(|image| image.key == *stem)
+            .map(|image| image.path.clone())
+            .collect::<Vec<PathBuf>>();
+        image_paths_for_stem.sort_by(|a, b| a.to_string_lossy().cmp(&b.to_string_lossy()));
+
+        let mut image_paths_for_stem = image_paths_for_stem
+            .iter()
+            .map(|image| match image.to_str() {
+                Some(p) => Ok(p.to_string()),
+                None => Err(()),
+            })
+            .collect::<Vec<Result<String, ()>>>();
+        image_paths_for_stem.sort_by(|a, b| {
+            let a_str = a.as_ref().map(|s| s.as_str()).unwrap_or("");
+            let b_str = b.as_ref().map(|s| s.as_str()).unwrap_or("");
+            a_str.cmp(b_str)
+        });
+
+        let mut label_paths_for_stem = label_filenames
+            .iter()
+            .filter(|label| label.key == *stem)
+            .map(|label| label.path.clone())
+            .collect::<Vec<PathBuf>>();
+        label_paths_for_stem.sort_by(|a, b| a.to_string_lossy().cmp(&b.to_string_lossy()));
+
+        let mut label_paths_for_stem = label_paths_for_stem
+            .iter()
+            .map(|label| match label.to_str() {
+                Some(p) => Ok(p.to_string()),
+                None => Err(()),
+            })
+            .collect::<Vec<Result<String, ()>>>();
+        label_paths_for_stem.sort_by(|a, b| {
+            let a_str = a.as_ref().map(|s| s.as_str()).unwrap_or("");
+            let b_str = b.as_ref().map(|s| s.as_str()).unwrap_or("");
+            a_str.cmp(b_str)
+        });
+>>>>>>> 296ef2ce047247f51f7750eb57a5ee55d9f55b59
 
         let (invalid_pairs, valid_label_paths) =
             process_label_path(&file_metadata, label_paths_for_stem);
@@ -54,14 +97,21 @@ pub fn pair(
 
             match result {
                 PairingResult::Valid(pair) => match primary_pair {
-                    Some(ref primary_pair) => {
-                        pairs.push(PairingResult::Invalid(PairingError::Duplicate(
-                            DuplicateImageLabelPair {
+                    Some(ref primary) => {
+                        let error = if primary.label_file != pair.label_file {
+                            PairingError::DuplicateLabelMismatch(DuplicateImageLabelPair {
                                 name: stem.clone(),
-                                primary: primary_pair.clone(),
+                                primary: primary.clone(),
                                 duplicate: pair.clone(),
-                            },
-                        )));
+                            })
+                        } else {
+                            PairingError::Duplicate(DuplicateImageLabelPair {
+                                name: stem.clone(),
+                                primary: primary.clone(),
+                                duplicate: pair.clone(),
+                            })
+                        };
+                        pairs.push(PairingResult::Invalid(error));
                     }
                     None => {
                         primary_pair = Some(pair.clone());
@@ -79,7 +129,10 @@ pub fn pair(
 
     pairs
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 296ef2ce047247f51f7750eb57a5ee55d9f55b59
 pub fn process_label_path(
     file_metadata: &FileMetadata,
     label_paths_for_stem: Vec<Result<String, ()>>,
@@ -109,6 +162,7 @@ pub fn process_label_path(
     (invalid_pairs, valid_paths)
 }
 
+/// Build a [`PairingResult`] from a potential image/label pair.
 pub fn evaluate_pair(
     stem: String,
     pair: EitherOrBoth<Result<String, ()>>,

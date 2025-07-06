@@ -208,10 +208,9 @@ impl Default for YoloProjectConfig {
 impl YoloProjectConfig {
     /// Read a YAML configuration from disk.
     pub fn new(path: &str) -> Result<Self, ExportError> {
-        let data =
-            fs::read_to_string(path).map_err(|e| ExportError::ReadConfig(e.to_string()))?;
-        let config = serde_yml::from_str(&data)
-            .map_err(|e| ExportError::ParseConfig(e.to_string()))?;
+        let data = fs::read_to_string(path).map_err(|e| ExportError::ReadConfig(e.to_string()))?;
+        let config =
+            serde_yml::from_str(&data).map_err(|e| ExportError::ParseConfig(e.to_string()))?;
         Ok(config)
     }
 }
