@@ -47,9 +47,6 @@ mod duplicate_tests {
         let valid_pairs = project.get_valid_pairs();
         let invalid_pairs = project.get_invalid_pairs();
 
-        println!("{:#?}", valid_pairs);
-        println!("{:#?}", invalid_pairs);
-
         let valid_pair = valid_pairs.into_iter().find(|pair| pair.name == "test1");
         let invalid_pair = invalid_pairs
             .into_iter()
@@ -113,9 +110,6 @@ mod duplicate_tests {
 
         let valid_pairs = project.get_valid_pairs();
         let invalid_pairs = project.get_invalid_pairs();
-
-        println!("{:#?}", valid_pairs);
-        println!("{:#?}", invalid_pairs);
 
         let valid_pair = valid_pairs.into_iter().find(|pair| pair.name == file_key);
         let invalid_pairs = invalid_pairs

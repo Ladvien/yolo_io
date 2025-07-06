@@ -86,5 +86,8 @@ pub fn get_filepaths_for_extension(
         }
     }
 
+    // Ensure deterministic ordering
+    paths.sort_by(|a, b| a.path.cmp(&b.path));
+
     Ok(paths)
 }
