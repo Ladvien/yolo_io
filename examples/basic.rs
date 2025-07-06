@@ -1,19 +1,18 @@
+use std::fs;
 use yolo_io::*;
 
 fn main() {
-    let images_path = "examples/images";
-    let labels_path = "examples/labels";
-    let config = YoloProjectConfig::new("examples/config.yaml").unwrap();
-    let project = YoloProject::new(&config);
+    // Load the project configuration from disk
+    let config = YoloProjectConfig::new("examples/config.yaml").expect("Failed to load config");
 
-    // let report = YoloDataQualityReport::generate(project.clone().unwrap());
+    // Build a project using the configuration
+    let project = YoloProject::new(&config).expect("Failed to create project");
 
-    // match report {
-    //     Some(report) => {
-    //         let mut file = fs::File::create("report.json").expect("Unable to create file");
-    //         file.write_all(report.as_bytes())
-    //             .expect("Unable to write data to file");
-    //     }
-    //     None => todo!(),
-    // }
+    // Generate a data quality report
+    if let Some(report) = YoloDataQualityReport::generate(project.clone()) {
+        fs::write("report.json", report).expect("Unable to write report");
+    }
+
+    // Export the validated project to the configured paths
+    YoloProjectExporter::export(project).expect("Failed to export project");
 }
