@@ -15,26 +15,66 @@ pub fn pair(
     let mut pairs: Vec<PairingResult> = Vec::new();
 
     for stem in stems {
+<<<<<<< HEAD
         let image_paths_for_stem = image_filenames
             .clone()
             .into_iter()
             .filter(|image| image.key == *stem)
             .map(|image| match image.clone().path.to_str() {
+=======
+        let mut image_paths_for_stem = image_filenames
+            .clone()
+            .into_iter()
+            .filter(|image| image.key == *stem)
+            .map(|image| image.path.clone())
+            .collect::<Vec<PathBuf>>();
+        image_paths_for_stem.sort();
+        let mut image_paths_for_stem = image_paths_for_stem
+            .iter()
+            .map(|image| match image.to_str() {
+>>>>>>> 41a5c29104dc33c0f0f2a3a1576287e6710baaeb
                 Some(path) => Ok(path.to_string()),
                 None => Err(()),
             })
             .collect::<Vec<Result<String, ()>>>();
 
+<<<<<<< HEAD
         let label_paths_for_stem = label_filenames
             .clone()
             .into_iter()
             .filter(|label| label.key == *stem)
             .map(|label| match label.clone().path.to_str() {
+=======
+        image_paths_for_stem.sort_by(|a, b| {
+            let a_str = a.as_ref().map(|s| s.as_str()).unwrap_or("");
+            let b_str = b.as_ref().map(|s| s.as_str()).unwrap_or("");
+            a_str.cmp(b_str)
+        });
+
+        let mut label_paths_for_stem = label_filenames
+            .clone()
+            .into_iter()
+            .filter(|label| label.key == *stem)
+            .map(|label| label.path.clone())
+            .collect::<Vec<PathBuf>>();
+        label_paths_for_stem.sort();
+        let mut label_paths_for_stem = label_paths_for_stem
+            .iter()
+            .map(|label| match label.to_str() {
+>>>>>>> 41a5c29104dc33c0f0f2a3a1576287e6710baaeb
                 Some(path) => Ok(path.to_string()),
                 None => Err(()),
             })
             .collect::<Vec<Result<String, ()>>>();
 
+<<<<<<< HEAD
+=======
+        label_paths_for_stem.sort_by(|a, b| {
+            let a_str = a.as_ref().map(|s| s.as_str()).unwrap_or("");
+            let b_str = b.as_ref().map(|s| s.as_str()).unwrap_or("");
+            a_str.cmp(b_str)
+        });
+>>>>>>> 41a5c29104dc33c0f0f2a3a1576287e6710baaeb
         let (invalid_pairs, valid_label_paths) =
             process_label_path(&file_metadata, label_paths_for_stem);
 

@@ -198,6 +198,10 @@ mod pairing_tests {
         create_image_file(&image_file, &image_data);
 
         let label_file = PathBuf::from(format!("{}/testMiXeD.TxT", this_test_directory));
+<<<<<<< HEAD
+=======
+
+>>>>>>> 41a5c29104dc33c0f0f2a3a1576287e6710baaeb
         create_dir_and_write_file(&label_file, "0 0.5 0.5 0.5 0.5");
 
         create_yolo_project_config.source_paths.images = this_test_directory.clone();

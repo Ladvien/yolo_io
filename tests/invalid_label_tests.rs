@@ -367,6 +367,7 @@ mod invalid_label_tests {
 
         let yolo_file = YoloFile::new(&metadata, &path);
 
+<<<<<<< HEAD
         assert!(yolo_file.is_ok());
     }
 
@@ -386,5 +387,11 @@ mod invalid_label_tests {
         let yolo_file = YoloFile::new(&metadata, &path);
 
         assert!(yolo_file.is_ok());
+=======
+        assert!(matches!(
+            yolo_file,
+            Err(YoloFileParseError::DuplicateEntries(_))
+        ));
+>>>>>>> 41a5c29104dc33c0f0f2a3a1576287e6710baaeb
     }
 }
