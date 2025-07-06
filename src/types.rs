@@ -177,12 +177,7 @@ pub struct FileMetadata {
 pub struct YoloProjectConfig {
     /// Location of images and labels to scan.
     pub source_paths: SourcePaths,
-<<<<<<< HEAD
-    /// Identifies the project format. Currently only "yolo" is supported but
-    /// this field is reserved for future project types.
-=======
     /// Type of project, currently always "yolo".
->>>>>>> a70e8c027a2b221f4edca79f180332770abbb8a1
     pub r#type: String,
     /// Name of the project.
     pub project_name: String,

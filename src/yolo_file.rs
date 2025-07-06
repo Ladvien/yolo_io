@@ -115,6 +115,9 @@ impl YoloFile {
                 return Err(YoloFileParseError::EmptyFile(details));
             }
 
+            let tolerance = metadata.duplicate_tolerance;
+            let mut coords: Vec<(f32, f32, f32, f32)> = Vec::new();
+
             for (index, line) in file.lines().enumerate() {
                 let parts: Vec<&str> = line.split(" ").collect();
 
@@ -259,6 +262,34 @@ impl YoloFile {
                     ));
                 }
 
+                if tolerance > 0.0 {
+                    let x1 = x_center - width / 2.0;
+                    let x2 = x_center + width / 2.0;
+                    let y1 = y_center - height / 2.0;
+                    let y2 = y_center + height / 2.0;
+
+                    for (prev_index, (px1, px2, py1, py2)) in coords.iter().enumerate() {
+                        if (x1 - *px1).abs() <= tolerance
+                            && (x2 - *px2).abs() <= tolerance
+                            && (y1 - *py1).abs() <= tolerance
+                            && (y2 - *py2).abs() <= tolerance
+                        {
+                            return Err(YoloFileParseError::DuplicateEntries(
+                                YoloFileParseErrorDetails {
+                                    path: path.to_string(),
+                                    class: None,
+                                    row: Some(prev_index),
+                                    other_row: Some(index),
+                                    column: None,
+                                    value: None,
+                                },
+                            ));
+                        }
+                    }
+
+                    coords.push((x1, x2, y1, y2));
+                }
+
                 entries.push(YoloEntry {
                     class,
                     x_center,
@@ -267,32 +298,6 @@ impl YoloFile {
                     height,
                 });
             }
-
-            // TODO: I need to move these checks into the inner loop.
-            let mut label_coordinates = Vec::<(f32, f32, f32, f32)>::new();
-
-            for entry in &entries {
-                let x1 = entry.x_center - entry.width / 2.0;
-                let x2 = entry.x_center + entry.width / 2.0;
-                let y1 = entry.y_center - entry.height / 2.0;
-                let y2 = entry.y_center + entry.height / 2.0;
-
-                label_coordinates.push((x1, x2, y1, y2))
-            }
-
-            let tolerance = metadata.duplicate_tolerance;
-            if let Some(indices) = Self::get_duplicate_index(&label_coordinates, tolerance) {
-                return Err(YoloFileParseError::DuplicateEntries(
-                    YoloFileParseErrorDetails {
-                        path: path.to_string(),
-                        class: None,
-                        row: Some(indices.0),
-                        other_row: Some(indices.1),
-                        column: None,
-                        value: None,
-                    },
-                ));
-            };
         }
 
         let stem = get_file_stem(Path::new(path))
@@ -313,36 +318,5 @@ impl YoloFile {
             path: path.to_string(),
             entries,
         })
-    }
-
-    fn get_duplicate_index(
-        duplicated_labels: &[(f32, f32, f32, f32)],
-        tolerance: f32,
-    ) -> Option<(usize, usize)> {
-        use hashbrown::HashMap;
-
-        if tolerance <= 0.0 {
-            return None;
-        }
-
-        let scale = 1.0 / tolerance;
-        let mut seen: HashMap<(i32, i32, i32, i32), usize> = HashMap::new();
-
-        for (index, (x1, x2, y1, y2)) in duplicated_labels.iter().cloned().enumerate() {
-            let key = (
-                (x1 * scale).round() as i32,
-                (x2 * scale).round() as i32,
-                (y1 * scale).round() as i32,
-                (y2 * scale).round() as i32,
-            );
-
-            if let Some(prev_index) = seen.get(&key) {
-                return Some((*prev_index, index));
-            }
-
-            seen.insert(key, index);
-        }
-
-        None
     }
 }
