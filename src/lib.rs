@@ -2,7 +2,20 @@
 //!
 //! The crate scans directories for image and label files, pairs them,
 //! validates the labels and can export the result into the YOLO directory
-//! structure.  See [`YoloProject`] for the main entry point.
+//! structure. See [`YoloProject`] for the main entry point.
+//!
+//! # Example
+//!
+//! ```rust,no_run
+//! use yolo_io::{YoloProjectConfig, YoloProject, YoloProjectExporter};
+//!
+//! fn main() -> Result<(), Box<dyn std::error::Error>> {
+//!     let config = YoloProjectConfig::new("examples/config.yaml")?;
+//!     let project = YoloProject::new(&config)?;
+//!     YoloProjectExporter::export(project)?;
+//!     Ok(())
+//! }
+//! ```
 mod export;
 mod file_utils;
 mod pairing;
