@@ -28,15 +28,18 @@ Add the crate to your `Cargo.toml`:
 yolo_io = "0.1.103"
 ```
 
-Load your project and export it back out:
+Load your project and export it back out. A complete example is provided in
+`examples/minimal.rs`:
 
 ```rust
-use yolo_io::*;
+use yolo_io::{YoloProjectConfig, YoloProject, YoloProjectExporter};
 
-let config = YoloProjectConfig::new("examples/config.yaml")?;
-let project = YoloProject::new(&config)?;
-YoloProjectExporter::export(project)?;
-# Ok::<(), Box<dyn std::error::Error>>(())
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let config = YoloProjectConfig::new("examples/config.yaml")?;
+    let project = YoloProject::new(&config)?;
+    YoloProjectExporter::export(project)?;
+    Ok(())
+}
 ```
 
 Run the included example (requires the sample dataset in `examples/`):
