@@ -20,8 +20,8 @@ pub struct DataQualityItem {
 pub struct YoloDataQualityReport;
 
 impl YoloDataQualityReport {
-    /// Create a JSON report from a [`YoloProject`].
-    pub fn generate(project: YoloProject) -> Option<String> {
+    /// Collect all [`DataQualityItem`]s from a [`YoloProject`].
+    fn collect_items(project: &YoloProject) -> Vec<DataQualityItem> {
         let mut errors = Vec::<DataQualityItem>::new();
 
         for error in project.data.pairs.iter() {
@@ -32,9 +32,16 @@ impl YoloDataQualityReport {
                     data: pairing_error.clone(),
                 };
 
-                errors.push(dq_item.clone());
+                errors.push(dq_item);
             }
         }
+
+        errors
+    }
+
+    /// Create a JSON report from a [`YoloProject`].
+    pub fn generate(project: YoloProject) -> Option<String> {
+        let errors = Self::collect_items(&project);
 
         if errors.is_empty() {
             None
@@ -45,19 +52,7 @@ impl YoloDataQualityReport {
 
     /// Create a YAML report from a [`YoloProject`].
     pub fn generate_yaml(project: YoloProject) -> Option<String> {
-        let mut errors = Vec::<DataQualityItem>::new();
-
-        for error in project.data.pairs.iter() {
-            if let PairingResult::Invalid(pairing_error) = error {
-                let dq_item = DataQualityItem {
-                    source: Self::get_source_name(pairing_error),
-                    message: pairing_error.to_string(),
-                    data: pairing_error.clone(),
-                };
-
-                errors.push(dq_item.clone());
-            }
-        }
+        let errors = Self::collect_items(&project);
 
         if errors.is_empty() {
             None
