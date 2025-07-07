@@ -1,4 +1,7 @@
-use std::{fs, path::Path};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 use hashbrown::HashMap;
 use image::{ImageBuffer, Rgb};
@@ -94,10 +97,10 @@ pub fn create_yolo_project_config() -> YoloProjectConfig {
         project_name: String::from("test_project"),
         export: Export {
             paths: Paths {
-                train: String::from("train/"),
-                validation: String::from("validation/"),
-                test: String::from("test/"),
-                root: String::from("tests/sandbox/export/"),
+                train: PathBuf::from("train/"),
+                validation: PathBuf::from("validation/"),
+                test: PathBuf::from("test/"),
+                root: PathBuf::from("tests/sandbox/export/"),
             },
             class_map,
             duplicate_tolerance: 0.01,

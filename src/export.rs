@@ -2,7 +2,10 @@ use hashbrown::HashMap;
 use log::debug;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
-use std::{fs, path::PathBuf};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 use thiserror::Error;
 
@@ -59,23 +62,23 @@ impl YoloProjectExporter {
         let (train_pairs, validation_pairs, test_pairs) =
             Self::split_pairs(project.get_valid_pairs(), project.config.export.split);
 
-        let test_image_path = &paths.get_test_images_path();
-        let test_label_path = &paths.get_test_label_images_path();
+        let test_image_path = paths.get_test_images_path();
+        let test_label_path = paths.get_test_label_images_path();
 
-        let train_image_path = &paths.get_train_images_path();
-        let train_label_path = &paths.get_train_label_images_path();
+        let train_image_path = paths.get_train_images_path();
+        let train_label_path = paths.get_train_label_images_path();
 
-        let val_image_path = &paths.get_validation_images_path();
-        let val_label_path = &paths.get_validation_label_images_path();
+        let val_image_path = paths.get_validation_images_path();
+        let val_label_path = paths.get_validation_label_images_path();
 
-        let splits: Vec<(&str, &str, Vec<ImageLabelPair>)> = vec![
+        let splits: Vec<(PathBuf, PathBuf, Vec<ImageLabelPair>)> = vec![
             (test_image_path, test_label_path, test_pairs),
             (train_image_path, train_label_path, train_pairs),
             (val_image_path, val_label_path, validation_pairs),
         ];
 
         for (images_path, labels_path, pairs) in splits {
-            Self::copy_files(images_path, labels_path, pairs)?;
+            Self::copy_files(&images_path, &labels_path, pairs)?;
         }
 
         Ok(())
@@ -108,8 +111,8 @@ impl YoloProjectExporter {
     }
 
     fn copy_files(
-        export_images_path: &str,
-        export_labels_path: &str,
+        export_images_path: &Path,
+        export_labels_path: &Path,
         pairs: Vec<ImageLabelPair>,
     ) -> Result<(), ExportError> {
         for pair in pairs {
@@ -135,11 +138,11 @@ impl YoloProjectExporter {
                 .and_then(|e| e.to_str())
                 .unwrap_or("");
 
-            let new_image_path = PathBuf::from(export_images_path)
-                .join(PathBuf::from(&pair.name).with_extension(image_ext));
+            let new_image_path =
+                export_images_path.join(PathBuf::from(&pair.name).with_extension(image_ext));
 
-            let new_label_path = PathBuf::from(export_labels_path)
-                .join(PathBuf::from(&pair.name).with_extension(label_ext));
+            let new_label_path =
+                export_labels_path.join(PathBuf::from(&pair.name).with_extension(label_ext));
 
             fs::copy(&image_path, &new_image_path).map_err(|_| {
                 ExportError::FailedToCopyFile(
@@ -182,17 +185,22 @@ impl YoloProjectExporter {
 
         let yolo_yaml = format!(
             "# Generate by yolo_io - https://github.com/Ladvien/yolo_io
-path: {root_path}
-train: {train_path}
-val: {val_path}
-test: {test_path}
+path: {}
+train: {}
+val: {}
+test: {}
 
 names:
-{classes_as_yaml}
-"
+{}
+",
+            root_path.to_string_lossy(),
+            train_path,
+            val_path,
+            test_path,
+            classes_as_yaml
         );
 
-        let yolo_yaml_path = PathBuf::from(&root_path).join(format!("{project_name}.yaml"));
+        let yolo_yaml_path = root_path.join(format!("{project_name}.yaml"));
         fs::write(&yolo_yaml_path, yolo_yaml)
             .map_err(|_| ExportError::WriteFile(yolo_yaml_path.to_string_lossy().into()))?;
 
