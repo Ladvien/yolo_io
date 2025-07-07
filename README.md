@@ -68,13 +68,13 @@ Create a project and export your dataset:
 ```rust
 use yolo_io::*;
 
-let config = YoloProjectConfig::new("config.yaml")?;
+let config = YoloProjectConfig::new("examples/config.yaml")?;
 let project = YoloProject::new(&config)?;
 YoloProjectExporter::export(project)?;
 # Ok::<(), Box<dyn std::error::Error>>(())
 ```
 
-Run the provided example:
+Run the provided example (requires the sample dataset in `examples/`):
 
 ```bash
 cargo run --example basic
@@ -85,7 +85,7 @@ cargo run --example basic
 Generate a data quality report with the built-in CLI:
 
 ```bash
-cargo run --bin report -- --config config.yaml --output report.json
+cargo run --bin report -- --config examples/config.yaml --output report.json
 ```
 
 Add `--format yaml` to output YAML instead of JSON.
