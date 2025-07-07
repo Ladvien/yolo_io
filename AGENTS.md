@@ -44,4 +44,3 @@ Here’s a general-purpose, bulletized list of what an agent should do — indep
 
   * Design your code so that config—not code—drives behavior when possible.
 
-Would you like to include this as a new section at the top or bottom of your existing guide?
