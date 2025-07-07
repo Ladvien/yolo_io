@@ -213,4 +213,29 @@ mod pairing_tests {
 
         assert!(valid_pair.is_some());
     }
+
+    #[rstest]
+    fn test_pair_at_index_out_of_range(
+        image_data: ImageBuffer<Rgb<u8>, Vec<u8>>,
+        mut create_yolo_project_config: YoloProjectConfig,
+    ) {
+        let filename = "index_out_of_range";
+        let this_test_directory = format!("{}/{}/", TEST_SANDBOX_DIR, filename);
+
+        let image_file = PathBuf::from(format!("{}/test.jpg", this_test_directory));
+        create_image_file(&image_file, &image_data);
+
+        let label_file = PathBuf::from(format!("{}/test.txt", this_test_directory));
+        create_dir_and_write_file(&label_file, "0 0.5 0.5 0.5 0.5");
+
+        create_yolo_project_config.source_paths.images = this_test_directory.clone();
+        create_yolo_project_config.source_paths.labels = this_test_directory.clone();
+
+        let project =
+            YoloProject::new(&create_yolo_project_config).expect("Unable to create project");
+
+        let pair = project.pair_at_index(1);
+
+        assert!(pair.is_none());
+    }
 }

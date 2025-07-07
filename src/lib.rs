@@ -157,8 +157,10 @@ impl YoloProject {
     }
 
     /// Access a valid pair by index.
-    pub fn pair_at_index(&self, index: isize) -> Option<ImageLabelPair> {
-        self.get_valid_pairs().get(index as usize).cloned()
+    ///
+    /// Returns `None` if the index is out of bounds.
+    pub fn pair_at_index(&self, index: usize) -> Option<ImageLabelPair> {
+        self.get_valid_pairs().get(index).cloned()
     }
 
     fn get_file_stems(filenames: &[&PathWithKey]) -> Vec<String> {
