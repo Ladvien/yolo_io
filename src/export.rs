@@ -93,12 +93,15 @@ impl YoloProjectExporter {
         let mut pairs = pairs;
         pairs.shuffle(&mut rng);
 
-        let num_test_pairs = ((1.0 - split.test) * pairs.len() as f32).round() as usize;
-        let test_pairs = pairs.split_off(num_test_pairs);
+        let total = pairs.len();
 
-        let num_val_pairs = ((1.0 - split.validation) * pairs.len() as f32).round() as usize;
-        let validation_pairs = pairs.split_off(num_val_pairs);
+        let num_test_pairs = (split.test * total as f32).round() as usize;
+        let num_val_pairs = (split.validation * total as f32).round() as usize;
 
+        let test_pairs: Vec<ImageLabelPair> =
+            pairs.drain(0..num_test_pairs.min(pairs.len())).collect();
+        let validation_pairs: Vec<ImageLabelPair> =
+            pairs.drain(0..num_val_pairs.min(pairs.len())).collect();
         let train_pairs = pairs;
 
         (train_pairs, validation_pairs, test_pairs)

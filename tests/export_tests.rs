@@ -11,7 +11,7 @@ mod tests {
     };
     use image::{ImageBuffer, Rgb};
     use rstest::rstest;
-    use yolo_io::{YoloProject, YoloProjectConfig, YoloProjectExporter};
+    use yolo_io::{Split, YoloProject, YoloProjectConfig, YoloProjectExporter};
 
     fn run_export(
         mut create_yolo_project_config: YoloProjectConfig,
@@ -19,6 +19,8 @@ mod tests {
         image_data: ImageBuffer<Rgb<u8>, Vec<u8>>,
         image_ext: &str,
         label_ext: &str,
+        num_pairs: usize,
+        split: Split,
     ) -> YoloProjectConfig {
         let export_source_dir = format!("{}/export_source_{}", TEST_SANDBOX_DIR, export_name);
         let export_out_dir = format!("{}/export_{}", TEST_SANDBOX_DIR, export_name);
@@ -29,18 +31,14 @@ mod tests {
 
         create_dir(&export_source_dir);
 
-        // Set split percentages
-        create_yolo_project_config.export.split.train = 0.6;
-        create_yolo_project_config.export.split.validation = 0.2;
-        create_yolo_project_config.export.split.test = 0.2;
+        create_yolo_project_config.export.split = split;
 
         create_yolo_project_config.source_paths.images = export_source_dir.clone();
         create_yolo_project_config.source_paths.labels = export_source_dir.clone();
 
         create_yolo_project_config.export.paths.root = export_out_dir.clone();
 
-        let num_of_pairs = 10;
-        for i in 0..num_of_pairs {
+        for i in 0..num_pairs {
             let image_path = format!("{}/test_{}.{}", export_source_dir, i, image_ext);
             let label_path = format!("{}/test_{}.{}", export_source_dir, i, label_ext);
             image_data.save(&image_path).expect("Unable to save image");
@@ -64,6 +62,12 @@ mod tests {
             image_data(),
             "jpg",
             "txt",
+            10,
+            Split {
+                train: 0.6,
+                validation: 0.2,
+                test: 0.2,
+            },
         );
         let train_image_path = format!("{}/train/images", exported_config.export.paths.root);
 
@@ -91,6 +95,46 @@ mod tests {
     }
 
     #[rstest]
+    fn test_splits_respect_fraction(create_yolo_project_config: YoloProjectConfig) {
+        let exported_config = run_export(
+            create_yolo_project_config,
+            "test_splits_fraction".to_string(),
+            image_data(),
+            "jpg",
+            "txt",
+            7,
+            Split {
+                train: 0.3,
+                validation: 0.3,
+                test: 0.4,
+            },
+        );
+
+        let num_train_image_files = fs::read_dir(format!(
+            "{}/train/images",
+            exported_config.export.paths.root
+        ))
+        .unwrap()
+        .count();
+
+        let num_validation_image_files = fs::read_dir(format!(
+            "{}/validation/images",
+            exported_config.export.paths.root
+        ))
+        .unwrap()
+        .count();
+
+        let num_test_image_files =
+            fs::read_dir(format!("{}/test/images", exported_config.export.paths.root))
+                .unwrap()
+                .count();
+
+        assert_eq!(num_train_image_files, 2);
+        assert_eq!(num_validation_image_files, 2);
+        assert_eq!(num_test_image_files, 3);
+    }
+
+    #[rstest]
     fn test_yolo_yaml_created(create_yolo_project_config: YoloProjectConfig) {
         let exported_config = run_export(
             create_yolo_project_config,
@@ -98,6 +142,12 @@ mod tests {
             image_data(),
             "jpg",
             "txt",
+            10,
+            Split {
+                train: 0.6,
+                validation: 0.2,
+                test: 0.2,
+            },
         );
 
         let yolo_yaml_path = format!("{}/test_project.yaml", exported_config.export.paths.root);
@@ -126,6 +176,12 @@ names:
             image_data(),
             "jpeg",
             "data",
+            10,
+            Split {
+                train: 0.6,
+                validation: 0.2,
+                test: 0.2,
+            },
         );
 
         let image_dirs = vec![
