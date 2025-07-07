@@ -110,22 +110,24 @@ mod tests {
 
         let num_train_image_files = fs::read_dir(format!(
             "{}/train/images",
-            exported_config.export.paths.root
+            exported_config.export.paths.root.display()
         ))
         .unwrap()
         .count();
 
         let num_validation_image_files = fs::read_dir(format!(
             "{}/validation/images",
-            exported_config.export.paths.root
+            exported_config.export.paths.root.display()
         ))
         .unwrap()
         .count();
 
-        let num_test_image_files =
-            fs::read_dir(format!("{}/test/images", exported_config.export.paths.root))
-                .unwrap()
-                .count();
+        let num_test_image_files = fs::read_dir(format!(
+            "{}/test/images",
+            exported_config.export.paths.root.display()
+        ))
+        .unwrap()
+        .count();
 
         assert_eq!(num_train_image_files, 2);
         assert_eq!(num_validation_image_files, 2);
