@@ -53,3 +53,39 @@ if let Some(yaml) = YoloDataQualityReport::generate_yaml(project.clone()) {
 ```
 
 This produces `report.yaml` alongside `report.json`.
+
+## Getting Started
+
+Add `yolo_io` to your `Cargo.toml`:
+
+```toml
+[dependencies]
+yolo_io = "0.1.103"
+```
+
+Create a project and export your dataset:
+
+```rust
+use yolo_io::*;
+
+let config = YoloProjectConfig::new("config.yaml")?;
+let project = YoloProject::new(&config)?;
+YoloProjectExporter::export(project)?;
+# Ok::<(), Box<dyn std::error::Error>>(())
+```
+
+Run the provided example:
+
+```bash
+cargo run --example basic
+```
+
+### Command line reports
+
+Generate a data quality report with the built-in CLI:
+
+```bash
+cargo run --bin report -- --config config.yaml --output report.json
+```
+
+Add `--format yaml` to output YAML instead of JSON.
