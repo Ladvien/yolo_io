@@ -33,74 +33,79 @@ pub struct Export {
 /// Collection of paths used during export.
 pub struct Paths {
     /// Root directory for exported data.
-    pub root: String,
+    pub root: PathBuf,
     /// Sub directory used for training data.
-    pub train: String,
+    pub train: PathBuf,
     /// Sub directory used for validation data.
-    pub validation: String,
+    pub validation: PathBuf,
     /// Sub directory used for test data.
-    pub test: String,
+    pub test: PathBuf,
 }
 
 impl Paths {
     /// Create a new set of export paths.
-    pub fn new(root: &str, train: &str, validation: &str, test: &str) -> Self {
+    pub fn new(
+        root: impl Into<PathBuf>,
+        train: impl Into<PathBuf>,
+        validation: impl Into<PathBuf>,
+        test: impl Into<PathBuf>,
+    ) -> Self {
         Paths {
-            root: root.to_string(),
-            train: train.to_string(),
-            validation: validation.to_string(),
-            test: test.to_string(),
+            root: root.into(),
+            train: train.into(),
+            validation: validation.into(),
+            test: test.into(),
         }
     }
 
     /// Root path used for export.
-    pub fn get_root(&self) -> String {
+    pub fn get_root(&self) -> PathBuf {
         self.root.clone()
     }
 
     /// Path to the training images directory.
-    pub fn get_train_images_path(&self) -> String {
-        format!("{}/train/images", self.root).replace("//", "/")
+    pub fn get_train_images_path(&self) -> PathBuf {
+        self.root.join(&self.train).join("images")
     }
 
     /// Path to the training labels directory.
-    pub fn get_train_label_images_path(&self) -> String {
-        format!("{}/train/labels", self.root).replace("//", "/")
+    pub fn get_train_label_images_path(&self) -> PathBuf {
+        self.root.join(&self.train).join("labels")
     }
 
     /// Path to the validation images directory.
-    pub fn get_validation_images_path(&self) -> String {
-        format!("{}/validation/images", self.root).replace("//", "/")
+    pub fn get_validation_images_path(&self) -> PathBuf {
+        self.root.join(&self.validation).join("images")
     }
 
     /// Path to the validation labels directory.
-    pub fn get_validation_label_images_path(&self) -> String {
-        format!("{}/validation/labels", self.root).replace("//", "/")
+    pub fn get_validation_label_images_path(&self) -> PathBuf {
+        self.root.join(&self.validation).join("labels")
     }
 
     /// Path to the test images directory.
-    pub fn get_test_images_path(&self) -> String {
-        format!("{}/test/images", self.root).replace("//", "/")
+    pub fn get_test_images_path(&self) -> PathBuf {
+        self.root.join(&self.test).join("images")
     }
 
     /// Path to the test labels directory.
-    pub fn get_test_label_images_path(&self) -> String {
-        format!("{}/test/labels", self.root).replace("//", "/")
+    pub fn get_test_label_images_path(&self) -> PathBuf {
+        self.root.join(&self.test).join("labels")
     }
 
     /// Directory stem used for training data.
     pub fn get_train_stem(&self) -> String {
-        self.train.clone()
+        self.train.to_string_lossy().into_owned()
     }
 
     /// Directory stem used for validation data.
     pub fn get_validation_stem(&self) -> String {
-        self.validation.clone()
+        self.validation.to_string_lossy().into_owned()
     }
 
     /// Directory stem used for test data.
     pub fn get_test_stem(&self) -> String {
-        self.test.clone()
+        self.test.to_string_lossy().into_owned()
     }
 
     /// Create the directory structure on disk.
@@ -116,8 +121,10 @@ impl Paths {
         ];
 
         for path in paths_to_create {
-            if fs::create_dir_all(path.clone()).is_err() {
-                return Err(ExportError::UnableToCreateDirectory(path));
+            if fs::create_dir_all(&path).is_err() {
+                return Err(ExportError::UnableToCreateDirectory(
+                    path.to_string_lossy().into_owned(),
+                ));
             }
         }
 
@@ -128,10 +135,10 @@ impl Paths {
 impl Default for Paths {
     fn default() -> Self {
         Self {
-            root: "export".to_string(),
-            train: "train".to_string(),
-            validation: "validation".to_string(),
-            test: "test".to_string(),
+            root: PathBuf::from("export"),
+            train: PathBuf::from("train"),
+            validation: PathBuf::from("validation"),
+            test: PathBuf::from("test"),
         }
     }
 }

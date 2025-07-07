@@ -3,7 +3,7 @@ mod common;
 #[cfg(test)]
 mod tests {
 
-    use std::fs;
+    use std::{fs, path::PathBuf};
 
     use crate::common::{
         create_dir, create_dir_and_write_file, create_yolo_project_config, image_data,
@@ -37,7 +37,7 @@ mod tests {
         create_yolo_project_config.source_paths.images = export_source_dir.clone();
         create_yolo_project_config.source_paths.labels = export_source_dir.clone();
 
-        create_yolo_project_config.export.paths.root = export_out_dir.clone();
+        create_yolo_project_config.export.paths.root = PathBuf::from(&export_out_dir);
 
         let num_of_pairs = 10;
         for i in 0..num_of_pairs {
@@ -65,23 +65,21 @@ mod tests {
             "jpg",
             "txt",
         );
-        let train_image_path = format!("{}/train/images", exported_config.export.paths.root);
+        let train_image_path = exported_config.export.paths.root.join("train/images");
 
-        let num_train_image_files = fs::read_dir(train_image_path)
+        let num_train_image_files = fs::read_dir(&train_image_path)
             .expect("Unable to read train folder")
             .count();
 
         // Check validation folder has 2 label, 2 image
-        let num_validation_image_files = fs::read_dir(format!(
-            "{}/validation/images",
-            exported_config.export.paths.root
-        ))
-        .unwrap()
-        .count();
+        let num_validation_image_files =
+            fs::read_dir(exported_config.export.paths.root.join("validation/images"))
+                .unwrap()
+                .count();
 
         // Check test folder has 2 label, 2 image
         let num_test_image_files =
-            fs::read_dir(format!("{}/test/images", exported_config.export.paths.root))
+            fs::read_dir(exported_config.export.paths.root.join("test/images"))
                 .unwrap()
                 .count();
 
@@ -100,7 +98,7 @@ mod tests {
             "txt",
         );
 
-        let yolo_yaml_path = format!("{}/test_project.yaml", exported_config.export.paths.root);
+        let yolo_yaml_path = exported_config.export.paths.root.join("test_project.yaml");
 
         let expected_yaml = r#"# Generate by yolo_io - https://github.com/Ladvien/yolo_io
 path: tests/sandbox/export_test_yolo_yaml_created
@@ -113,7 +111,7 @@ names:
   1: car
 "#;
 
-        let yolo_yaml = fs::read_to_string(yolo_yaml_path).expect("Unable to read yolo.yaml");
+        let yolo_yaml = fs::read_to_string(&yolo_yaml_path).expect("Unable to read yolo.yaml");
 
         assert_eq!(yolo_yaml, expected_yaml);
     }
@@ -129,9 +127,9 @@ names:
         );
 
         let image_dirs = vec![
-            format!("{}/train/images", exported_config.export.paths.root),
-            format!("{}/validation/images", exported_config.export.paths.root),
-            format!("{}/test/images", exported_config.export.paths.root),
+            exported_config.export.paths.root.join("train/images"),
+            exported_config.export.paths.root.join("validation/images"),
+            exported_config.export.paths.root.join("test/images"),
         ];
 
         for dir in image_dirs {
@@ -142,9 +140,9 @@ names:
         }
 
         let label_dirs = vec![
-            format!("{}/train/labels", exported_config.export.paths.root),
-            format!("{}/validation/labels", exported_config.export.paths.root),
-            format!("{}/test/labels", exported_config.export.paths.root),
+            exported_config.export.paths.root.join("train/labels"),
+            exported_config.export.paths.root.join("validation/labels"),
+            exported_config.export.paths.root.join("test/labels"),
         ];
 
         for dir in label_dirs {
