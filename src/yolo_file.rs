@@ -40,6 +40,8 @@ pub enum YoloFileParseError {
     FailedToParseColumn(YoloFileParseErrorDetails),
     #[error("Failed to get file stem for file '{}'", .0.path)]
     FailedToGetFileStem(YoloFileParseErrorDetails),
+    #[error("Failed to read file '{}'", .0.path)]
+    FailedToReadFile(YoloFileParseErrorDetails),
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
@@ -97,209 +99,216 @@ pub struct YoloFile {
 impl YoloFile {
     /// Read and validate a label file.
     pub fn new(metadata: &FileMetadata, path: &String) -> Result<YoloFile, YoloFileParseError> {
-        let potential_file = read_to_string(path);
+        let file = read_to_string(path).map_err(|_| {
+            YoloFileParseError::FailedToReadFile(YoloFileParseErrorDetails {
+                path: path.to_string(),
+                class: None,
+                row: None,
+                other_row: None,
+                column: None,
+                value: None,
+            })
+        })?;
+
+        if file.is_empty() {
+            let details = YoloFileParseErrorDetails {
+                path: path.to_string(),
+                class: None,
+                row: None,
+                other_row: None,
+                column: None,
+                value: None,
+            };
+
+            return Err(YoloFileParseError::EmptyFile(details));
+        }
 
         let mut entries = Vec::<YoloEntry>::new();
 
-        if let Ok(file) = potential_file {
-            if file.is_empty() {
-                let details = YoloFileParseErrorDetails {
-                    path: path.to_string(),
-                    class: None,
-                    row: None,
-                    other_row: None,
-                    column: None,
-                    value: None,
-                };
+        let tolerance = metadata.duplicate_tolerance;
+        let mut seen_bboxes: Vec<(f32, f32, f32, f32)> = Vec::new();
 
-                return Err(YoloFileParseError::EmptyFile(details));
+        for (index, line) in file.lines().enumerate() {
+            let parts: Vec<&str> = line.split(" ").collect();
+
+            if parts.len() != 5 {
+                return Err(YoloFileParseError::InvalidFormat(
+                    YoloFileParseErrorDetails {
+                        path: path.to_string(),
+                        class: None,
+                        row: None,
+                        other_row: None,
+                        column: None,
+                        value: None,
+                    },
+                ));
             }
 
-            let tolerance = metadata.duplicate_tolerance;
-            let mut seen_bboxes: Vec<(f32, f32, f32, f32)> = Vec::new();
+            let class = parts[0].parse::<isize>().map_err(|_| {
+                YoloFileParseError::FailedToParseClassId(YoloFileParseErrorDetails {
+                    path: path.to_string(),
+                    class: Some(parts[0].to_string()),
+                    row: Some(index),
+                    other_row: None,
+                    column: Some("class".to_string()),
+                    value: None,
+                })
+            })?;
 
-            for (index, line) in file.lines().enumerate() {
-                let parts: Vec<&str> = line.split(" ").collect();
-
-                if parts.len() != 5 {
-                    return Err(YoloFileParseError::InvalidFormat(
-                        YoloFileParseErrorDetails {
-                            path: path.to_string(),
-                            class: None,
-                            row: None,
-                            other_row: None,
-                            column: None,
-                            value: None,
-                        },
-                    ));
-                }
-
-                let class = parts[0].parse::<isize>().map_err(|_| {
-                    YoloFileParseError::FailedToParseClassId(YoloFileParseErrorDetails {
+            let found = metadata.classes.iter().any(|c| c.id == class);
+            if !found {
+                return Err(YoloFileParseError::ClassIdNotFound(
+                    YoloFileParseErrorDetails {
                         path: path.to_string(),
-                        class: Some(parts[0].to_string()),
+                        class: Some(class.to_string()),
                         row: Some(index),
                         other_row: None,
                         column: Some("class".to_string()),
                         value: None,
-                    })
-                })?;
+                    },
+                ));
+            }
 
-                let found = metadata.classes.iter().any(|c| c.id == class);
-                if !found {
-                    return Err(YoloFileParseError::ClassIdNotFound(
-                        YoloFileParseErrorDetails {
-                            path: path.to_string(),
-                            class: Some(class.to_string()),
-                            row: Some(index),
-                            other_row: None,
-                            column: Some("class".to_string()),
-                            value: None,
-                        },
-                    ));
-                }
+            let x_center = parts[1].parse::<f32>().map_err(|_| {
+                YoloFileParseError::FailedToParseColumn(YoloFileParseErrorDetails {
+                    path: path.to_string(),
+                    class: Some(class.to_string()),
+                    row: Some(index),
+                    other_row: None,
+                    column: Some("x".to_string()),
+                    value: None,
+                })
+            })?;
 
-                let x_center = parts[1].parse::<f32>().map_err(|_| {
-                    YoloFileParseError::FailedToParseColumn(YoloFileParseErrorDetails {
+            let y_center = parts[2].parse::<f32>().map_err(|_| {
+                YoloFileParseError::FailedToParseColumn(YoloFileParseErrorDetails {
+                    path: path.to_string(),
+                    class: Some(class.to_string()),
+                    row: Some(index),
+                    other_row: None,
+                    column: Some("y".to_string()),
+                    value: None,
+                })
+            })?;
+
+            let width = parts[3].parse::<f32>().map_err(|_| {
+                YoloFileParseError::FailedToParseColumn(YoloFileParseErrorDetails {
+                    path: path.to_string(),
+                    class: Some(class.to_string()),
+                    row: Some(index),
+                    other_row: None,
+                    column: Some("w".to_string()),
+                    value: None,
+                })
+            })?;
+
+            let height = parts[4].parse::<f32>().map_err(|_| {
+                YoloFileParseError::FailedToParseColumn(YoloFileParseErrorDetails {
+                    path: path.to_string(),
+                    class: Some(class.to_string()),
+                    row: Some(index),
+                    other_row: None,
+                    column: Some("h".to_string()),
+                    value: None,
+                })
+            })?;
+
+            // if !(0..=79).contains(&class) {
+            //     return Err(Box::new(YoloFileParseError::ClassIdGreaterThanMax(
+            //         path.to_string(),
+            //         class,
+            //     )));
+            // }
+
+            if !(0.0..=1.0).contains(&x_center) {
+                return Err(YoloFileParseError::LabelDataOutOfRange(
+                    YoloFileParseErrorDetails {
                         path: path.to_string(),
                         class: Some(class.to_string()),
                         row: Some(index),
                         other_row: None,
                         column: Some("x".to_string()),
-                        value: None,
-                    })
-                })?;
+                        value: Some(x_center),
+                    },
+                ));
+            }
 
-                let y_center = parts[2].parse::<f32>().map_err(|_| {
-                    YoloFileParseError::FailedToParseColumn(YoloFileParseErrorDetails {
+            if !(0.0..=1.0).contains(&y_center) {
+                return Err(YoloFileParseError::LabelDataOutOfRange(
+                    YoloFileParseErrorDetails {
                         path: path.to_string(),
                         class: Some(class.to_string()),
                         row: Some(index),
                         other_row: None,
                         column: Some("y".to_string()),
-                        value: None,
-                    })
-                })?;
+                        value: Some(y_center),
+                    },
+                ));
+            }
 
-                let width = parts[3].parse::<f32>().map_err(|_| {
-                    YoloFileParseError::FailedToParseColumn(YoloFileParseErrorDetails {
+            if !(0.0..=1.0).contains(&width) {
+                return Err(YoloFileParseError::LabelDataOutOfRange(
+                    YoloFileParseErrorDetails {
                         path: path.to_string(),
                         class: Some(class.to_string()),
                         row: Some(index),
                         other_row: None,
                         column: Some("w".to_string()),
-                        value: None,
-                    })
-                })?;
+                        value: Some(width),
+                    },
+                ));
+            }
 
-                let height = parts[4].parse::<f32>().map_err(|_| {
-                    YoloFileParseError::FailedToParseColumn(YoloFileParseErrorDetails {
+            if !(0.0..=1.0).contains(&height) {
+                return Err(YoloFileParseError::LabelDataOutOfRange(
+                    YoloFileParseErrorDetails {
                         path: path.to_string(),
                         class: Some(class.to_string()),
                         row: Some(index),
                         other_row: None,
                         column: Some("h".to_string()),
-                        value: None,
-                    })
-                })?;
+                        value: Some(height),
+                    },
+                ));
+            }
 
-                // if !(0..=79).contains(&class) {
-                //     return Err(Box::new(YoloFileParseError::ClassIdGreaterThanMax(
-                //         path.to_string(),
-                //         class,
-                //     )));
-                // }
+            let bbox = (
+                x_center - width / 2.0,
+                x_center + width / 2.0,
+                y_center - height / 2.0,
+                y_center + height / 2.0,
+            );
 
-                if !(0.0..=1.0).contains(&x_center) {
-                    return Err(YoloFileParseError::LabelDataOutOfRange(
-                        YoloFileParseErrorDetails {
-                            path: path.to_string(),
-                            class: Some(class.to_string()),
-                            row: Some(index),
-                            other_row: None,
-                            column: Some("x".to_string()),
-                            value: Some(x_center),
-                        },
-                    ));
-                }
-
-                if !(0.0..=1.0).contains(&y_center) {
-                    return Err(YoloFileParseError::LabelDataOutOfRange(
-                        YoloFileParseErrorDetails {
-                            path: path.to_string(),
-                            class: Some(class.to_string()),
-                            row: Some(index),
-                            other_row: None,
-                            column: Some("y".to_string()),
-                            value: Some(y_center),
-                        },
-                    ));
-                }
-
-                if !(0.0..=1.0).contains(&width) {
-                    return Err(YoloFileParseError::LabelDataOutOfRange(
-                        YoloFileParseErrorDetails {
-                            path: path.to_string(),
-                            class: Some(class.to_string()),
-                            row: Some(index),
-                            other_row: None,
-                            column: Some("w".to_string()),
-                            value: Some(width),
-                        },
-                    ));
-                }
-
-                if !(0.0..=1.0).contains(&height) {
-                    return Err(YoloFileParseError::LabelDataOutOfRange(
-                        YoloFileParseErrorDetails {
-                            path: path.to_string(),
-                            class: Some(class.to_string()),
-                            row: Some(index),
-                            other_row: None,
-                            column: Some("h".to_string()),
-                            value: Some(height),
-                        },
-                    ));
-                }
-
-                let bbox = (
-                    x_center - width / 2.0,
-                    x_center + width / 2.0,
-                    y_center - height / 2.0,
-                    y_center + height / 2.0,
-                );
-
-                if tolerance > 0.0 {
-                    for (prev_index, (px1, px2, py1, py2)) in seen_bboxes.iter().enumerate() {
-                        if (bbox.0 - *px1).abs() <= tolerance
-                            && (bbox.1 - *px2).abs() <= tolerance
-                            && (bbox.2 - *py1).abs() <= tolerance
-                            && (bbox.3 - *py2).abs() <= tolerance
-                        {
-                            return Err(YoloFileParseError::DuplicateEntries(
-                                YoloFileParseErrorDetails {
-                                    path: path.to_string(),
-                                    class: None,
-                                    row: Some(prev_index),
-                                    other_row: Some(index),
-                                    column: None,
-                                    value: None,
-                                },
-                            ));
-                        }
+            if tolerance > 0.0 {
+                for (prev_index, (px1, px2, py1, py2)) in seen_bboxes.iter().enumerate() {
+                    if (bbox.0 - *px1).abs() <= tolerance
+                        && (bbox.1 - *px2).abs() <= tolerance
+                        && (bbox.2 - *py1).abs() <= tolerance
+                        && (bbox.3 - *py2).abs() <= tolerance
+                    {
+                        return Err(YoloFileParseError::DuplicateEntries(
+                            YoloFileParseErrorDetails {
+                                path: path.to_string(),
+                                class: None,
+                                row: Some(prev_index),
+                                other_row: Some(index),
+                                column: None,
+                                value: None,
+                            },
+                        ));
                     }
                 }
-
-                seen_bboxes.push(bbox);
-
-                entries.push(YoloEntry {
-                    class,
-                    x_center,
-                    y_center,
-                    width,
-                    height,
-                });
             }
+
+            seen_bboxes.push(bbox);
+
+            entries.push(YoloEntry {
+                class,
+                x_center,
+                y_center,
+                width,
+                height,
+            });
         }
 
         let stem = get_file_stem(Path::new(path))

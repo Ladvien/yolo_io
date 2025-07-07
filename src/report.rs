@@ -91,6 +91,9 @@ impl YoloDataQualityReport {
                 YoloFileParseError::FailedToGetFileStem(_) => {
                     String::from("YoloFileParseError::FailedToGetFileStem")
                 }
+                YoloFileParseError::FailedToReadFile(_) => {
+                    String::from("YoloFileParseError::FailedToReadFile")
+                }
             },
             PairingError::BothFilesMissing => String::from("BothFilesMissing"),
             PairingError::LabelFileMissing(_) => String::from("LabelFileMissing"),
